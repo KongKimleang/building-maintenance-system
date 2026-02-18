@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../../components/Navbar';
 
 function AdminDashboard() {
   // Dummy data for display
@@ -20,46 +21,18 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-primary">🏢 BuildingMMS</span>
-              <div className="hidden md:flex ml-10 space-x-8">
-                <Link to="/admin/dashboard" className="text-gray-900 hover:text-primary px-3 py-2 font-medium">
-                  Dashboard
-                </Link>
-                <Link to="/admin/users" className="text-gray-600 hover:text-primary px-3 py-2 font-medium">
-                  Users
-                </Link>
-                <Link to="/admin/requests" className="text-gray-600 hover:text-primary px-3 py-2 font-medium">
-                  Requests
-                </Link>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-600 hover:text-primary">
-                <span className="text-xl">🔔</span>
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-danger rounded-full">
-                  3
-                </span>
-              </button>
-              
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-700 font-medium">Admin</span>
-                <button className="p-2 text-gray-600 hover:text-primary">
-                  <span className="text-xl">👤</span>
-                </button>
-              </div>
-              
-              <Link to="/login" className="text-gray-600 hover:text-danger font-medium">
-                Logout
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar
+        userInfo={{
+          name: 'Admin',
+          dashboardLink: '/admin/dashboard',
+          navLinks: [
+            { label: 'Dashboard', path: '/admin/dashboard', active: true },
+            { label: 'Users', path: '/admin/users', active: false },
+            { label: 'Requests', path: '/admin/requests', active: false }
+          ]
+        }}
+        notificationCount={3}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

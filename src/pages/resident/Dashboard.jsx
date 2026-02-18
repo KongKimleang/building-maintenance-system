@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../../components/Navbar';
 
 function ResidentDashboard() {
   // Dummy data
@@ -49,52 +50,20 @@ function ResidentDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-primary">🏢 BuildingMMS</span>
-              <div className="hidden md:flex ml-10 space-x-8">
-                <Link to="/resident/dashboard" className="text-gray-900 hover:text-primary px-3 py-2 font-medium">
-                  Dashboard
-                </Link>
-                <Link to="/resident/submit-request" className="text-gray-600 hover:text-primary px-3 py-2 font-medium">
-                  Submit Request
-                </Link>
-                <Link to="/resident/my-requests" className="text-gray-600 hover:text-primary px-3 py-2 font-medium">
-                  My Requests
-                </Link>
-                <Link to="/resident/history" className="text-gray-600 hover:text-primary px-3 py-2 font-medium">
-                  History
-                </Link>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-600 hover:text-primary">
-                <span className="text-xl">🔔</span>
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-danger rounded-full">
-                  2
-                </span>
-              </button>
-              
-              <div className="flex items-center space-x-2">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-700">{userInfo.name}</p>
-                  <p className="text-xs text-gray-500">{userInfo.role} - {userInfo.unit}</p>
-                </div>
-                <button className="p-2 text-gray-600 hover:text-primary">
-                  <span className="text-xl">👤</span>
-                </button>
-              </div>
-              
-              <Link to="/login" className="text-gray-600 hover:text-danger font-medium">
-                Logout
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar
+        userInfo={{
+          name: 'John Doe',
+          subtitle: 'Resident - Unit 305',
+          dashboardLink: '/resident/dashboard',
+          navLinks: [
+            { label: 'Dashboard', path: '/resident/dashboard', active: true },
+            { label: 'Submit Request', path: '/resident/submit-request', active: false },
+            { label: 'My Requests', path: '/resident/my-requests', active: false },
+            { label: 'History', path: '/resident/history', active: false }
+          ]
+        }}
+        notificationCount={2}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

@@ -4,6 +4,9 @@ import Login from './pages/auth/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import ResidentDashboard from './pages/resident/Dashboard';
 import TechnicianDashboard from './pages/technician/Dashboard';
+import SubmitRequest from './pages/resident/SubmitRequest';
+import MyRequests from './pages/resident/MyRequests';
+import RequestDetails from './pages/resident/RequestDetails';
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/resident/dashboard" element={<ResidentDashboard />} />
         <Route path="/technician/dashboard" element={<TechnicianDashboard />} />
+        <Route path="/resident/submit-request" element={<SubmitRequest />} />
+        <Route path="/resident/my-requests" element={<MyRequests />} />
+        <Route path="/resident/request-details/:id" element={<RequestDetails />} />
         
 
       </Routes>
