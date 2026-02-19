@@ -7,6 +7,11 @@ import TechnicianDashboard from './pages/technician/Dashboard';
 import SubmitRequest from './pages/resident/SubmitRequest';
 import MyRequests from './pages/resident/MyRequests';
 import RequestDetails from './pages/resident/RequestDetails';
+import MyTasks from './pages/technician/MyTasks';
+import AllRequests from './pages/admin/AllRequests';
+import TaskDetails from './pages/technician/TaskDetails';
+import AdminRequestDetails from './pages/admin/RequestDetails';
+import UserManagement from './pages/admin/UserManagement';
 
 function App() {
   return (
@@ -25,6 +30,11 @@ function App() {
         <Route path="/resident/submit-request" element={<SubmitRequest />} />
         <Route path="/resident/my-requests" element={<MyRequests />} />
         <Route path="/resident/request-details/:id" element={<RequestDetails />} />
+        <Route path="/technician/tasks" element={<MyTasks />} />
+        <Route path="/admin/requests" element={<AllRequests />} />
+        <Route path="/technician/task-details/:id" element={<TaskDetails />} />
+        <Route path="/admin/request-details/:id" element={<AdminRequestDetails />} />
+        <Route path="/admin/users" element={<UserManagement />} />
         
 
       </Routes>
