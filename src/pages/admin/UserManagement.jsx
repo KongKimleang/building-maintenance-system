@@ -1,10 +1,26 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
+import { registerUser } from '../../services/api';
 
 function UserManagement() {
   const [activeTab, setActiveTab] = useState('residents');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [newUser, setNewUser] = useState({
+    firstName: '',
+    lastName: '',
+    sex: '',
+    email: '',
+    phone: '',
+    role: '',
+    floor: '',
+    unit: '',
+    position: '',
+    specialization: ''
+  });
+  const [formError, setFormError] = useState('');
+  const [formLoading, setFormLoading] = useState(false);
+  const [createdUserCredentials, setCreatedUserCredentials] = useState(null);
 
   // Dummy data - all users
   const users = {
@@ -26,6 +42,44 @@ function UserManagement() {
     admins: [
       { id: 10, name: 'Admin User', email: 'admin@system.com', phone: '+1111111111', status: 'Active', lastLogin: 'Just now' },
     ]
+  };
+
+  // Handle add user form submission
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    setFormLoading(true);
+    setCreatedUserCredentials(null);
+
+    try {
+      // Call backend API
+      const data = await registerUser(newUser);
+      
+      // Show success with credentials
+      setCreatedUserCredentials(data.credentials);
+      
+      // Reset form
+      setNewUser({
+        firstName: '',
+        lastName: '',
+        sex: '',
+        email: '',
+        phone: '',
+        role: '',
+        floor: '',
+        unit: '',
+        position: '',
+        specialization: ''
+      });
+      
+      // Refresh page or update user list (for now, just show success)
+      // In future, we'll add the new user to the list without refresh
+      
+    } catch (error) {
+      setFormError(error.message || 'Failed to create user');
+    } finally {
+      setFormLoading(false);
+    }
   };
 
   // Get current tab data
@@ -228,28 +282,270 @@ function UserManagement() {
         </div>
       </main>
 
-      {/* Add User Modal - Placeholder */}
+      {/* Add User Modal - FULL FORM */}
       {showAddUserModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Add New User</h2>
-            <p className="text-gray-600 mb-6">
-              This is a placeholder modal. The full form will be implemented in Week 2-3 when we connect to the backend.
-            </p>
-            <p className="text-sm text-gray-500 mb-4">
-              The form will include: First Name, Last Name, Sex, Email, Phone, Role Selection, and role-specific fields (Unit for residents, Position for staff, Specialization for technicians).
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowAddUserModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Close
-              </button>
-              <button className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700">
-                Save User (Coming in Week 2)
-              </button>
-            </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 my-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New User</h2>
+            
+            <form onSubmit={handleAddUser}>
+              <div className="space-y-4">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      First Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newUser.firstName}
+                      onChange={(e) => setNewUser({...newUser, firstName: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Last Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newUser.lastName}
+                      onChange={(e) => setNewUser({...newUser, lastName: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+
+                {/* Sex */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sex *
+                  </label>
+                  <select
+                    required
+                    value={newUser.sex}
+                    onChange={(e) => setNewUser({...newUser, sex: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Select sex</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+
+                {/* Email and Phone */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={newUser.email}
+                      onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={newUser.phone}
+                      onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+
+                {/* Role Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role *
+                  </label>
+                  <select
+                    required
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Select role</option>
+                    <option value="admin">Admin</option>
+                    <option value="resident">Resident</option>
+                    <option value="staff">Staff</option>
+                    <option value="technician">Technician</option>
+                  </select>
+                </div>
+
+                {/* Role-Specific Fields - RESIDENT */}
+                {newUser.role === 'resident' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-md">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Floor *
+                      </label>
+                      <select
+                        required
+                        value={newUser.floor}
+                        onChange={(e) => setNewUser({...newUser, floor: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">Select floor</option>
+                        <option value="1">Floor 1</option>
+                        <option value="2">Floor 2</option>
+                        <option value="3">Floor 3</option>
+                        <option value="4">Floor 4</option>
+                        <option value="5">Floor 5</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Unit *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newUser.unit}
+                        onChange={(e) => setNewUser({...newUser, unit: e.target.value})}
+                        placeholder="e.g., 305"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Role-Specific Fields - STAFF */}
+                {newUser.role === 'staff' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-green-50 rounded-md">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Position *
+                      </label>
+                      <select
+                        required
+                        value={newUser.position}
+                        onChange={(e) => setNewUser({...newUser, position: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">Select position</option>
+                        <option value="Receptionist">Receptionist</option>
+                        <option value="Security">Security</option>
+                        <option value="Housekeeper">Housekeeper</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Assigned Floor *
+                      </label>
+                      <select
+                        required
+                        value={newUser.floor}
+                        onChange={(e) => setNewUser({...newUser, floor: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">Select floor</option>
+                        <option value="Ground">Ground Floor</option>
+                        <option value="1">Floor 1</option>
+                        <option value="2">Floor 2</option>
+                        <option value="3">Floor 3</option>
+                        <option value="4">Floor 4</option>
+                        <option value="5">Floor 5</option>
+                        <option value="All">All Floors</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Role-Specific Fields - TECHNICIAN */}
+                {newUser.role === 'technician' && (
+                  <div className="p-4 bg-yellow-50 rounded-md">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Specialization *
+                    </label>
+                    <select
+                      required
+                      value={newUser.specialization}
+                      onChange={(e) => setNewUser({...newUser, specialization: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="">Select specialization</option>
+                      <option value="Plumber">Plumber</option>
+                      <option value="Electrician">Electrician</option>
+                      <option value="HVAC Technician">HVAC Technician</option>
+                      <option value="Carpenter">Carpenter</option>
+                      <option value="General Maintenance">General Maintenance</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {formError && (
+                  <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {formError}
+                  </div>
+                )}
+
+                {/* Success Message with Credentials */}
+                {createdUserCredentials && (
+                  <div className="p-4 bg-green-100 border border-green-400 rounded">
+                    <p className="font-bold text-green-800 mb-2">✅ User Created Successfully!</p>
+                    <div className="bg-white p-3 rounded border border-green-300">
+                      <p className="text-sm font-medium text-gray-700">Temporary Credentials:</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        <span className="font-medium">Username:</span> {createdUserCredentials.username}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium">Password:</span> {createdUserCredentials.tempPassword}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        ⚠️ Please save these credentials and provide them to the user. They will be required to change the password on first login.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddUserModal(false);
+                    setNewUser({
+                      firstName: '',
+                      lastName: '',
+                      sex: '',
+                      email: '',
+                      phone: '',
+                      role: '',
+                      floor: '',
+                      unit: '',
+                      position: '',
+                      specialization: ''
+                    });
+                    setFormError('');
+                    setCreatedUserCredentials(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  {createdUserCredentials ? 'Close' : 'Cancel'}
+                </button>
+                {!createdUserCredentials && (
+                  <button
+                    type="submit"
+                    disabled={formLoading}
+                    className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+                  >
+                    {formLoading ? 'Creating...' : 'Create User'}
+                  </button>
+                )}
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../../services/api';
 
 function Login() {
   const navigate = useNavigate();
@@ -8,22 +9,35 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e) => {
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // For now, just log the values
-    console.log('Login attempt:', { email, password, rememberMe });
-    
-    // TEMPORARY: Simple role selection for testing
-    // Week 2 will use real authentication from backend
-    
-    // Check email to determine which dashboard to show
-    if (email.includes('admin')) {
+    setError('');
+    setLoading(true);
+
+    try {
+      // Call backend API
+      const data = await login(email, password);
+      
+      // Save token to localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Navigate based on role
+      if (data.user.role === 'admin') {
         navigate('/admin/dashboard');
-    } else if (email.includes('tech')) {
+      } else if (data.user.role === 'technician') {
         navigate('/technician/dashboard');
-    } else {
+      } else {
+        // Both resident and staff use resident dashboard
         navigate('/resident/dashboard');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,11 +137,18 @@ function Login() {
 
           {/* Login Button */}
           <div>
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150"
+              disabled={loading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:bg-gray-400"
             >
-              Login
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
 
