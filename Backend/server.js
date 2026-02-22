@@ -16,6 +16,7 @@ const app = express();
 // Middleware
 app.use(cors()); // Allow frontend to connect
 app.use(express.json()); // Parse JSON request bodies
+app.use('/uploads', express.static('uploads')); // Serve uploaded photos
 
 // Test route
 app.get('/', (req, res) => {
@@ -23,7 +24,10 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth',          require('./routes/auth'));
+app.use('/api/users',         require('./routes/users'));
+app.use('/api/requests',      require('./routes/requests'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // Start server
 const PORT = process.env.PORT || 5000;
