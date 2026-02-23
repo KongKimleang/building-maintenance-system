@@ -1,70 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { getMyRequests } from '../../services/api';
 
 function MyRequests() {
-  // State for filtering
-  const [filter, setFilter] = useState('All');
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user'));
+  
+  const [filter, setFilter] = useState('All');
+  const [allRequests, setAllRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Dummy data - all requests from this resident
-  const allRequests = [
-    { 
-      id: '012', 
-      title: 'Leaking Pipe in Bathroom', 
-      status: 'In Progress', 
-      priority: 'High',
-      category: 'Plumbing',
-      location: 'Unit 305 - Floor 3',
-      submittedDate: 'Feb 10, 2024',
-      assignedTo: 'Mike Wilson (Plumber)',
-      lastUpdate: 'Working on it, will finish by today',
-      updateTime: '2 hours ago',
-      description: 'Water leaking from pipe under bathroom sink. Started yesterday evening.'
-    },
-    { 
-      id: '011', 
-      title: 'Door Lock Not Working', 
-      status: 'Pending', 
-      priority: 'Medium',
-      category: 'Carpentry',
-      location: 'Unit 305 - Floor 3',
-      submittedDate: 'Feb 09, 2024',
-      assignedTo: 'Not assigned yet',
-      lastUpdate: 'Waiting for technician assignment',
-      updateTime: 'Yesterday',
-      description: 'Main door lock is stuck, difficult to open and close.'
-    },
-    { 
-      id: '008', 
-      title: 'AC Not Cooling Properly', 
-      status: 'Completed', 
-      priority: 'Low',
-      category: 'HVAC',
-      location: 'Unit 305 - Floor 3',
-      submittedDate: 'Feb 05, 2024',
-      completedDate: 'Feb 07, 2024',
-      assignedTo: 'Sarah Lee (HVAC Tech)',
-      lastUpdate: 'AC cleaned and refilled gas. Working perfectly now.',
-      updateTime: '3 days ago',
-      description: 'Air conditioner not cooling as it should. Might need servicing.'
-    },
-    { 
-      id: '005', 
-      title: 'Light Bulb Replacement', 
-      status: 'Completed', 
-      priority: 'Low',
-      category: 'Electrical',
-      location: 'Unit 305 - Floor 3',
-      submittedDate: 'Feb 01, 2024',
-      completedDate: 'Feb 02, 2024',
-      assignedTo: 'Tom Chen (Electrician)',
-      lastUpdate: 'Replaced all bulbs in living room.',
-      updateTime: '1 week ago',
-      description: 'Multiple light bulbs in living room need replacement.'
-    },
-  ];
+  // Fetch my requests
+  useEffect(() => {
+    fetchMyRequests();
+  }, []);
 
+  const fetchMyRequests = async () => {
+    try {
+      setLoading(true);
+      const data = await getMyRequests();
+      setAllRequests(data.requests);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to load requests');
+    } finally {
+      setLoading(false);
+    }
+  };
   // Filter requests based on selected filter
   const filteredRequests = filter === 'All' 
     ? allRequests 
@@ -83,8 +47,8 @@ function MyRequests() {
       {/* Navbar */}
       <Navbar
         userInfo={{
-          name: 'John Doe',
-          subtitle: 'Resident - Unit 305',
+          name: `${user.firstName} ${user.lastName}`,
+          subtitle: user.role === 'resident' ? `Resident - Unit ${user.unit}` : `${user.position}`,
           dashboardLink: '/resident/dashboard',
           navLinks: [
             { label: 'Dashboard', path: '/resident/dashboard', active: false },
@@ -173,7 +137,19 @@ function MyRequests() {
 
         {/* Requests List */}
         <div className="space-y-4">
-          {filteredRequests.length === 0 ? (
+          {loading && (
+            <div className="bg-white rounded-lg shadow p-12 text-center">
+              <p className="text-gray-600">Loading your requests...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="p-4 bg-red-100 text-red-700 rounded">
+              Error: {error}
+            </div>
+          )}
+
+          {!loading && !error && filteredRequests.length === 0 ? (
             // Empty State
             <div className="bg-white rounded-lg shadow p-12 text-center">
               <span className="text-6xl mb-4 block">📭</span>
@@ -196,14 +172,14 @@ function MyRequests() {
           ) : (
             // Request Cards
             filteredRequests.map((request) => (
-              <div key={request.id} className="bg-white rounded-lg shadow hover:shadow-md transition">
+              <div key={request._id} className="bg-white rounded-lg shadow hover:shadow-md transition">
                 <div className="p-6">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-bold text-gray-900">
-                          #{request.id} {request.title}
+                          #{request.requestId} {request.title}
                         </h3>
                         
                         {/* Status Badge */}
@@ -241,7 +217,7 @@ function MyRequests() {
                         <span className="font-medium">📍 Location:</span> {request.location}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">📅 Submitted:</span> {request.submittedDate}
+                        <span className="font-medium">📅 Submitted:</span> {new Date(request.createdAt).toLocaleDateString()}
                       </p>
                       {request.completedDate && (
                         <p className="text-sm text-gray-600 mt-1">
@@ -251,10 +227,10 @@ function MyRequests() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">👷 Assigned to:</span> {request.assignedTo}
+                        <span className="font-medium">👷 Assigned to:</span> {request.assignedTo ? `${request.assignedTo.firstName} ${request.assignedTo.lastName} (${request.assignedTo.specialization})` : 'Not assigned yet'}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">🕐 Last update:</span> {request.updateTime}
+                        <span className="font-medium">🕐 Last update:</span> {new Date(request.updatedAt).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -268,15 +244,17 @@ function MyRequests() {
                   </div>
 
                   {/* Latest Update */}
-                  <div className="bg-blue-50 border-l-4 border-primary p-4 mb-4">
-                    <p className="text-sm font-medium text-gray-900 mb-1">💬 Latest Update:</p>
-                    <p className="text-sm text-gray-700">{request.lastUpdate}</p>
-                  </div>
+                  {request.timeline && request.timeline.length > 0 && (
+                    <div className="bg-blue-50 border-l-4 border-primary p-4 mb-4">
+                      <p className="text-sm font-medium text-gray-900 mb-1">💬 Latest Update:</p>
+                      <p className="text-sm text-gray-700">{request.timeline[request.timeline.length - 1].note}</p>
+                    </div>
+                  )}
 
                   {/* Action Buttons */}
                   <div className="flex gap-3">
                     <button 
-                        onClick={() => navigate(`/resident/request-details/${request.id}`)}
+                        onClick={() => navigate(`/resident/request-details/${request._id}`)}
                         className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition font-medium text-sm"
                     >
                         View Full Details

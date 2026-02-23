@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { getAllRequests as fetchAllRequests } from '../../services/api';
 
 function AllRequests() {
   const navigate = useNavigate();
@@ -10,89 +11,27 @@ function AllRequests() {
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [allRequests, setAllRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Dummy data - all requests from all users
-  const allRequests = [
-    {
-      id: '001',
-      title: 'Broken Elevator',
-      category: 'Mechanical',
-      priority: 'High',
-      status: 'Pending',
-      location: 'Floor 3',
-      submittedBy: 'Alice Johnson',
-      submittedByUnit: 'Unit 305',
-      submittedDate: 'Feb 10, 2024',
-      assignedTo: null,
-      description: 'Elevator stuck between floors'
-    },
-    {
-      id: '002',
-      title: 'Leaking Pipe',
-      category: 'Plumbing',
-      priority: 'Medium',
-      status: 'Assigned',
-      location: 'Unit 501',
-      submittedBy: 'John Doe',
-      submittedByUnit: 'Unit 501',
-      submittedDate: 'Feb 09, 2024',
-      assignedTo: 'Mike Wilson (Plumber)',
-      description: 'Bathroom sink pipe leaking'
-    },
-    {
-      id: '003',
-      title: 'AC Not Working',
-      category: 'HVAC',
-      priority: 'Low',
-      status: 'In Progress',
-      location: 'Unit 702',
-      submittedBy: 'Sarah Lee',
-      submittedByUnit: 'Unit 702',
-      submittedDate: 'Feb 08, 2024',
-      assignedTo: 'Tom Chen (HVAC Tech)',
-      description: 'Air conditioning not cooling'
-    },
-    {
-      id: '004',
-      title: 'Door Lock Issue',
-      category: 'Carpentry',
-      priority: 'Medium',
-      status: 'Pending',
-      location: 'Unit 205',
-      submittedBy: 'Bob Johnson',
-      submittedByUnit: 'Unit 205',
-      submittedDate: 'Feb 07, 2024',
-      assignedTo: null,
-      description: 'Main door lock stuck'
-    },
-    {
-      id: '005',
-      title: 'Light Fixture Broken',
-      category: 'Electrical',
-      priority: 'Low',
-      status: 'Completed',
-      location: 'Unit 103',
-      submittedBy: 'Mary Smith',
-      submittedByUnit: 'Unit 103',
-      submittedDate: 'Feb 05, 2024',
-      completedDate: 'Feb 06, 2024',
-      assignedTo: 'David Lee (Electrician)',
-      description: 'Living room light not working'
-    },
-    {
-      id: '006',
-      title: 'Water Heater Issue',
-      category: 'Plumbing',
-      priority: 'High',
-      status: 'In Progress',
-      location: 'Unit 401',
-      submittedBy: 'Jane Wilson',
-      submittedByUnit: 'Unit 401',
-      submittedDate: 'Feb 10, 2024',
-      assignedTo: 'Mike Wilson (Plumber)',
-      description: 'No hot water'
-    },
-  ];
+  // Fetch requests from database
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchAllRequests();
+      setAllRequests(data.requests);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to load requests');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Apply filters
   let filteredRequests = allRequests;
@@ -112,13 +51,13 @@ function AllRequests() {
     filteredRequests = filteredRequests.filter(req => req.category === categoryFilter);
   }
 
-  // Search filter
+  // Search filter (need to change tittle & location if error occur)
   if (searchQuery) {
     filteredRequests = filteredRequests.filter(req =>
-      req.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (req.requestId || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       req.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      req.submittedBy.toLowerCase().includes(searchQuery.toLowerCase())
+      (req.submittedBy && `${req.submittedBy.firstName} ${req.submittedBy.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }
 
@@ -303,21 +242,37 @@ function AllRequests() {
         </div>
 
         {/* Results Count */}
-        <div className="mb-4 text-sm text-gray-600">
-          Showing {filteredRequests.length} of {allRequests.length} requests
-        </div>
+        {!loading && !error && (
+          <div className="mb-4 text-sm text-gray-600">
+            Showing {filteredRequests.length} of {allRequests.length} requests
+          </div>
+        )}
 
         {/* Requests Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          {filteredRequests.length === 0 ? (
+          {/* Loading State */}
+          {loading && (
+            <div className="p-12 text-center">
+              <p className="text-gray-600">Loading requests...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {!loading && error && (
+            <div className="p-4 bg-red-100 text-red-700 rounded">
+              Error: {error}
+            </div>
+          )}
+          {!loading && !error && filteredRequests.length === 0 &&(
             // Empty State
             <div className="p-12 text-center">
               <span className="text-6xl mb-4 block">📭</span>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No requests found</h3>
               <p className="text-gray-600">Try adjusting your filters or search query</p>
             </div>
-          ) : (
-            // Table
+          )}
+            {/* Table */}
+          {!loading && !error && filteredRequests.length > 0 && (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -350,9 +305,9 @@ function AllRequests() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredRequests.map((request) => (
-                    <tr key={request.id} className="hover:bg-gray-50">
+                    <tr key={request._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        #{request.id}
+                        #{request.requestId}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <div className="font-medium">{request.title}</div>
@@ -362,8 +317,8 @@ function AllRequests() {
                         {request.location}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        <div>{request.submittedBy}</div>
-                        <div className="text-xs text-gray-500">{request.submittedByUnit}</div>
+                        <div>{request.submittedBy ? `${request.submittedBy.firstName} ${request.submittedBy.lastName}` : 'Unknown'}</div>
+                        <div className="text-xs text-gray-500">{request.submittedBy?.unit ? `Unit ${request.submittedBy.unit}` : ''}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -383,13 +338,13 @@ function AllRequests() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {request.assignedTo || (
+                        {request.assignedTo ? `${request.assignedTo.firstName} ${request.assignedTo.lastName}` : (
                           <span className="text-gray-400 italic">Not assigned</span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button 
-                          onClick={() => navigate(`/admin/request-details/${request.id}`)}
+                          onClick={() => navigate(`/admin/request-details/${request._id}`)}
                           className="text-primary hover:text-blue-700"
                         >
                           View

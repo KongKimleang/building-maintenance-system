@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
-import { registerUser } from '../../services/api';
+import { registerUser, getAllUsers, deleteUser } from '../../services/api';
+
 
 function UserManagement() {
   const [activeTab, setActiveTab] = useState('residents');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [allUsers, setAllUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dataError, setDataError] = useState('');
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -22,26 +26,36 @@ function UserManagement() {
   const [formLoading, setFormLoading] = useState(false);
   const [createdUserCredentials, setCreatedUserCredentials] = useState(null);
 
-  // Dummy data - all users
+  // Fetch users from database
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllUsers();
+
+      const formattedUsers = data.users.map(user => ({
+        ...user,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim()
+      }));
+
+      setAllUsers(formattedUsers);
+      setDataError('');
+    } catch (error) {
+      setDataError(error.message || 'Failed to load users');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Group users by role
   const users = {
-    residents: [
-      { id: 1, name: 'John Doe', email: 'john@email.com', phone: '+1234567890', unit: '305', floor: '3', status: 'Active', lastLogin: '2 hours ago' },
-      { id: 2, name: 'Jane Smith', email: 'jane@email.com', phone: '+0987654321', unit: '501', floor: '5', status: 'Active', lastLogin: '1 day ago' },
-      { id: 3, name: 'Bob Johnson', email: 'bob@email.com', phone: '+1122334455', unit: '205', floor: '2', status: 'Active', lastLogin: '3 days ago' },
-    ],
-    staff: [
-      { id: 4, name: 'Alice Brown', email: 'alice@staff.com', phone: '+5544332211', position: 'Receptionist', location: 'Ground Floor - Reception', status: 'Active', lastLogin: '1 hour ago' },
-      { id: 5, name: 'Tom Wilson', email: 'tom@staff.com', phone: '+9988776655', position: 'Security', location: 'Ground Floor - Security Office', status: 'Active', lastLogin: '30 mins ago' },
-      { id: 6, name: 'Mary Lee', email: 'mary@staff.com', phone: '+6677889900', position: 'Housekeeper', location: 'Floor 3', status: 'Active', lastLogin: '5 hours ago' },
-    ],
-    technicians: [
-      { id: 7, name: 'Mike Wilson', email: 'mike@maintenance.com', phone: '+0987654321', specialization: 'Plumber', status: 'Active', lastLogin: '15 mins ago' },
-      { id: 8, name: 'Sarah Lee', email: 'sarah@maintenance.com', phone: '+1231231234', specialization: 'HVAC Technician', status: 'Active', lastLogin: '2 hours ago' },
-      { id: 9, name: 'David Chen', email: 'david@maintenance.com', phone: '+3213213210', specialization: 'Electrician', status: 'Active', lastLogin: '1 day ago' },
-    ],
-    admins: [
-      { id: 10, name: 'Admin User', email: 'admin@system.com', phone: '+1111111111', status: 'Active', lastLogin: 'Just now' },
-    ]
+    residents: allUsers.filter(u => u.role === 'resident'),
+    staff: allUsers.filter(u => u.role === 'staff'),
+    technicians: allUsers.filter(u => u.role === 'technician'),
+    admins: allUsers.filter(u => u.role === 'admin')
   };
 
   // Handle add user form submission
@@ -57,6 +71,9 @@ function UserManagement() {
       
       // Show success with credentials
       setCreatedUserCredentials(data.credentials);
+
+      // Refresh user list
+      await fetchUsers();
       
       // Reset form
       setNewUser({
@@ -82,13 +99,28 @@ function UserManagement() {
     }
   };
 
+  // Handle delete user
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to delete ${userName}? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await deleteUser(userId);
+      alert('User deleted successfully');
+      await fetchUsers(); // Refresh list
+    } catch (error) {
+      alert('Error: ' + (error.message || 'Failed to delete user'));
+    }
+  };
+
   // Get current tab data
   const currentUsers = users[activeTab];
 
   // Filter users by search
   const filteredUsers = currentUsers.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -122,6 +154,7 @@ function UserManagement() {
             + Add New User
           </button>
         </div>
+
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow mb-6">
@@ -181,103 +214,132 @@ function UserManagement() {
             />
           </div>
         </div>
+        
+        
 
         {/* Users Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          {filteredUsers.length === 0 ? (
-            // Empty State
+
+          {loading && (
             <div className="p-12 text-center">
-              <span className="text-6xl mb-4 block">👥</span>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No users found</h3>
-              <p className="text-gray-600 mb-6">
-                {searchQuery ? 'Try adjusting your search' : `No ${activeTab} in the system yet`}
-              </p>
-              <button
-                onClick={() => setShowAddUserModal(true)}
-                className="px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-blue-700 transition"
-              >
-                + Add New User
-              </button>
+              <p className="text-gray-600">Loading users...</p>
             </div>
-          ) : (
-            // Table
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Phone
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {activeTab === 'residents' ? 'Unit' : activeTab === 'staff' ? 'Position' : 'Specialization'}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Login
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-primary rounded-full flex items-center justify-center text-white font-medium">
-                            {user.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {user.phone}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {activeTab === 'residents' ? `Unit ${user.unit} - Floor ${user.floor}` :
-                         activeTab === 'staff' ? user.position :
-                         user.specialization}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {user.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.lastLogin}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
-                        <button className="text-primary hover:text-blue-700">
-                          Edit
-                        </button>
-                        <button className="text-warning hover:text-yellow-700">
-                          Reset Password
-                        </button>
-                        <button className="text-danger hover:text-red-700">
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          )}
+
+          {dataError && (
+            <div className="p-4 bg-red-100 text-red-700 rounded">
+              Error: {dataError}
             </div>
+          )}
+
+          {!loading && !dataError && (
+            <>
+              {filteredUsers.length === 0 ? (
+                // Empty State
+                <div className="p-12 text-center">
+                  <span className="text-6xl mb-4 block">👥</span>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No users found</h3>
+                  <p className="text-gray-600 mb-6">
+                    {searchQuery ? 'Try adjusting your search' : `No ${activeTab} in the system yet`}
+                  </p>
+                  <button
+                    onClick={() => setShowAddUserModal(true)}
+                    className="px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-blue-700 transition"
+                  >
+                    + Add New User
+                  </button>
+                </div>
+              ) : (
+                // Table
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Email
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Phone
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {activeTab === 'residents' ? 'Unit' : activeTab === 'staff' ? 'Position' : 'Specialization'}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Last Login
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredUsers.map((user) => (
+                        <tr key={user._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10 bg-primary rounded-full flex items-center justify-center text-white font-medium">
+                                {(user.name || '')
+                                  .split(' ')
+                                  .map(n => n[0])
+                                  .join('')}
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {user.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {user.phone}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {activeTab === 'residents'
+                              ? `Unit ${user.unit} - Floor ${user.floor}`
+                              : activeTab === 'staff'
+                              ? user.position
+                              : activeTab === 'technicians'
+                              ? user.specialization
+                              : '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {user.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.lastLogin}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                            <button className="text-primary hover:text-blue-700">
+                              Edit
+                            </button>
+                            <button className="text-warning hover:text-yellow-700">
+                              Reset Password
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteUser(user._id, user.firstName)}
+                              className="text-danger hover:text-red-700"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

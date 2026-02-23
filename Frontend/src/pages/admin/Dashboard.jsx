@@ -1,22 +1,39 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { getAllRequests as fetchAllRequests } from '../../services/api';
 
 function AdminDashboard() {
-  // Dummy data for display
-  const stats = {
-    totalRequests: 156,
-    pendingRequests: 23,
-    inProgress: 12,
-    completed: 121
+  const navigate = useNavigate();
+
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const data = await fetchAllRequests();
+      setRequests(data.requests);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentRequests = [
-    { id: '001', title: 'Broken Elevator', location: 'Floor 3', priority: 'High', status: 'Pending' },
-    { id: '002', title: 'Leaking Pipe', location: 'Unit 501', priority: 'Medium', status: 'Assigned' },
-    { id: '003', title: 'AC Not Working', location: 'Unit 702', priority: 'Low', status: 'In Progress' },
-    { id: '004', title: 'Door Lock Issue', location: 'Unit 205', priority: 'Medium', status: 'Pending' },
-  ];
+  // Calculate stats
+  const stats = {
+    total: requests.length,
+    pending: requests.filter(r => r.status === 'Pending').length,
+    inProgress: requests.filter(r => r.status === 'In Progress').length,
+    completed: requests.filter(r => r.status === 'Completed').length
+  };
+
+  // Get recent requests (last 4)
+  const recentRequests = requests.slice(0, 4);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,7 +66,7 @@ function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalRequests}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
                 <span className="text-2xl">📊</span>
@@ -62,7 +79,7 @@ function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-3xl font-bold text-warning mt-2">{stats.pendingRequests}</p>
+                <p className="text-3xl font-bold text-warning mt-2">{stats.pending}</p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">
                 <span className="text-2xl">📋</span>
@@ -131,39 +148,64 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {recentRequests.map((request) => (
-                  <tr key={request.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{request.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.title}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {request.location}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${request.priority === 'High' ? 'bg-red-100 text-red-800' : 
-                          request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
-                          'bg-green-100 text-green-800'}`}>
-                        {request.priority === 'High' ? '🔴' : request.priority === 'Medium' ? '🟡' : '🟢'} {request.priority}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                        ${request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                          request.status === 'Assigned' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-blue-100 text-blue-800'}`}>
-                        {request.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-primary hover:text-blue-700 mr-3">View</button>
-                      <button className="text-success hover:text-green-700">Assign</button>
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-8 text-center text-gray-600">
+                      Loading requests...
                     </td>
                   </tr>
-                ))}
+                ) : recentRequests.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-8 text-center text-gray-600">
+                      No requests yet
+                    </td>
+                  </tr>
+                ) : (
+                  recentRequests.map((request) => (
+                    <tr key={request._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                        #{request.requestId}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {request.title}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {request.location}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          request.priority === 'High' ? 'bg-red-100 text-red-800' :
+                          request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {request.priority === 'High' ? '🔴' : request.priority === 'Medium' ? '🟡' : '🟢'} {request.priority}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
+                          request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {request.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                        <button 
+                          onClick={() => navigate(`/admin/request-details/${request._id}`)}
+                          className="text-primary hover:text-blue-700 font-medium"
+                        >
+                          View
+                        </button>
+                        {!request.assignedTo && (
+                          <button className="text-success hover:text-green-700 font-medium">
+                            Assign
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

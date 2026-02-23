@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { createRequest } from '../../services/api';
 
 function SubmitRequest() {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
   
   // State to store form data
   const [formData, setFormData] = useState({
@@ -16,12 +18,16 @@ function SubmitRequest() {
     photo: null
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      ...(name === 'floor' ? { unit: '' } : {})
     }));
   };
 
@@ -34,20 +40,53 @@ function SubmitRequest() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
     
     // Validation
     if (!formData.title || !formData.category || !formData.priority || 
         !formData.floor || !formData.unit || !formData.description) {
       alert('Please fill all required fields!');
+      setLoading(false);
       return;
     }
 
-    // For now, just show success and redirect (Week 2 will connect to backend)
-    console.log('Request submitted:', formData);
-    alert('Request submitted successfully! Request ID: #' + Math.floor(Math.random() * 1000));
-    navigate('/resident/dashboard');
+    try {
+      // Call backend API
+      const data = await createRequest({
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        priority: formData.priority,
+        floor: Number(formData.floor),
+        unit: formData.unit
+      });
+
+      // Show success with REAL request ID
+      alert(`✅ Request submitted successfully!\n\nRequest ID: #${data.request.requestId}\n\nYou can track this request in "My Requests" page.`);
+      
+      // Reset form
+      setFormData({
+        title: '',
+        category: '',
+        priority: '',
+        floor: '',
+        unit: '',
+        description: '',
+        photo: null
+      });
+      
+      // Redirect to My Requests page
+      navigate('/resident/my-requests');
+
+    } catch (err) {
+      setError(err.message || 'Failed to submit request');
+      alert('❌ Error: ' + (err.message || 'Failed to submit request'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,8 +94,8 @@ function SubmitRequest() {
       {/* Navbar */}
       <Navbar
         userInfo={{
-          name: 'John Doe',
-          subtitle: 'Resident - Unit 305',
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User',
+          subtitle: user.role === 'resident' ? `Resident - Unit ${user.unit || ''}` : `${user.position || 'Staff'} - ${user.floor || ''}`,
           dashboardLink: '/resident/dashboard',
           navLinks: [
             { label: 'Dashboard', path: '/resident/dashboard', active: false },
@@ -116,8 +155,7 @@ function SubmitRequest() {
                 <option value="Electrical">Electrical</option>
                 <option value="HVAC">HVAC (AC/Heating)</option>
                 <option value="Carpentry">Carpentry</option>
-                <option value="Appliance">Appliance</option>
-                <option value="Cleaning">Cleaning</option>
+                <option value="General">General</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -159,7 +197,7 @@ function SubmitRequest() {
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">Select floor</option>
-                <option value="Ground">Ground Floor</option>
+                <option value="0">Ground Floor</option>
                 <option value="1">Floor 1</option>
                 <option value="2">Floor 2</option>
                 <option value="3">Floor 3</option>
@@ -269,9 +307,10 @@ function SubmitRequest() {
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-3 bg-primary text-white rounded-md font-medium hover:bg-blue-700 transition"
+              disabled={loading}
+              className="flex-1 px-4 py-3 bg-primary text-white rounded-md font-medium hover:bg-blue-700 transition disabled:bg-gray-400"
             >
-              Submit Request
+              {loading ? 'Submitting...' : 'Submit Request'}
             </button>
           </div>
         </form>
