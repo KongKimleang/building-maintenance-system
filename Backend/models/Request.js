@@ -1,44 +1,90 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const RequestSchema = new mongoose.Schema({
-  requestId:   { type: String, unique: true },
-  title:       { type: String, required: true },
-  description: { type: String, required: true },
+
+const requestSchema = new mongoose.Schema({
+  // Auto-increment ID
+  requestId: {
+    type: String,
+    unique: true,
+  },
+  
+  // Request Details
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
   category: {
     type: String,
     required: true,
-    enum: ["Plumbing", "Electrical", "HVAC", "Carpentry", "General", "Other"]
+    enum: ['Plumbing', 'Electrical', 'HVAC', 'Carpentry', 'Appliance', 'Cleaning', 'Mechanical', 'Other']
   },
   priority: {
     type: String,
-    enum: ["Low", "Medium", "High"],
-    default: "Medium"
+    required: true,
+    enum: ['Low', 'Medium', 'High']
   },
   status: {
     type: String,
-    default: "Pending",
-    enum: ["Pending", "Assigned", "In Progress", "Completed", "Cancelled"]
+    required: true,
+    default: 'Pending',
+    enum: ['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled']
   },
-  floor:       { type: Number, required: true },
-  unit:        { type: String, required: true },
-  location:    { type: String },
-  submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  assignedTo:  { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  photos:      [{ type: String }],
+  
+  // Location
+  floor: {
+    type: String,
+    required: true
+  },
+  unit: {
+    type: String,
+    required: true
+  },
+  location: {
+    type: String,
+    required: true
+  },
+  
+  // Users
+  submittedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  
+  // Photos
+  photos: [{
+    type: String // Store file paths
+  }],
+  
+  // Timeline
   timeline: [{
-    message:   { type: String },
-    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    date:      { type: Date, default: Date.now }
-  }]
-}, { timestamps: true });
-
-// Auto generate #001, #002...
-RequestSchema.pre("save", async function (next) {
-  if (!this.requestId) {
-    const count = await mongoose.model("Request").countDocuments();
-    this.requestId = `#${String(count + 1).padStart(3, "0")}`;
-  }
-  next();
+    type: {
+      type: String,
+      enum: ['created', 'assigned', 'status_update', 'comment']
+    },
+    user: String,
+    action: String,
+    note: String,
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  
+  // Dates
+  completedDate: Date
+}, {
+  timestamps: true
 });
 
-module.exports = mongoose.model("Request", RequestSchema);
+const Request = mongoose.model('Request', requestSchema);
+
+module.exports = Request;

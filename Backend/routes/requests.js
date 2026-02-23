@@ -1,16 +1,40 @@
-const express    = require("express");
-const router     = express.Router();
-const rc         = require("../controllers/requestController");
-const { protect }    = require("../middleware/auth");
-const { authorize }  = require("../middleware/roleCheck");
+const express = require('express');
+const router = express.Router();
+const multer = require('multer'); // use multer for multipart/formdata
 
-router.get("/stats",        protect, rc.getStats);
-router.get("/my-requests",  protect, rc.getMyRequests);
-router.get("/",             protect, authorize("admin", "technician"), rc.getAllRequests);
-router.get("/:id",          protect, rc.getRequest);
-router.post("/",            protect, rc.createRequest);
-router.put("/:id/assign",   protect, authorize("admin"), rc.assignRequest);
-router.put("/:id/status",   protect, rc.updateStatus);
-router.post("/:id/comment", protect, rc.addComment);
+const {
+  createRequest,
+  getAllRequests,
+  getMyRequests,
+  getRequestById,
+  assignTechnician,
+  updateStatus
+} = require('../controllers/requestController');
+const { protect } = require('../middleware/auth');
+
+// Multer setup for file uploads (store in memory)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// All routes require authentication
+router.use(protect);
+
+// @route   POST /api/requests
+router.post('/', upload.single('photo'), createRequest);
+
+// @route   GET /api/requests
+router.get('/', getAllRequests);
+
+// @route   GET /api/requests/my-requests
+router.get('/my-requests', getMyRequests);
+
+// @route   GET /api/requests/:id
+router.get('/:id', getRequestById);
+
+// @route   PUT /api/requests/:id/assign
+router.put('/:id/assign', assignTechnician);
+
+// @route   PUT /api/requests/:id/status
+router.put('/:id/status', updateStatus);
 
 module.exports = router;

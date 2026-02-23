@@ -151,7 +151,11 @@ const loginUser = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
-        requirePasswordChange: user.requirePasswordChange
+        requirePasswordChange: user.requirePasswordChange,
+        floor: user.floor, // add this
+        unit: user.unit,   // add this
+        position: user.position,         // optional, for staff
+        specialization: user.specialization // optional, for technician
       }
     });
 

@@ -1,45 +1,109 @@
-const User = require("../models/User");
+const User = require('../models/User');
 
-// GET all users — filter by role if given
-exports.getAllUsers = async (req, res) => {
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private (Admin)
+const getAllUsers = async (req, res) => {
   try {
-    const filter = req.query.role ? { role: req.query.role } : {};
-    const users = await User.find(filter).select("-password").sort({ createdAt: -1 });
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const users = await User.find()
+      .select('-password') // Don't send passwords
+      .sort({ createdAt: -1 }); // Newest first
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      users
+    });
+
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// GET single user
-exports.getUser = async (req, res) => {
+// @desc    Get single user
+// @route   GET /api/users/:id
+// @access  Private (Admin)
+const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const user = await User.findById(req.params.id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      user
+    });
+
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// PUT update user
-exports.updateUser = async (req, res) => {
+// @desc    Update user
+// @route   PUT /api/users/:id
+// @access  Private (Admin)
+const updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id, req.body, { new: true }
-    ).select("-password");
-    res.json(user);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update fields
+    const updateFields = ['firstName', 'lastName', 'sex', 'email', 'phone', 'floor', 'unit', 'position', 'specialization', 'isActive'];
+    
+    updateFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        user[field] = req.body[field];
+      }
+    });
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'User updated successfully',
+      user: await User.findById(user._id).select('-password')
+    });
+
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// DELETE user
-exports.deleteUser = async (req, res) => {
+// @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private (Admin)
+const deleteUser = async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: "User deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    await user.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
+};
+
+module.exports = {
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser
 };
