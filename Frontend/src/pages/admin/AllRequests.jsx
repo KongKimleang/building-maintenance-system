@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import { getAllRequests as fetchAllRequests } from '../../services/api';
+import { assignTechnician, getAllTechnicians } from '../../services/api';
 
 function AllRequests() {
   const navigate = useNavigate();
@@ -14,6 +15,11 @@ function AllRequests() {
   const [allRequests, setAllRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [technicians, setTechnicians] = useState([]);
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
+  const [assignLoading, setAssignLoading] = useState(false);
 
   // Fetch requests from database
   useEffect(() => {
@@ -30,6 +36,45 @@ function AllRequests() {
       setError(err.message || 'Failed to load requests');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch technicians
+  const fetchTechnicians = async () => {
+    try {
+      const data = await getAllTechnicians();
+      setTechnicians(data.technicians);
+    } catch (error) {
+      console.error('Error fetching technicians:', error);
+    }
+  };
+
+  // Open assign modal
+  const handleOpenAssignModal = async (request) => {
+    setSelectedRequest(request);
+    setShowAssignModal(true);
+    await fetchTechnicians();
+  };
+
+  // Handle assign technician
+  const handleAssignTechnician = async () => {
+    if (!selectedTechnicianId) {
+      alert('Please select a technician');
+      return;
+    }
+
+    try {
+      setAssignLoading(true);
+      await assignTechnician(selectedRequest._id, selectedTechnicianId);
+      alert('✅ Technician assigned successfully!');
+      setShowAssignModal(false);
+      setSelectedRequest(null);
+      setSelectedTechnicianId('');
+      await fetchRequests(); // Refresh list
+    } catch (error) {
+      alert('Error: ' + (error.message || 'Failed to assign technician'));
+    } finally {
+      setAssignLoading(false);
     }
   };
 
@@ -350,7 +395,10 @@ function AllRequests() {
                           View
                         </button>
                         {!request.assignedTo && (
-                          <button className="text-success hover:text-green-700">
+                          <button 
+                            onClick={() => handleOpenAssignModal(request)}
+                            className="text-success hover:text-green-700 font-medium"
+                          >
                             Assign
                           </button>
                         )}
@@ -366,6 +414,60 @@ function AllRequests() {
           )}
         </div>
       </main>
+
+      {/* Assign Technician Modal */}
+      {showAssignModal && selectedRequest && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Assign Technician</h2>
+            
+            <div className="mb-4 p-4 bg-gray-50 rounded">
+              <p className="text-sm text-gray-600 mb-1">Request:</p>
+              <p className="font-semibold text-gray-900">#{selectedRequest.requestId} {selectedRequest.title}</p>
+              <p className="text-sm text-gray-600 mt-2">Category: {selectedRequest.category}</p>
+              <p className="text-sm text-gray-600">Priority: {selectedRequest.priority}</p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Technician *
+              </label>
+              <select
+                value={selectedTechnicianId}
+                onChange={(e) => setSelectedTechnicianId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">Choose a technician...</option>
+                {technicians.map((tech) => (
+                  <option key={tech._id} value={tech._id}>
+                    {tech.firstName} {tech.lastName} - {tech.specialization}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedRequest(null);
+                  setSelectedTechnicianId('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAssignTechnician}
+                disabled={assignLoading || !selectedTechnicianId}
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+              >
+                {assignLoading ? 'Assigning...' : 'Assign Technician'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
