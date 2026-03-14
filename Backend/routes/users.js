@@ -3,24 +3,22 @@ const router = express.Router();
 const {
   getAllUsers,
   getUserById,
+  createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  getTechnicians,
+  resetPassword
 } = require('../controllers/userController');
 const { protect } = require('../middleware/auth');
+const { authorize } = require('../middleware/roleCheck');
 
-// All routes require authentication
-router.use(protect);
+router.get('/technicians',         protect, getTechnicians);
+router.get('/',                    protect, authorize('admin'), getAllUsers);
+router.post('/',                   protect, authorize('admin'), createUser);
+router.get('/:id',                 protect, authorize('admin'), getUserById);
+router.put('/:id',                 protect, authorize('admin'), updateUser);
+router.delete('/:id',              protect, authorize('admin'), deleteUser);
+router.put('/:id/reset-password',  protect, authorize('admin'), resetPassword);
 
-// @route   GET /api/users
-router.get('/', getAllUsers);
-
-// @route   GET /api/users/:id
-router.get('/:id', getUserById);
-
-// @route   PUT /api/users/:id
-router.put('/:id', updateUser);
-
-// @route   DELETE /api/users/:id
-router.delete('/:id', deleteUser);
 
 module.exports = router;

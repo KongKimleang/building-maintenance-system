@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs'); 
+
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -100,10 +102,131 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+// @desc    Create user (Admin only)
+// @route   POST /api/users
+// @access  Private (Admin)
+const createUser = async (req, res) => {
+  try {
+    const {
+      firstName, lastName, email, username,
+      role, phone, sex,
+      floor, unit, specialization, position
+    } = req.body;
+
+    if (!firstName || !lastName || !role) {
+      return res.status(400).json({ message: 'firstName, lastName and role are required' });
+    }
+
+    // Check email exists
+    if (email) {
+      const emailExists = await User.findOne({ email });
+      if (emailExists) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
+    }
+
+    // Generate username if not provided
+    let finalUsername = username ||
+      `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
+
+    // Make sure username is unique
+    const usernameExists = await User.findOne({ username: finalUsername });
+    if (usernameExists) {
+      finalUsername = `${finalUsername}${Math.floor(Math.random() * 100)}`;
+    }
+
+    // Temporary password
+    const tempPassword = 'Password123';
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(tempPassword, salt);
+
+    const user = await User.create({
+      firstName, lastName, email,
+      username: finalUsername,
+      password: hashedPassword,
+      role, phone, sex,
+      floor, unit, specialization, position,
+      requirePasswordChange: true,
+      isActive: true
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      credentials: {
+        username: finalUsername,
+        tempPassword,
+        note: 'Give these credentials to the user. They must change password on first login.'
+      },
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Create user error:', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Get all technicians
+// @route   GET /api/users/technicians
+// @access  Private (Admin)
+const getTechnicians = async (req, res) => {
+  try {
+    const technicians = await User.find({
+      role: 'technician',
+      isActive: true
+    }).select('-password');
+
+    res.status(200).json({
+      success: true,
+      count: technicians.length,
+      technicians
+    });
+  } catch (error) {
+    console.error('Get technicians error:', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Reset user password (Admin)
+// @route   PUT /api/users/:id/reset-password
+// @access  Private (Admin)
+const resetPassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const tempPassword = 'Password123';
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(tempPassword, salt);
+    user.requirePasswordChange = true;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully',
+      tempPassword
+    });
+  } catch (error) {
+    console.error('Reset password error:', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
 module.exports = {
   getAllUsers,
   getUserById,
+  createUser, 
   updateUser,
-  deleteUser
+  deleteUser,
+  getTechnicians,
+  resetPassword 
 };
