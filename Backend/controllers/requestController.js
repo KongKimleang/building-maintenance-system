@@ -358,7 +358,6 @@ const addComment = async (req, res) => {
 const getMyTasks = async (req, res) => {
   try {
     const { status } = req.query;
-    
     let filter = { assignedTo: req.user._id };
     if (status) filter.status = status;
 
