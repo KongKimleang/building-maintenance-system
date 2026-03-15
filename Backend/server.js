@@ -81,7 +81,7 @@ app.use('/api/feedback',      require('./routes/feedback'));
 
 // ERROR HANDLING
 // Handle unknown routes
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({ message: `Route ${req.originalUrl} not found` });
 });
 
