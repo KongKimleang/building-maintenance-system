@@ -1,187 +1,457 @@
-# Getting Started with Create React App
+# Building Maintenance Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack web application for managing maintenance requests in residential apartment buildings. Built as a Final Year Project using React.js, Node.js, Express.js, and MongoDB.
 
-## Available Scripts
+![Project Status](https://img.shields.io/badge/Status-In%20Development-yellow)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🌐 Live Demo
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+| Service | URL |
+|---------|-----|
+| 🎨 Frontend | [https://your-app.vercel.app](https://your-app.vercel.app) |
+| ⚙️ Backend API | [https://your-app.railway.app](https://your-app.railway.app) |
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+> Replace these URLs with your real deployed URLs after deployment!
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 👥 Team Members
 
-### `npm run build`
+| Name | Role | Student ID |
+|------|------|------------|
+| Kong Kimleang | Frontend Developer & Integration Lead | 2023491 |
+| Phann Chanthariroza | Backend Developer & Database Architect | 2023430 |
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**Instructor:** Chandan Mukherjee
+**Course:** FYP 401 001 - Final Year Project I
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📋 Table of Contents
 
-### `npm run eject`
+- [About](#about)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [API Documentation](#api-documentation)
+- [Screenshots](#screenshots)
+- [Team](#team)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📖 About
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The Building Maintenance Management System is a comprehensive web-based application designed to streamline and digitize the maintenance request and management process for residential apartment buildings.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Problem Statement
+Traditional maintenance management relies on manual processes such as phone calls, paper forms, or verbal complaints. These methods lead to lost requests, delayed responses, and lack of transparency.
 
-## Learn More
+### Solution
+A centralized digital platform connecting residents, administrators, and technicians through an efficient workflow system.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## ✨ Features
 
-### Code Splitting
+### 👤 Authentication & Authorization
+- Secure login with JWT tokens
+- Role-based access control (Admin, Resident, Staff, Technician)
+- Password hashing with bcrypt
+- First-login password change requirement
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 🔧 Maintenance Requests
+- Submit requests with title, description, category, priority and location
+- Auto-generated unique request IDs (#001, #002...)
+- Photo upload support
+- Complete request timeline tracking
+- Filter and search by status, priority, category
 
-### Analyzing the Bundle Size
+### 👑 Admin Features
+- View all maintenance requests
+- Assign technicians to requests
+- Create and manage user accounts
+- View system statistics and analytics
+- Manage buildings and units
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 🏠 Resident Features
+- Submit maintenance requests
+- View personal request history
+- Track request status in real-time
+- Submit feedback and ratings
 
-### Making a Progressive Web App
+### 👷 Technician Features
+- View assigned tasks
+- Update request status (In Progress, Completed)
+- Add work notes and timeline updates
+- View resident contact information
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 🔔 Notifications
+- Real-time notifications for status updates
+- Notification bell with unread count
+- Mark as read / mark all as read
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🛠️ Tech Stack
+
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| React.js | UI framework |
+| Tailwind CSS | Styling |
+| React Router | Navigation |
+| Axios | API calls |
+
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| Node.js | Runtime environment |
+| Express.js | Web framework |
+| JWT | Authentication |
+| Bcrypt.js | Password hashing |
+| Multer | File uploads |
+| Helmet | Security headers |
+| Express Rate Limit | Brute force protection |
+
+### Database
+| Technology | Purpose |
+|------------|---------|
+| MongoDB Atlas | Cloud database |
+| Mongoose | ODM |
 
 ### Deployment
+| Service | Purpose |
+|---------|---------|
+| Vercel | Frontend hosting |
+| Railway | Backend hosting |
+| MongoDB Atlas | Database hosting |
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 🚀 Getting Started
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Prerequisites
+- Node.js v18+
+- npm or yarn
+- MongoDB Atlas account
+- Git
 
+### Installation
 
- Git commands 
-
-## **1️⃣ Setup / Configuration**
-
+**1. Clone the repository**
 ```bash
-git config --global user.name "Your Name"       # Set your Git username
-git config --global user.email "you@example.com" # Set your Git email
-git config --global core.editor "code --wait"    # Use VS Code as Git editor
-git config --global color.ui auto                # Enable color in terminal
+git clone https://github.com/KongKimleang/building-maintenance-system.git
+cd building-maintenance-system
+```
+
+**2. Setup Backend**
+```bash
+cd Backend
+npm install
+```
+
+Create `.env` file in `Backend/` folder:
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRE=7d
+NODE_ENV=development
+```
+
+Run backend:
+```bash
+npm run dev
+```
+
+**3. Setup Frontend**
+```bash
+cd Frontend
+npm install
+```
+
+Create `.env` file in `Frontend/` folder:
+```env
+REACT_APP_API_URL=http://localhost:5000
+```
+
+Run frontend:
+```bash
+npm start
+```
+
+**4. Open in browser**
+```
+http://localhost:3000
 ```
 
 ---
 
-## **2️⃣ Cloning / Initial setup**
+## 📁 Project Structure
 
-```bash
-git clone https://github.com/username/repo-name.git   # Clone a repo
-cd repo-name                                         # Enter repo folder
-git remote -v                                       # Check remote URLs
-git remote add origin <url>                          # Add remote if missing
-git branch -a                                       # Show all branches
+```
+building-maintenance-system/
+│
+├── Frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Sidebar.jsx
+│   │   │   ├── RequestCard.jsx
+│   │   │   └── NotificationBell.jsx
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── auth/         # Login, Register
+│   │   │   ├── admin/        # Dashboard, AllRequests, ManageUsers, ManageBuildings
+│   │   │   ├── resident/     # Dashboard, SubmitRequest, MyRequests, History
+│   │   │   └── technician/   # Dashboard, MyTasks, UpdateTask
+│   │   │
+│   │   ├── services/
+│   │   │   ├── api.js        # All API calls
+│   │   │   └── auth.js       # Auth helpers
+│   │   │
+│   │   └── utils/
+│   │       ├── formatDate.js
+│   │       └── validateForm.js
+│   │
+├── Backend/
+│   ├── config/db.js
+│   ├── models/               # User, Request, Notification, Building, Unit, Feedback
+│   ├── controllers/          # authController, userController, requestController, buildingController, feedbackController
+│   ├── middleware/            # auth, roleCheck, upload
+│   ├── routes/               # auth, users, requests, notifications, buildings, feedback
+│   └── server.js
 ```
 
 ---
 
-## **3️⃣ Branching / Switching**
+## 📡 API Documentation
 
+### Base URL
+```
+http://localhost:5000/api
+```
+
+### Authentication
+All protected routes require:
+```
+Authorization: Bearer <token>
+```
+
+### Endpoints
+
+#### 🔐 Auth
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/auth/login` | Login user | Public |
+| POST | `/auth/register` | Register user | Admin |
+| GET | `/auth/me` | Get current user | Private |
+| POST | `/auth/change-password` | Change password | Private |
+
+#### 👤 Users
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/users` | Get all users | Admin |
+| POST | `/users` | Create user | Admin |
+| GET | `/users/:id` | Get single user | Admin |
+| PUT | `/users/:id` | Update user | Admin |
+| DELETE | `/users/:id` | Delete user | Admin |
+| GET | `/users/technicians` | Get technicians | Admin |
+| PUT | `/users/:id/reset-password` | Reset password | Admin |
+
+#### 🔧 Requests
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/requests` | Get all requests | Admin, Technician |
+| POST | `/requests` | Create request | Resident, Staff |
+| GET | `/requests/stats` | Get statistics | Private |
+| GET | `/requests/my-requests` | Get my requests | Resident, Staff |
+| GET | `/requests/my-tasks` | Get my tasks | Technician |
+| GET | `/requests/:id` | Get single request | Private |
+| PUT | `/requests/:id/assign` | Assign technician | Admin |
+| PUT | `/requests/:id/status` | Update status | Admin, Technician |
+| POST | `/requests/:id/comment` | Add comment | Private |
+
+#### 🔔 Notifications
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/notifications` | Get my notifications | Private |
+| PUT | `/notifications/read-all` | Mark all read | Private |
+| PUT | `/notifications/:id/read` | Mark one read | Private |
+| DELETE | `/notifications/:id` | Delete notification | Private |
+
+#### 🏢 Buildings
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/buildings` | Get all buildings | Private |
+| POST | `/buildings` | Create building | Admin |
+| GET | `/buildings/:id` | Get single building | Private |
+| PUT | `/buildings/:id` | Update building | Admin |
+| DELETE | `/buildings/:id` | Delete building | Admin |
+| GET | `/buildings/:id/units` | Get units | Private |
+| POST | `/buildings/:id/units` | Create unit | Admin |
+
+#### ⭐ Feedback
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/feedback` | Submit feedback | Resident |
+| GET | `/feedback` | Get all feedback | Admin |
+| GET | `/feedback/:requestId` | Get request feedback | Private |
+
+---
+
+## 🔒 Security Features
+
+- JWT token authentication
+- Password hashing with bcrypt
+- HTTP security headers (Helmet)
+- Rate limiting (100 req/15min, 10 login attempts/15min)
+- NoSQL injection prevention (mongo-sanitize)
+- XSS attack prevention (xss-clean)
+- CORS protection
+- Request body size limit (10kb)
+
+---
+
+## 👥 User Roles
+
+| Role | Permissions |
+|------|-------------|
+| **Admin** | Full access — manage users, buildings, requests, view analytics |
+| **Resident** | Submit requests, view own requests, submit feedback |
+| **Staff** | Same as resident |
+| **Technician** | View assigned tasks, update status, add notes |
+
+---
+
+## 📊 Database Schema
+
+### Collections
+- **users** — User accounts with role-based fields
+- **requests** — Maintenance requests with timeline
+- **notifications** — User notifications
+- **buildings** — Building information
+- **units** — Units/rooms within buildings
+- **feedbacks** — Resident ratings and comments
+
+---
+
+## 🎯 Project Status
+
+| Feature | Status |
+|---------|--------|
+| Authentication | ✅ Complete |
+| User Management | ✅ Complete |
+| Request Submission | ✅ Complete |
+| Request Workflow | ✅ Complete |
+| Notifications | ✅ Complete |
+| Buildings Management | ✅ Complete |
+| Feedback System | ✅ Complete |
+| Security | ✅ Complete |
+| Frontend UI | 🔄 In Progress |
+| Deployment | 🔄 In Progress |
+| Documentation | 🔄 In Progress |
+
+---
+
+## 📝 License
+
+This project is for academic purposes — Final Year Project at AUPP.
+
+---
+
+## 🌿 Git Commands — Daily Workflow
+
+### First Time Setup
 ```bash
-git branch new-branch-name          # Create a new branch
-git checkout new-branch-name        # Switch to a branch
-git checkout -b new-branch-name     # Create + switch at once
-git branch -d old-branch-name       # Delete local branch
-git push origin --delete old-branch # Delete remote branch
+# Clone the project
+git clone https://github.com/KongKimleang/building-maintenance-system.git
+
+# Go into the project
+cd building-maintenance-system
+
+# Check everything is connected
+git status
 ```
 
 ---
 
-## **4️⃣ Syncing / Updating**
-
+### Every Day Workflow
 ```bash
-git pull origin main                # Pull latest changes from main
-git fetch origin                    # Fetch updates without merging
-git merge origin/main               # Merge fetched changes
-git rebase origin/main              # Rebase your changes onto main
+# Step 1 — Always pull latest code first before starting work
+git pull origin main
+
+# Step 2 — Check what files you changed
+git status
+
+# Step 3 — Add all changed files
+git add .
+
+# OR add specific file only
+git add Backend/controllers/requestController.js
+
+# Step 4 — Commit with a clear message
+git commit -m "Add filter to getAllRequests"
+
+# Step 5 — Push to GitHub
+git push origin main
 ```
 
 ---
 
-## **5️⃣ Staging / Committing**
-
+### Good Commit Message Examples
 ```bash
-git status                          # See changes
-git add file.txt                     # Stage one file
-git add .                            # Stage all changes
-git commit -m "Your commit message"  # Commit staged changes
-git commit -am "Update"              # Add+commit tracked files in one step
+# ✅ Good — clear and specific
+git commit -m "Fix submit request bug in requestController"
+git commit -m "Add notification bell component"
+git commit -m "Connect login page to backend API"
+git commit -m "Add security middleware to server.js"
+git commit -m "Update README with API documentation"
+
+# ❌ Bad — too vague
+git commit -m "fix"
+git commit -m "update"
+git commit -m "changes"
 ```
 
 ---
 
-## **6️⃣ Pushing / Sharing**
-
+### Check History
 ```bash
-git push origin main                # Push commits to main
-git push origin new-branch          # Push a branch
-git push -u origin new-branch       # Push branch and set upstream
+# See all commits
+git log
+
+# See short commit history
+git log --oneline
+
+# See what changed in a file
+git diff Backend/server.js
 ```
 
 ---
 
-## **7️⃣ Undo / Fix mistakes**
-
+### Undo Mistakes
 ```bash
-git restore file.txt                # Discard changes in a file
-git restore .                       # Discard all changes
-git reset HEAD file.txt             # Unstage a file
-git reset --soft HEAD~1             # Undo last commit, keep changes staged
-git reset --hard HEAD~1             # Undo last commit, discard changes
-git revert <commit-hash>            # Revert a specific commit safely
+# Undo changes in a file (before commit)
+git checkout -- filename.js
+
+# Unstage a file (after git add but before commit)
+git reset HEAD filename.js
+
+# See what branch you are on
+git branch
 ```
 
 ---
 
-## **8️⃣ Viewing history / logs**
+##  Acknowledgements
 
-```bash
-git log                             # Show commit history
-git log --oneline                   # Short history
-git log --graph --all --decorate    # Visual graph of branches
-git diff                            # Show unstaged changes
-git diff --staged                    # Show staged changes
-```
-
----
-
-## **9️⃣ Tagging / Releases**
-
-```bash
-git tag v1.0                        # Create a tag
-git tag                              # List tags
-git push origin v1.0                 # Push a tag
-```
-
----
-
-## **🔟 Advanced / Collaboration**
-
-```bash
-git stash                           # Save local changes temporarily
-git stash list                      # See stashed changes
-git stash apply                     # Reapply stashed changes
-git cherry-pick <commit-hash>       # Apply a specific commit to current branch
-git remote show origin              # See info about remote
-git reflog                           # See all actions in Git history
-```
+- [React Documentation](https://react.dev/)
+- [Node.js Documentation](https://nodejs.org/docs/)
+- [Express.js Documentation](https://expressjs.com/)
+- [MongoDB Documentation](https://www.mongodb.com/docs/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
