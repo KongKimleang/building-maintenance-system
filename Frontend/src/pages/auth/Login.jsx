@@ -25,14 +25,18 @@ function Login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Navigate based on role
+      // Check if password change is required
+      if (data.user.requirePasswordChange) {
+        navigate('/change-password');
+        return;
+      }
+      // Redirect based on role
       if (data.user.role === 'admin') {
         navigate('/admin/dashboard');
+      } else if (data.user.role === 'resident' || data.user.role === 'staff') {
+        navigate('/resident/dashboard');
       } else if (data.user.role === 'technician') {
         navigate('/technician/dashboard');
-      } else {
-        // Both resident and staff use resident dashboard
-        navigate('/resident/dashboard');
       }
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');

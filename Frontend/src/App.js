@@ -12,6 +12,7 @@ import AllRequests from './pages/admin/AllRequests';
 import TaskDetails from './pages/technician/TaskDetails';
 import AdminRequestDetails from './pages/admin/RequestDetails';
 import UserManagement from './pages/admin/UserManagement';
+import ChangePassword from './pages/auth/ChangePassword'; 
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         
         {/* Authentication route */}
         <Route path="/login" element={<Login />} />
+        <Route path="/change-password" element={<ChangePassword />} />
         
         {/* Dashboard routes */}
         {/* Admin routes */}

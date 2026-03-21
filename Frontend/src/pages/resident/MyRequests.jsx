@@ -21,6 +21,22 @@ function MyRequests() {
     try {
       setLoading(true);
       const data = await getMyRequests();
+
+      // Debug logs
+      console.log('🔍 Current user ID:', user.id);
+      console.log('📋 Fetched requests:', data.requests);
+      console.log('📊 Total requests:', data.requests.length);
+      
+      // Check each request's submittedBy
+      data.requests.forEach((req, index) => {
+        console.log(`Request ${index + 1}:`, {
+          id: req.requestId,
+          submittedBy: req.submittedBy?._id,
+          currentUser: user.id,
+          match: req.submittedBy?._id === user.id
+        });
+      });
+
       setAllRequests(data.requests);
       setError('');
     } catch (err) {
