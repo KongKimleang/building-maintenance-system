@@ -1,119 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { getAllRequests, updateRequestStatus } from '../../services/api';
 
 function MyTasks() {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  
   const [filter, setFilter] = useState('All');
+  const [allTasks, setAllTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [statusNotes, setStatusNotes] = useState('');
+  const [updateLoading, setUpdateLoading] = useState(false);
 
-  // Dummy data - all tasks assigned to this technician
-  const allTasks = [
-    { 
-      id: '012', 
-      title: 'Leaking Pipe in Bathroom', 
-      status: 'In Progress', 
-      priority: 'High',
-      category: 'Plumbing',
-      location: 'Building - Unit 305',
-      floor: 'Floor 3',
-      assignedDate: 'Feb 10, 2024 11:00 AM',
-      dueDate: 'Feb 10, 2024 (Today)',
-      resident: {
-        name: 'John Doe',
-        phone: '+1234567890',
-        email: 'john.doe@email.com'
-      },
-      description: 'Water leaking from pipe under bathroom sink. Started yesterday evening. Water pooling on floor.',
-      photos: ['photo1.jpg', 'photo2.jpg'],
-      lastUpdate: '2 hours ago',
-      estimatedTime: '2-3 hours'
-    },
-    { 
-      id: '015', 
-      title: 'Toilet Not Flushing', 
-      status: 'Pending', 
-      priority: 'Medium',
-      category: 'Plumbing',
-      location: 'Building - Unit 501',
-      floor: 'Floor 5',
-      assignedDate: 'Feb 10, 2024 1:00 PM',
-      dueDate: 'Feb 11, 2024 (Tomorrow)',
-      resident: {
-        name: 'Jane Smith',
-        phone: '+0987654321',
-        email: 'jane.smith@email.com'
-      },
-      description: 'Toilet flush mechanism broken, needs replacement.',
-      photos: ['photo3.jpg'],
-      lastUpdate: '1 hour ago',
-      estimatedTime: '1-2 hours'
-    },
-    { 
-      id: '018', 
-      title: 'Kitchen Sink Clogged', 
-      status: 'Pending', 
-      priority: 'Low',
-      category: 'Plumbing',
-      location: 'Building - Unit 205',
-      floor: 'Floor 2',
-      assignedDate: 'Feb 10, 2024 2:30 PM',
-      dueDate: 'Feb 12, 2024',
-      resident: {
-        name: 'Bob Johnson',
-        phone: '+1122334455',
-        email: 'bob.j@email.com'
-      },
-      description: 'Kitchen sink draining very slowly. Possibly clogged drain.',
-      photos: [],
-      lastUpdate: '30 minutes ago',
-      estimatedTime: '1 hour'
-    },
-    { 
-      id: '010', 
-      title: 'Fixed Shower Head Leak', 
-      status: 'Completed', 
-      priority: 'Medium',
-      category: 'Plumbing',
-      location: 'Building - Unit 402',
-      floor: 'Floor 4',
-      assignedDate: 'Feb 09, 2024',
-      completedDate: 'Feb 09, 2024',
-      dueDate: 'Feb 09, 2024',
-      resident: {
-        name: 'Alice Brown',
-        phone: '+5544332211',
-        email: 'alice.b@email.com'
-      },
-      description: 'Shower head was leaking. Replaced washer and tested.',
-      photos: [],
-      lastUpdate: 'Yesterday',
-      completionNotes: 'Replaced rubber washer. Leak stopped. Tested for 10 minutes.',
-      timeSpent: '45 minutes'
-    },
-    { 
-      id: '007', 
-      title: 'Bathroom Faucet Dripping', 
-      status: 'Completed', 
-      priority: 'Low',
-      category: 'Plumbing',
-      location: 'Building - Unit 103',
-      floor: 'Floor 1',
-      assignedDate: 'Feb 08, 2024',
-      completedDate: 'Feb 08, 2024',
-      dueDate: 'Feb 08, 2024',
-      resident: {
-        name: 'Tom Wilson',
-        phone: '+9988776655',
-        email: 'tom.w@email.com'
-      },
-      description: 'Bathroom faucet constantly dripping.',
-      photos: [],
-      lastUpdate: '2 days ago',
-      completionNotes: 'Tightened valve and replaced O-ring. No more dripping.',
-      timeSpent: '30 minutes'
-    },
-  ];
+  // Fetch tasks from database
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllRequests();
+      
+      // Filter only tasks assigned to this technician
+      const myTasks = data.requests.filter(req => 
+        req.assignedTo && req.assignedTo._id === user.id
+      );
+      
+      setAllTasks(myTasks);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to load tasks');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Open status update modal
+  const handleOpenStatusModal = (task, status) => {
+    setSelectedTask(task);
+    setNewStatus(status);
+    setStatusNotes('');
+    setShowStatusModal(true);
+  };
+
+  // Handle status update
+  const handleUpdateStatus = async () => {
+    if (newStatus === 'Completed' && !statusNotes.trim()) {
+      alert('Please add completion notes');
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      await updateRequestStatus(selectedTask._id, newStatus, statusNotes);
+      
+      const statusMessage = newStatus === 'In Progress' ? 'Task started!' : 'Task completed!';
+      alert(`✅ ${statusMessage}`);
+      
+      setShowStatusModal(false);
+      setSelectedTask(null);
+      setStatusNotes('');
+      await fetchTasks(); // Refresh list
+    } catch (error) {
+      alert('Error: ' + (error.message || 'Failed to update status'));
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   // Filter tasks
   const filteredTasks = filter === 'All' 
@@ -123,7 +83,7 @@ function MyTasks() {
   // Count by status
   const statusCounts = {
     all: allTasks.length,
-    pending: allTasks.filter(t => t.status === 'Pending').length,
+    assigned: allTasks.filter(t => t.status === 'Assigned').length,
     inProgress: allTasks.filter(t => t.status === 'In Progress').length,
     completed: allTasks.filter(t => t.status === 'Completed').length
   };
@@ -133,8 +93,8 @@ function MyTasks() {
       {/* Navbar */}
       <Navbar
         userInfo={{
-          name: 'Mike Wilson',
-          subtitle: 'Plumber',
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          subtitle: user.specialization || 'Technician',
           dashboardLink: '/technician/dashboard',
           navLinks: [
             { label: 'Dashboard', path: '/technician/dashboard', active: false },
@@ -168,15 +128,15 @@ function MyTasks() {
           </button>
 
           <button
-            onClick={() => setFilter('Pending')}
+            onClick={() => setFilter('Assigned')}
             className={`p-4 rounded-lg border-2 transition ${
-              filter === 'Pending' 
-                ? 'border-warning bg-yellow-50' 
+              filter === 'Assigned' 
+                ? 'border-purple-500 bg-purple-50' 
                 : 'border-gray-200 bg-white hover:border-gray-300'
             }`}
           >
-            <p className="text-sm font-medium text-gray-600">Pending</p>
-            <p className="text-2xl font-bold text-warning mt-1">{statusCounts.pending}</p>
+            <p className="text-sm font-medium text-gray-600">Assigned</p>
+            <p className="text-2xl font-bold text-purple-600 mt-1">{statusCounts.assigned}</p>
           </button>
 
           <button
@@ -220,43 +180,57 @@ function MyTasks() {
           </div>
         )}
 
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <p className="text-gray-600">Loading tasks...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {!loading && error && (
+          <div className="bg-red-100 text-red-700 p-4 rounded-lg">
+            Error: {error}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && filteredTasks.length === 0 && (
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <span className="text-6xl mb-4 block">📭</span>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No {filter !== 'All' ? filter.toLowerCase() : ''} tasks found
+            </h3>
+            <p className="text-gray-600">
+              {filter === 'All' 
+                ? "You don't have any assigned tasks yet."
+                : `You don't have any ${filter.toLowerCase()} tasks.`
+              }
+            </p>
+          </div>
+        )}
+
         {/* Tasks List */}
-        <div className="space-y-4">
-          {filteredTasks.length === 0 ? (
-            // Empty State
-            <div className="bg-white rounded-lg shadow p-12 text-center">
-              <span className="text-6xl mb-4 block">📭</span>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No {filter !== 'All' ? filter.toLowerCase() : ''} tasks found
-              </h3>
-              <p className="text-gray-600">
-                {filter === 'All' 
-                  ? "You don't have any assigned tasks yet."
-                  : `You don't have any ${filter.toLowerCase()} tasks.`
-                }
-              </p>
-            </div>
-          ) : (
-            // Task Cards
-            filteredTasks.map((task) => (
-              <div key={task.id} className="bg-white rounded-lg shadow hover:shadow-md transition">
+        {!loading && !error && filteredTasks.length > 0 && (
+          <div className="space-y-4">
+            {filteredTasks.map((task) => (
+              <div key={task._id} className="bg-white rounded-lg shadow hover:shadow-md transition">
                 <div className="p-6">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold text-gray-900">
-                          #{task.id} {task.title}
+                          #{task.requestId} {task.title}
                         </h3>
                         
                         {/* Status Badge */}
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                          task.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
+                          task.status === 'Assigned' ? 'bg-purple-100 text-purple-800' :
                           task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
                           'bg-green-100 text-green-800'
                         }`}>
-                          {task.status === 'Pending' ? '⏰' : 
-                           task.status === 'In Progress' ? '🔵' : '✅'} {task.status}
+                          {task.status}
                         </span>
                         
                         {/* Priority Badge */}
@@ -284,23 +258,23 @@ function MyTasks() {
                         <span className="font-medium">📍 Location:</span> {task.location}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">{task.floor}</span>
+                        <span className="font-medium">Floor {task.floor}</span>
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">👤 Resident:</span> {task.resident.name}
+                        <span className="font-medium">👤 Resident:</span> {task.submittedBy ? `${task.submittedBy.firstName} ${task.submittedBy.lastName}` : 'Unknown'}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">📞</span> {task.resident.phone}
+                        <span className="font-medium">📞</span> {task.submittedBy?.phone || 'N/A'}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">📅 Assigned:</span> {task.assignedDate}
+                        <span className="font-medium">📅 Created:</span> {new Date(task.createdAt).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">⏰ Due:</span> {task.dueDate}
+                        <span className="font-medium">Unit:</span> {task.unit}
                       </p>
                     </div>
                   </div>
@@ -313,72 +287,92 @@ function MyTasks() {
                     </p>
                   </div>
 
-                  {/* Estimated Time */}
-                  {task.status !== 'Completed' && (
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">⏱️ Estimated Time:</span> {task.estimatedTime}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Completion Notes (for completed tasks) */}
-                  {task.status === 'Completed' && task.completionNotes && (
-                    <div className="bg-green-50 border-l-4 border-success p-4 mb-4">
-                      <p className="text-sm font-medium text-gray-900 mb-1">✅ Work Completed:</p>
-                      <p className="text-sm text-gray-700">{task.completionNotes}</p>
-                      <p className="text-sm text-gray-600 mt-2">
-                        <span className="font-medium">Time spent:</span> {task.timeSpent}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3">
-                    {task.status === 'Pending' && (
-                      <>
-                        <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition font-medium text-sm">
-                          🚀 Start Task
-                        </button>
-                        <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm">
-                          📞 Call Resident
-                        </button>
-                      </>
+                    <button 
+                      onClick={() => navigate(`/technician/task-details/${task._id}`)}
+                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition font-medium text-sm"
+                    >
+                      📋 View Details
+                    </button>
+                    
+                    {task.status === 'Assigned' && (
+                      <button 
+                        onClick={() => handleOpenStatusModal(task, 'In Progress')}
+                        className="px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 transition font-medium text-sm"
+                      >
+                        🚀 Start Task
+                      </button>
                     )}
                     
                     {task.status === 'In Progress' && (
-                      <>
-                        <button className="px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 transition font-medium text-sm">
-                          ✅ Mark Complete
-                        </button>
-                        <button className="px-4 py-2 bg-warning text-white rounded-md hover:bg-yellow-600 transition font-medium text-sm">
-                          💬 Add Update
-                        </button>
-                        <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm">
-                          📸 Upload Photo
-                        </button>
-                      </>
-                    )}
-                    
-                    <button 
-                      onClick={() => navigate(`/technician/task-details/${task.id}`)}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm"
-                    >
-                       View Full Details
-                    </button>
-                    
-                    {task.status === 'Completed' && (
-                      <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm">
-                        📄 View Report
+                      <button 
+                        onClick={() => handleOpenStatusModal(task, 'Completed')}
+                        className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition font-medium text-sm"
+                      >
+                        ✅ Mark Complete
                       </button>
                     )}
                   </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
+
+      {/* Update Status Modal */}
+      {showStatusModal && selectedTask && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {newStatus === 'In Progress' ? 'Start Task' : 'Complete Task'}
+            </h2>
+            
+            <div className="mb-4 p-4 bg-gray-50 rounded">
+              <p className="text-sm text-gray-600 mb-1">Request:</p>
+              <p className="font-semibold text-gray-900">#{selectedTask.requestId} {selectedTask.title}</p>
+              <p className="text-sm text-gray-600 mt-2">Current Status: {selectedTask.status}</p>
+              <p className="text-sm text-success mt-1">New Status: {newStatus}</p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Add Notes {newStatus === 'Completed' ? '(Required)' : '(Optional)'}
+              </label>
+              <textarea
+                value={statusNotes}
+                onChange={(e) => setStatusNotes(e.target.value)}
+                rows="4"
+                placeholder={newStatus === 'Completed' 
+                  ? "Describe the work completed, parts used, any issues found..." 
+                  : "Add any notes about starting this task..."}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowStatusModal(false);
+                  setSelectedTask(null);
+                  setStatusNotes('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateStatus}
+                disabled={updateLoading || (newStatus === 'Completed' && !statusNotes.trim())}
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+              >
+                {updateLoading ? 'Updating...' : newStatus === 'In Progress' ? 'Start Task' : 'Mark Complete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

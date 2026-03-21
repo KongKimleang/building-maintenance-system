@@ -248,4 +248,31 @@ export const getAllTechnicians = async () => {
   } catch (error) {
     throw error;
   }
+
+};
+
+// Update request status (Technician)
+export const updateRequestStatus = async (requestId, status, notes = '') => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/requests/${requestId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ status, notes }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update status');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
 };

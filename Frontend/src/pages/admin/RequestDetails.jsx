@@ -1,93 +1,129 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { getRequestById, assignTechnician, getAllTechnicians } from '../../services/api';
 
 function RequestDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  // Dummy data - same as others but with admin perspective
-  const request = {
-    id: '012',
-    title: 'Leaking Pipe in Bathroom',
-    description: 'Water is leaking from the pipe under the bathroom sink. The leak started yesterday evening around 6 PM. Water is slowly pooling on the floor and needs urgent attention.',
-    category: 'Plumbing',
-    priority: 'High',
-    status: 'In Progress',
-    location: 'Unit 305 - Floor 3',
-    floor: '3',
-    unit: '305',
-    
-    submittedBy: {
-      name: 'John Doe',
-      role: 'Resident',
-      unit: '305',
-      phone: '+1234567890',
-      email: 'john.doe@email.com'
-    },
-    submittedDate: 'Feb 10, 2024 10:30 AM',
-    
-    assignedTo: {
-      name: 'Mike Wilson',
-      role: 'Plumber',
-      specialization: 'Plumbing',
-      phone: '+0987654321',
-      email: 'mike.wilson@maintenance.com'
-    },
-    assignedDate: 'Feb 10, 2024 11:00 AM',
-    
-    photos: [
-      { id: 1, url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=300&fit=crop', caption: 'Under sink leak' },
-      { id: 2, url: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&h=300&fit=crop', caption: 'Water pooling on floor' }
-    ],
-    
-    timeline: [
-      {
-        id: 1,
-        type: 'created',
-        user: 'John Doe (Resident)',
-        action: 'Submitted maintenance request',
-        timestamp: 'Feb 10, 2024 10:30 AM',
-        note: 'Initial request submitted with photos'
-      },
-      {
-        id: 2,
-        type: 'assigned',
-        user: 'Admin',
-        action: 'Assigned to Mike Wilson (Plumber)',
-        timestamp: 'Feb 10, 2024 11:00 AM',
-        note: 'High priority - needs immediate attention'
-      },
-      {
-        id: 3,
-        type: 'status_update',
-        user: 'Mike Wilson (Plumber)',
-        action: 'Changed status to "In Progress"',
-        timestamp: 'Feb 10, 2024 2:00 PM',
-        note: 'On my way to the unit. ETA 30 minutes.'
-      },
-      {
-        id: 4,
-        type: 'comment',
-        user: 'Mike Wilson (Plumber)',
-        action: 'Added comment',
-        timestamp: 'Feb 10, 2024 3:15 PM',
-        note: 'Inspected the issue. Need to replace the pipe section. Getting parts from storage.'
-      },
-      {
-        id: 5,
-        type: 'comment',
-        user: 'Mike Wilson (Plumber)',
-        action: 'Added update',
-        timestamp: 'Feb 10, 2024 4:45 PM',
-        note: 'Working on pipe replacement. Almost done, testing for leaks.'
-      }
-    ]
+  const [request, setRequest] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [technicians, setTechnicians] = useState([]);
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
+  const [assignLoading, setAssignLoading] = useState(false);
+
+  useEffect(() => {
+    fetchRequestDetails();
+  }, [id]);
+
+  const fetchRequestDetails = async () => {
+    try {
+      setLoading(true);
+      const data = await getRequestById(id);
+      setRequest(data.request);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to load request details');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const fetchTechnicians = async () => {
+    try {
+      const data = await getAllTechnicians();
+      setTechnicians(data.technicians);
+    } catch (error) {
+      console.error('Error fetching technicians:', error);
+    }
+  };
+
+  const handleOpenAssignModal = async () => {
+    setShowAssignModal(true);
+    await fetchTechnicians();
+  };
+
+  const handleAssignTechnician = async () => {
+    if (!selectedTechnicianId) {
+      alert('Please select a technician');
+      return;
+    }
+
+    try {
+      setAssignLoading(true);
+      await assignTechnician(request._id, selectedTechnicianId);
+      alert('✅ Technician assigned successfully!');
+      setShowAssignModal(false);
+      setSelectedTechnicianId('');
+      await fetchRequestDetails(); // Refresh
+    } catch (error) {
+      alert('Error: ' + (error.message || 'Failed to assign technician'));
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar
+          userInfo={{
+            name: 'Admin',
+            dashboardLink: '/admin/dashboard',
+            navLinks: [
+              { label: 'Dashboard', path: '/admin/dashboard', active: false },
+              { label: 'Users', path: '/admin/users', active: false },
+              { label: 'Requests', path: '/admin/requests', active: true }
+            ]
+          }}
+          notificationCount={3}
+        />
+        <main className="max-w-7xl mx-auto py-6 px-4">
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <p className="text-gray-600">Loading request details...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !request) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar
+          userInfo={{
+            name: 'Admin',
+            dashboardLink: '/admin/dashboard',
+            navLinks: [
+              { label: 'Dashboard', path: '/admin/dashboard', active: false },
+              { label: 'Users', path: '/admin/users', active: false },
+              { label: 'Requests', path: '/admin/requests', active: true }
+            ]
+          }}
+          notificationCount={3}
+        />
+        <main className="max-w-7xl mx-auto py-6 px-4">
+          <div className="bg-red-100 text-red-700 p-4 rounded-lg">
+            Error: {error || 'Request not found'}
+          </div>
+          <button
+            onClick={() => navigate('/admin/requests')}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
+          >
+            ← Back to Requests
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar - ADMIN */}
       <Navbar
         userInfo={{
           name: 'Admin',
@@ -101,196 +137,256 @@ function RequestDetails() {
         notificationCount={3}
       />
 
-      {/* Main Content */}
-      <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <button
           onClick={() => navigate('/admin/requests')}
-          className="flex items-center text-primary hover:text-blue-700 font-medium mb-4"
+          className="mb-4 flex items-center text-primary hover:text-blue-700 font-medium"
         >
           ← Back to All Requests
         </button>
 
-        {/* Request Header */}
+        {/* Header */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                #{request.id} {request.title}
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Request #{request.requestId}
               </h1>
-              
-              <div className="flex flex-wrap gap-2">
-                <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
-                  request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                  request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                  'bg-green-100 text-green-800'
-                }`}>
-                  {request.status === 'Pending' ? '⏰' : 
-                   request.status === 'In Progress' ? '🔵' : '✅'} {request.status}
-                </span>
-                
-                <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
-                  request.priority === 'High' ? 'bg-red-100 text-red-800' :
-                  request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-green-100 text-green-800'
-                }`}>
-                  {request.priority === 'High' ? '🔴' : 
-                   request.priority === 'Medium' ? '🟡' : '🟢'} {request.priority} Priority
-                </span>
-
-                <span className="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-full">
-                  📁 {request.category}
-                </span>
-              </div>
+              <p className="text-xl text-gray-700">{request.title}</p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">📍 Location</p>
-              <p className="font-medium text-gray-900">{request.location}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 mb-1">📅 Submitted</p>
-              <p className="font-medium text-gray-900">{request.submittedDate}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 mb-1">👷 Assigned To</p>
-              <p className="font-medium text-gray-900">{request.assignedTo.name}</p>
+            <div className="flex gap-3">
+              {/* Status Badge */}
+              <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
+                request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
+                request.status === 'Assigned' ? 'bg-purple-100 text-purple-800' :
+                request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                'bg-green-100 text-green-800'
+              }`}>
+                {request.status}
+              </span>
+              {/* Priority Badge */}
+              <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
+                request.priority === 'High' ? 'bg-red-100 text-red-800' :
+                request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-green-100 text-green-800'
+              }`}>
+                {request.priority === 'High' ? '🔴' : request.priority === 'Medium' ? '🟡' : '🟢'} {request.priority}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column */}
+          {/* Main Content - Left Side */}
           <div className="lg:col-span-2 space-y-6">
-            
-            {/* Description */}
+            {/* Request Details */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-3">Description</h2>
-              <p className="text-gray-700 leading-relaxed">{request.description}</p>
-            </div>
-
-            {/* Photos */}
-            {request.photos && request.photos.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">📸 Attached Photos</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {request.photos.map((photo) => (
-                    <div key={photo.id} className="space-y-2">
-                      <img
-                        src={photo.url}
-                        alt={photo.caption}
-                        className="w-full h-48 object-cover rounded-lg border border-gray-200"
-                      />
-                      <p className="text-sm text-gray-600">{photo.caption}</p>
-                    </div>
-                  ))}
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Request Details</h2>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Category</p>
+                  <p className="text-gray-900">{request.category}</p>
                 </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Location</p>
+                  <p className="text-gray-900">{request.location}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Floor</p>
+                  <p className="text-gray-900">{request.floor}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Unit</p>
+                  <p className="text-gray-900">{request.unit}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">Submitted Date</p>
+                  <p className="text-gray-900">{new Date(request.createdAt).toLocaleString()}</p>
+                </div>
+                {request.completedDate && (
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Completed Date</p>
+                    <p className="text-gray-900">{new Date(request.completedDate).toLocaleString()}</p>
+                  </div>
+                )}
               </div>
-            )}
+
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 font-medium mb-2">Description</p>
+                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">{request.description}</p>
+              </div>
+            </div>
 
             {/* Timeline */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">🕐 Timeline & Updates</h2>
-              <div className="space-y-4">
-                {request.timeline.map((event, index) => (
-                  <div key={event.id} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        event.type === 'created' ? 'bg-blue-100' :
-                        event.type === 'assigned' ? 'bg-purple-100' :
-                        event.type === 'status_update' ? 'bg-yellow-100' :
-                        'bg-green-100'
-                      }`}>
-                        <span className="text-lg">
-                          {event.type === 'created' ? '📝' :
-                           event.type === 'assigned' ? '👷' :
-                           event.type === 'status_update' ? '🔄' :
-                           '💬'}
-                        </span>
-                      </div>
-                      {index < request.timeline.length - 1 && (
-                        <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 pb-6">
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <p className="font-medium text-gray-900">{event.action}</p>
-                        <p className="text-sm text-gray-600 mt-1">by {event.user}</p>
-                        <p className="text-sm text-gray-500 mt-1">{event.timestamp}</p>
-                        {event.note && (
-                          <p className="text-sm text-gray-700 mt-3 bg-white p-3 rounded border-l-4 border-primary">
-                            {event.note}
-                          </p>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Timeline</h2>
+              
+              {request.timeline && request.timeline.length > 0 ? (
+                <div className="space-y-4">
+                  {request.timeline.map((event, index) => (
+                    <div key={index} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 bg-primary rounded-full"></div>
+                        {index !== request.timeline.length - 1 && (
+                          <div className="w-0.5 h-full bg-gray-300 mt-1"></div>
                         )}
                       </div>
+                      <div className="flex-1 pb-4">
+                        <p className="font-semibold text-gray-900">{event.action}</p>
+                        {event.note && (
+                          <p className="text-sm text-gray-600 mt-1">{event.note}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(event.timestamp).toLocaleString()}
+                          {event.user && ` - ${event.user.firstName} ${event.user.lastName}`}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-600">No timeline events yet</p>
+              )}
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="lg:col-span-1 space-y-6">
-            
+          {/* Sidebar - Right Side */}
+          <div className="space-y-6">
             {/* Submitted By */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">👤 Submitted By</h3>
-              <div className="space-y-2">
-                <p className="font-medium text-gray-900">{request.submittedBy.name}</p>
-                <p className="text-sm text-gray-600">{request.submittedBy.role}</p>
-                <p className="text-sm text-gray-600">Unit {request.submittedBy.unit}</p>
-                <div className="pt-3 border-t space-y-1">
-                  <p className="text-sm text-gray-600">📞 {request.submittedBy.phone}</p>
-                  <p className="text-sm text-gray-600">📧 {request.submittedBy.email}</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Submitted By</h3>
+              {request.submittedBy ? (
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {request.submittedBy.firstName} {request.submittedBy.lastName}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Email:</span> {request.submittedBy.email}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    <span className="font-medium">Phone:</span> {request.submittedBy.phone}
+                  </p>
+                  {request.submittedBy.unit && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      <span className="font-medium">Unit:</span> {request.submittedBy.unit}
+                    </p>
+                  )}
                 </div>
-              </div>
+              ) : (
+                <p className="text-gray-600">Unknown</p>
+              )}
             </div>
 
-            {/* Assigned Technician */}
+            {/* Assigned To */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">👷 Assigned Technician</h3>
-              <div className="space-y-2">
-                <p className="font-medium text-gray-900">{request.assignedTo.name}</p>
-                <p className="text-sm text-gray-600">{request.assignedTo.specialization}</p>
-                <div className="pt-3 border-t space-y-1">
-                  <p className="text-sm text-gray-600">📞 {request.assignedTo.phone}</p>
-                  <p className="text-sm text-gray-600">📧 {request.assignedTo.email}</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Assigned Technician</h3>
+              {request.assignedTo ? (
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {request.assignedTo.firstName} {request.assignedTo.lastName}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Specialization:</span> {request.assignedTo.specialization}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    <span className="font-medium">Phone:</span> {request.assignedTo.phone}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    <span className="font-medium">Email:</span> {request.assignedTo.email}
+                  </p>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <p className="text-gray-600 mb-3">Not assigned yet</p>
+                  <button
+                    onClick={handleOpenAssignModal}
+                    className="w-full px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 font-medium"
+                  >
+                    Assign Technician
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Admin Actions - DIFFERENT FROM OTHERS */}
+            {/* Actions */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">⚙️ Admin Actions</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Actions</h3>
               <div className="space-y-3">
-                {!request.assignedTo && (
-                  <button className="w-full px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 transition font-medium">
-                    👷 Assign Technician
+                {request.assignedTo && request.status !== 'Completed' && (
+                  <button
+                    onClick={handleOpenAssignModal}
+                    className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 font-medium"
+                  >
+                    Reassign Technician
                   </button>
                 )}
-                {request.assignedTo && (
-                  <button className="w-full px-4 py-2 bg-warning text-white rounded-md hover:bg-yellow-600 transition font-medium">
-                    🔄 Re-assign Technician
-                  </button>
-                )}
-                <button className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition font-medium">
-                  📝 Update Status
-                </button>
-                <button className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition font-medium">
-                  ✏️ Edit Request
-                </button>
-                <button className="w-full px-4 py-2 bg-danger text-white rounded-md hover:bg-red-700 transition font-medium">
-                  🗑️ Delete Request
+                <button
+                  onClick={() => navigate('/admin/requests')}
+                  className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"
+                >
+                  Back to All Requests
                 </button>
               </div>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Assign Technician Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {request.assignedTo ? 'Reassign Technician' : 'Assign Technician'}
+            </h2>
+            
+            <div className="mb-4 p-4 bg-gray-50 rounded">
+              <p className="text-sm text-gray-600 mb-1">Request:</p>
+              <p className="font-semibold text-gray-900">#{request.requestId} {request.title}</p>
+              <p className="text-sm text-gray-600 mt-2">Category: {request.category}</p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Technician *
+              </label>
+              <select
+                value={selectedTechnicianId}
+                onChange={(e) => setSelectedTechnicianId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">Choose a technician...</option>
+                {technicians.map((tech) => (
+                  <option key={tech._id} value={tech._id}>
+                    {tech.firstName} {tech.lastName} - {tech.specialization}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedTechnicianId('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAssignTechnician}
+                disabled={assignLoading || !selectedTechnicianId}
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+              >
+                {assignLoading ? 'Assigning...' : 'Assign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
