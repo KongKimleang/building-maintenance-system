@@ -3,9 +3,6 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
 const connectDB = require('./config/db');
 
 // Load environment variables
@@ -16,7 +13,6 @@ connectDB();
 
 // Initialize Express app
 const app = express();
-
 
 // SECURITY MIDDLEWARE
 // 1. Helmet — secure HTTP headers
@@ -33,37 +29,12 @@ app.use(cors({
   credentials: true
 }));
 
-// 3. Rate limiting — prevent brute force
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,                  // max 100 requests per 15 min
-  message: { message: 'Too many requests, please try again later' }
-});
-
-// Stricter limit for login
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10,                   // max 10 attempts per 15 min
-  message: { message: 'Too many login attempts, try again in 15 minutes' }
-});
-
-app.use('/api/', generalLimiter);
-app.use('/api/auth/login',    authLimiter);
-app.use('/api/auth/register', authLimiter);
-
-// 4. MongoDB sanitize — prevent NoSQL injection
-app.use(mongoSanitize());
-
-// 5. XSS clean — prevent script injection
-app.use(xss());
-
-// 6. Body size limit — prevent overflow attacks
+// 3. Body parser - MUST BE BEFORE ROUTES
 app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 
 // Serve uploaded photos
 app.use('/uploads', express.static('uploads'));
-
 
 // ROUTES
 // Test route
@@ -75,9 +46,6 @@ app.use('/api/auth',          require('./routes/auth'));
 app.use('/api/users',         require('./routes/users'));
 app.use('/api/requests',      require('./routes/requests'));
 app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/buildings',     require('./routes/buildings'));
-app.use('/api/feedback',      require('./routes/feedback'));
-
 
 // ERROR HANDLING
 // Handle unknown routes
@@ -92,7 +60,6 @@ app.use((err, req, res, next) => {
     message: err.message || 'Server error'
   });
 });
-
 
 // START SERVER
 const PORT = process.env.PORT || 5000;
