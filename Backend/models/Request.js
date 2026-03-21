@@ -60,9 +60,10 @@ const requestSchema = new mongoose.Schema({
   },
   
   // Photos
-  photos: [{
-    type: String // Store file paths
-  }],
+  photo: {
+    data: Buffer,
+    contentType: String
+  }
   
   // Timeline
   timeline: [{

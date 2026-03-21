@@ -2,7 +2,6 @@ const Request = require('../models/Request');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 
-
 const createNotification = async (userId, type, title, message, requestId) => {
   try {
     await Notification.create({ userId, type, title, message, requestId });
@@ -38,7 +37,7 @@ const createRequest = async (req, res) => {
     }
 
     const count = await Request.countDocuments();
-    const requestId = `#${String(count + 1).padStart(3, "0")}`;
+    const requestId = String(count + 1).padStart(3, "0");
 
     // Create request
     const request = await Request.create({
@@ -50,7 +49,7 @@ const createRequest = async (req, res) => {
       floor,
       unit,
       location,
-      submittedBy: req.user.id, // From auth middleware
+      submittedBy: req.user.id,
       timeline: [{
         type: 'created',
         user: `${req.user.firstName} ${req.user.lastName} (${req.user.role})`,
@@ -72,7 +71,6 @@ const createRequest = async (req, res) => {
       );
     }
 
-    // Populate submittedBy details
     await request.populate('submittedBy', 'firstName lastName email phone unit');
 
     res.status(201).json({
@@ -94,13 +92,22 @@ const getAllRequests = async (req, res) => {
   try {
     const requests = await Request.find()
       .populate('submittedBy', 'firstName lastName email phone unit')
-      .populate('assignedTo', 'firstName lastName specialization')
-      .sort({ createdAt: -1 }); // Newest first
+      .populate('assignedTo', 'firstName lastName specialization phone email')
+      .sort({ createdAt: -1 });
+
+    // Convert photo buffers to base64
+    const requestsWithPhotos = requests.map(req => {
+      const reqObj = req.toObject();
+      if (reqObj.photo && reqObj.photo.data) {
+        reqObj.photo.data = reqObj.photo.data.toString('base64');
+      }
+      return reqObj;
+    });
 
     res.status(200).json({
       success: true,
-      count: requests.length,
-      requests
+      count: requestsWithPhotos.length,
+      requests: requestsWithPhotos
     });
 
   } catch (error) {
@@ -109,18 +116,21 @@ const getAllRequests = async (req, res) => {
   }
 };
 
-// @desc    Get my requests (current user)
+// @desc    Get my requests (current user only)
 // @route   GET /api/requests/my-requests
 // @access  Private (Resident, Staff)
 const getMyRequests = async (req, res) => {
   try {
-    const { status, priority, category, search, assignedTo } = req.query;
+    const { status, priority, category, search } = req.query;
     
-    let filter = {};
-    if (status)     filter.status = status;
-    if (priority)   filter.priority = priority;
-    if (category)   filter.category = category;
-    if (assignedTo) filter.assignedTo = assignedTo;
+    // CRITICAL: Always filter by current user
+    let filter = { submittedBy: req.user._id };
+    
+    // Add optional filters
+    if (status)   filter.status = status;
+    if (priority) filter.priority = priority;
+    if (category) filter.category = category;
+    
     if (search) {
       filter.$or = [
         { title:       { $regex: search, $options: 'i' } },
@@ -132,17 +142,26 @@ const getMyRequests = async (req, res) => {
 
     const requests = await Request.find(filter)
       .populate('submittedBy', 'firstName lastName email phone unit floor')
-      .populate('assignedTo', 'firstName lastName specialization phone')
+      .populate('assignedTo', 'firstName lastName specialization phone email')
       .sort({ createdAt: -1 });
+
+    // Convert photo buffers to base64
+    const requestsWithPhotos = requests.map(req => {
+      const reqObj = req.toObject();
+      if (reqObj.photo && reqObj.photo.data) {
+        reqObj.photo.data = reqObj.photo.data.toString('base64');
+      }
+      return reqObj;
+    });
 
     res.status(200).json({
       success: true,
-      count: requests.length,
-      requests
+      count: requestsWithPhotos.length,
+      requests: requestsWithPhotos
     });
 
   } catch (error) {
-    console.error('Get all requests error:', error);
+    console.error('Get my requests error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -160,9 +179,15 @@ const getRequestById = async (req, res) => {
       return res.status(404).json({ message: 'Request not found' });
     }
 
+    // Convert photo buffer to base64 for frontend
+    let requestData = request.toObject();
+    if (requestData.photo && requestData.photo.data) {
+      requestData.photo.data = requestData.photo.data.toString('base64');
+    }
+
     res.status(200).json({
       success: true,
-      request
+      request: requestData
     });
 
   } catch (error) {
@@ -192,14 +217,14 @@ const assignTechnician = async (req, res) => {
     request.status = 'Assigned';
     request.timeline.push({
       type: 'assigned',
-      user: 'Admin',
+      user: `${req.user.firstName} ${req.user.lastName}`,
       action: `Assigned to ${technician.firstName} ${technician.lastName} (${technician.specialization})`,
       note: `${request.priority} priority - needs attention`,
       timestamp: new Date()
     });
 
     await request.save();
-    // Notify technician
+    
     await createNotification(
       technicianId,
       'assigned',
@@ -208,7 +233,6 @@ const assignTechnician = async (req, res) => {
       request._id
     );
 
-    // Notify resident
     await createNotification(
       request.submittedBy,
       'assigned',
@@ -216,7 +240,8 @@ const assignTechnician = async (req, res) => {
       `Your request "${request.title}" has been assigned to a technician`,
       request._id
     );
-    await request.populate('assignedTo', 'firstName lastName specialization');
+    
+    await request.populate('assignedTo', 'firstName lastName specialization phone email');
 
     res.status(200).json({
       success: true,
@@ -235,7 +260,7 @@ const assignTechnician = async (req, res) => {
 // @access  Private (Technician, Admin)
 const updateStatus = async (req, res) => {
   try {
-    const { status, note } = req.body;
+    const { status, notes } = req.body;
 
     const request = await Request.findById(req.params.id);
     if (!request) {
@@ -252,11 +277,12 @@ const updateStatus = async (req, res) => {
       type: 'status_update',
       user: `${req.user.firstName} ${req.user.lastName} (${req.user.role})`,
       action: `Changed status to "${status}"`,
-      note: note || `Status updated to ${status}`,
+      note: notes || `Status updated to ${status}`,
       timestamp: new Date()
     });
 
     await request.save();
+    
     await createNotification(
       request.submittedBy,
       'status_update',
@@ -264,6 +290,7 @@ const updateStatus = async (req, res) => {
       `Your request "${request.title}" is now: ${status}`,
       request._id
     );
+    
     res.status(200).json({
       success: true,
       message: 'Status updated successfully',
@@ -275,6 +302,7 @@ const updateStatus = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 // @desc    Get request statistics
 // @route   GET /api/requests/stats
 // @access  Private
@@ -287,19 +315,17 @@ const getStats = async (req, res) => {
     const completed  = await Request.countDocuments({ status: 'Completed' });
     const cancelled  = await Request.countDocuments({ status: 'Cancelled' });
 
-    // Stats by category
     const byCategory = await Request.aggregate([
       { $group: { _id: '$category', count: { $sum: 1 } } }
     ]);
 
-    // Stats by priority
     const byPriority = await Request.aggregate([
       { $group: { _id: '$priority', count: { $sum: 1 } } }
     ]);
 
-    // Recent 5 requests
     const recent = await Request.find()
       .populate('submittedBy', 'firstName lastName')
+      .populate('assignedTo', 'firstName lastName')
       .sort({ createdAt: -1 })
       .limit(5);
 
@@ -352,6 +378,7 @@ const addComment = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 // @desc    Get requests assigned to logged in technician
 // @route   GET /api/requests/my-tasks
 // @access  Private (Technician)
@@ -363,12 +390,22 @@ const getMyTasks = async (req, res) => {
 
     const requests = await Request.find(filter)
       .populate('submittedBy', 'firstName lastName email phone unit floor')
+      .populate('assignedTo', 'firstName lastName specialization phone email')
       .sort({ createdAt: -1 });
+
+    // Convert photo buffers to base64
+    const requestsWithPhotos = requests.map(req => {
+      const reqObj = req.toObject();
+      if (reqObj.photo && reqObj.photo.data) {
+        reqObj.photo.data = reqObj.photo.data.toString('base64');
+      }
+      return reqObj;
+    });
 
     res.status(200).json({
       success: true,
-      count: requests.length,
-      requests
+      count: requestsWithPhotos.length,
+      requests: requestsWithPhotos
     });
   } catch (error) {
     console.error('Get my tasks error:', error);
