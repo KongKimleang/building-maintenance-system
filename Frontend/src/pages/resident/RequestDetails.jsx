@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import { getRequestById } from '../../services/api';
+import { getRequestById, addComment } from '../../services/api';
 
 function RequestDetails() {
   const { id } = useParams();
@@ -27,6 +27,17 @@ function RequestDetails() {
       setError(err.message || 'Failed to load request details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Add comment handler
+  const handleAddComment = async (comment) => {
+    try {
+      await addComment(request._id, comment);
+      alert('✅ Comment added successfully!');
+      await fetchRequestDetails(); // Refresh
+    } catch (error) {
+      alert('Error: ' + (error.message || 'Failed to add comment'));
     }
   };
 
@@ -182,6 +193,18 @@ function RequestDetails() {
                 <p className="text-sm text-gray-600 font-medium mb-2">Description</p>
                 <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">{request.description}</p>
               </div>
+
+              {/* Photo */}
+              {request.photo && request.photo.data && (
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 font-medium mb-2">Attached Photo</p>
+                  <img 
+                    src={`data:${request.photo.contentType};base64,${request.photo.data}`}
+                    alt="Request photo"
+                    className="max-w-md rounded-lg border-2 border-gray-300 shadow-sm"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Status Information */}
@@ -296,6 +319,19 @@ function RequestDetails() {
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
+                {request.status !== 'Completed' && (
+                  <button
+                    onClick={() => {
+                      const comment = prompt('Add a comment or question:');
+                      if (comment && comment.trim()) {
+                        handleAddComment(comment);
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 font-medium"
+                  >
+                    💬 Add Comment
+                  </button>
+                )}
                 <button
                   onClick={() => navigate('/resident/my-requests')}
                   className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"

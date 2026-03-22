@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import { getMyRequests } from '../../services/api';
+import { getMyRequests, addComment } from '../../services/api';
 
 function MyRequests() {
   const navigate = useNavigate();
@@ -21,22 +21,6 @@ function MyRequests() {
     try {
       setLoading(true);
       const data = await getMyRequests();
-
-      // Debug logs
-      console.log('🔍 Current user ID:', user.id);
-      console.log('📋 Fetched requests:', data.requests);
-      console.log('📊 Total requests:', data.requests.length);
-      
-      // Check each request's submittedBy
-      data.requests.forEach((req, index) => {
-        console.log(`Request ${index + 1}:`, {
-          id: req.requestId,
-          submittedBy: req.submittedBy?._id,
-          currentUser: user.id,
-          match: req.submittedBy?._id === user.id
-        });
-      });
-
       setAllRequests(data.requests);
       setError('');
     } catch (err) {
@@ -45,6 +29,18 @@ function MyRequests() {
       setLoading(false);
     }
   };
+
+  // Add comment handler
+  const handleAddComment = async (requestId, comment) => {
+    try {
+      await addComment(requestId, comment);
+      alert('✅ Comment added successfully!');
+      await fetchMyRequests(); // Refresh list
+    } catch (error) {
+      alert('Error: ' + (error.message || 'Failed to add comment'));
+    }
+  };
+
   // Filter requests based on selected filter
   const filteredRequests = filter === 'All' 
     ? allRequests 
@@ -193,7 +189,7 @@ function MyRequests() {
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold text-gray-900">
                           #{request.requestId} {request.title}
                         </h3>
@@ -201,10 +197,12 @@ function MyRequests() {
                         {/* Status Badge */}
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                           request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
+                          request.status === 'Assigned' ? 'bg-purple-100 text-purple-800' :
                           request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
                           'bg-green-100 text-green-800'
                         }`}>
                           {request.status === 'Pending' ? '⏰' : 
+                           request.status === 'Assigned' ? '👤' :
                            request.status === 'In Progress' ? '🔵' : '✅'} {request.status}
                         </span>
                         
@@ -237,7 +235,7 @@ function MyRequests() {
                       </p>
                       {request.completedDate && (
                         <p className="text-sm text-gray-600 mt-1">
-                          <span className="font-medium">✅ Completed:</span> {request.completedDate}
+                          <span className="font-medium">✅ Completed:</span> {new Date(request.completedDate).toLocaleDateString()}
                         </p>
                       )}
                     </div>
@@ -263,21 +261,32 @@ function MyRequests() {
                   {request.timeline && request.timeline.length > 0 && (
                     <div className="bg-blue-50 border-l-4 border-primary p-4 mb-4">
                       <p className="text-sm font-medium text-gray-900 mb-1">💬 Latest Update:</p>
-                      <p className="text-sm text-gray-700">{request.timeline[request.timeline.length - 1].note}</p>
+                      <p className="text-sm text-gray-700">{request.timeline[request.timeline.length - 1].action}</p>
+                      {request.timeline[request.timeline.length - 1].note && (
+                        <p className="text-sm text-gray-600 mt-1">{request.timeline[request.timeline.length - 1].note}</p>
+                      )}
                     </div>
                   )}
 
                   {/* Action Buttons */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 flex-wrap">
                     <button 
-                        onClick={() => navigate(`/resident/request-details/${request._id}`)}
-                        className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition font-medium text-sm"
+                      onClick={() => navigate(`/resident/request-details/${request._id}`)}
+                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition font-medium text-sm"
                     >
-                        View Full Details
+                      View Full Details
                     </button>
                     {request.status !== 'Completed' && (
-                      <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm">
-                        Add Comment
+                      <button 
+                        onClick={() => {
+                          const comment = prompt('Add a comment or update:');
+                          if (comment && comment.trim()) {
+                            handleAddComment(request._id, comment);
+                          }
+                        }}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm"
+                      >
+                        💬 Add Comment
                       </button>
                     )}
                     {request.status === 'Completed' && (

@@ -1,7 +1,8 @@
-// API base URL
 const API_URL = 'http://localhost:5000/api';
 
-// Login function
+const getToken = () => localStorage.getItem('token');
+
+// Login
 export const login = async (email, password) => {
   try {
     const response = await fetch(`${API_URL}/auth/login`, {
@@ -18,19 +19,26 @@ export const login = async (email, password) => {
       throw new Error(data.message || 'Login failed');
     }
 
+    // Store token and user data
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+
     return data;
   } catch (error) {
     throw error;
   }
 };
 
-// Register function (Admin creates user)
+// Register new user (Admin only)
 export const registerUser = async (userData) => {
   try {
+    const token = getToken();
+    
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(userData),
     });
@@ -47,12 +55,55 @@ export const registerUser = async (userData) => {
   }
 };
 
-// Get token from localStorage
-const getToken = () => {
-  return localStorage.getItem('token');
+// Get all users
+export const getAllUsers = async () => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/users`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch users');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
 };
 
-// Submit maintenance request
+// Delete user
+export const deleteUser = async (userId) => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to delete user');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Create maintenance request
 export const createRequest = async (requestData) => {
   try {
     const token = getToken();
@@ -78,7 +129,7 @@ export const createRequest = async (requestData) => {
   }
 };
 
-// Get my requests (current user)
+// Get current user's requests
 export const getMyRequests = async () => {
   try {
     const token = getToken();
@@ -93,7 +144,7 @@ export const getMyRequests = async () => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to get requests');
+      throw new Error(data.message || 'Failed to fetch requests');
     }
 
     return data;
@@ -102,7 +153,7 @@ export const getMyRequests = async () => {
   }
 };
 
-// Get all requests (admin/technician)
+// Get all requests (Admin/Technician)
 export const getAllRequests = async () => {
   try {
     const token = getToken();
@@ -117,7 +168,7 @@ export const getAllRequests = async () => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to get requests');
+      throw new Error(data.message || 'Failed to fetch requests');
     }
 
     return data;
@@ -126,7 +177,7 @@ export const getAllRequests = async () => {
   }
 };
 
-// Get single request by ID
+// Get request by ID
 export const getRequestById = async (id) => {
   try {
     const token = getToken();
@@ -141,7 +192,7 @@ export const getRequestById = async (id) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to get request');
+      throw new Error(data.message || 'Failed to fetch request');
     }
 
     return data;
@@ -150,55 +201,7 @@ export const getRequestById = async (id) => {
   }
 };
 
-// Get all users (Admin)
-export const getAllUsers = async () => {
-  try {
-    const token = getToken();
-    
-    const response = await fetch(`${API_URL}/users`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to get users');
-    }
-
-    return data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Delete user (Admin)
-export const deleteUser = async (userId) => {
-  try {
-    const token = getToken();
-    
-    const response = await fetch(`${API_URL}/users/${userId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to delete user');
-    }
-
-    return data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Assign technician to request (Admin)
+// Assign technician to request
 export const assignTechnician = async (requestId, technicianId) => {
   try {
     const token = getToken();
@@ -224,7 +227,7 @@ export const assignTechnician = async (requestId, technicianId) => {
   }
 };
 
-// Get all technicians (Admin)
+// Get all technicians
 export const getAllTechnicians = async () => {
   try {
     const token = getToken();
@@ -239,19 +242,19 @@ export const getAllTechnicians = async () => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to get users');
+      throw new Error(data.message || 'Failed to fetch users');
     }
 
     // Filter only technicians
-    const technicians = data.users.filter(u => u.role === 'technician');
+    const technicians = data.users.filter(user => user.role === 'technician');
+    
     return { technicians };
   } catch (error) {
     throw error;
   }
-
 };
 
-// Update request status (Technician)
+// Update request status
 export const updateRequestStatus = async (requestId, status, notes = '') => {
   try {
     const token = getToken();
@@ -269,6 +272,80 @@ export const updateRequestStatus = async (requestId, status, notes = '') => {
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to update status');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get technician's tasks
+export const getMyTasks = async () => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/requests/my-tasks`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch tasks');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get request statistics
+export const getRequestStats = async () => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/requests/stats`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch stats');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Add comment to request
+export const addComment = async (requestId, comment) => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/requests/${requestId}/comment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ comment }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to add comment');
     }
 
     return data;

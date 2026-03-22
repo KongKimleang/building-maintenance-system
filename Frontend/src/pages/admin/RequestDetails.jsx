@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import { getRequestById, assignTechnician, getAllTechnicians } from '../../services/api';
+import { getRequestById, assignTechnician, getAllTechnicians, addComment } from '../../services/api';
 
 function RequestDetails() {
   const { id } = useParams();
@@ -11,14 +11,16 @@ function RequestDetails() {
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [technicians, setTechnicians] = useState([]);
   const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
   const [assignLoading, setAssignLoading] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchRequestDetails();
+    fetchTechnicians();
   }, [id]);
 
   const fetchRequestDetails = async () => {
@@ -38,14 +40,14 @@ function RequestDetails() {
     try {
       const data = await getAllTechnicians();
       setTechnicians(data.technicians);
-    } catch (error) {
-      console.error('Error fetching technicians:', error);
+    } catch (err) {
+      console.error('Failed to fetch technicians:', err);
     }
   };
 
-  const handleOpenAssignModal = async () => {
+  const handleOpenAssignModal = () => {
+    setSelectedTechnicianId(request.assignedTo?._id || '');
     setShowAssignModal(true);
-    await fetchTechnicians();
   };
 
   const handleAssignTechnician = async () => {
@@ -57,14 +59,27 @@ function RequestDetails() {
     try {
       setAssignLoading(true);
       await assignTechnician(request._id, selectedTechnicianId);
-      alert('✅ Technician assigned successfully!');
+      
+      const selectedTech = technicians.find(t => t._id === selectedTechnicianId);
+      alert(`✅ Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}!`);
+      
       setShowAssignModal(false);
-      setSelectedTechnicianId('');
-      await fetchRequestDetails(); // Refresh
+      await fetchRequestDetails(); // Refresh to show updated assignment
     } catch (error) {
       alert('Error: ' + (error.message || 'Failed to assign technician'));
     } finally {
       setAssignLoading(false);
+    }
+  };
+
+  // Add comment handler
+  const handleAddComment = async (comment) => {
+    try {
+      await addComment(request._id, comment);
+      alert('✅ Note added successfully!');
+      await fetchRequestDetails(); // Refresh
+    } catch (error) {
+      alert('Error: ' + (error.message || 'Failed to add note'));
     }
   };
 
@@ -73,15 +88,16 @@ function RequestDetails() {
       <div className="min-h-screen bg-gray-50">
         <Navbar
           userInfo={{
-            name: 'Admin',
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+            subtitle: 'Administrator',
             dashboardLink: '/admin/dashboard',
             navLinks: [
               { label: 'Dashboard', path: '/admin/dashboard', active: false },
-              { label: 'Users', path: '/admin/users', active: false },
-              { label: 'Requests', path: '/admin/requests', active: true }
+              { label: 'All Requests', path: '/admin/requests', active: true },
+              { label: 'Users', path: '/admin/users', active: false }
             ]
           }}
-          notificationCount={3}
+          notificationCount={8}
         />
         <main className="max-w-7xl mx-auto py-6 px-4">
           <div className="bg-white rounded-lg shadow p-12 text-center">
@@ -97,15 +113,16 @@ function RequestDetails() {
       <div className="min-h-screen bg-gray-50">
         <Navbar
           userInfo={{
-            name: 'Admin',
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+            subtitle: 'Administrator',
             dashboardLink: '/admin/dashboard',
             navLinks: [
               { label: 'Dashboard', path: '/admin/dashboard', active: false },
-              { label: 'Users', path: '/admin/users', active: false },
-              { label: 'Requests', path: '/admin/requests', active: true }
+              { label: 'All Requests', path: '/admin/requests', active: true },
+              { label: 'Users', path: '/admin/users', active: false }
             ]
           }}
-          notificationCount={3}
+          notificationCount={8}
         />
         <main className="max-w-7xl mx-auto py-6 px-4">
           <div className="bg-red-100 text-red-700 p-4 rounded-lg">
@@ -115,7 +132,7 @@ function RequestDetails() {
             onClick={() => navigate('/admin/requests')}
             className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
           >
-            ← Back to Requests
+            ← Back to All Requests
           </button>
         </main>
       </div>
@@ -126,18 +143,19 @@ function RequestDetails() {
     <div className="min-h-screen bg-gray-50">
       <Navbar
         userInfo={{
-          name: 'Admin',
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          subtitle: 'Administrator',
           dashboardLink: '/admin/dashboard',
           navLinks: [
             { label: 'Dashboard', path: '/admin/dashboard', active: false },
-            { label: 'Users', path: '/admin/users', active: false },
-            { label: 'Requests', path: '/admin/requests', active: true }
+            { label: 'All Requests', path: '/admin/requests', active: true },
+            { label: 'Users', path: '/admin/users', active: false }
           ]
         }}
-        notificationCount={3}
+        notificationCount={8}
       />
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <button
           onClick={() => navigate('/admin/requests')}
@@ -148,14 +166,14 @@ function RequestDetails() {
 
         {/* Header */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Request #{request.requestId}
               </h1>
               <p className="text-xl text-gray-700">{request.title}</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               {/* Status Badge */}
               <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
                 request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
@@ -178,7 +196,7 @@ function RequestDetails() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content - Left Side */}
+          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Request Details */}
             <div className="bg-white rounded-lg shadow p-6">
@@ -217,18 +235,57 @@ function RequestDetails() {
                 <p className="text-sm text-gray-600 font-medium mb-2">Description</p>
                 <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">{request.description}</p>
               </div>
+
+              {/* Photo */}
+              {request.photo && request.photo.data && (
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 font-medium mb-2">Attached Photo</p>
+                  <img 
+                    src={`data:${request.photo.contentType};base64,${request.photo.data}`}
+                    alt="Request photo"
+                    className="max-w-md rounded-lg border-2 border-gray-300 shadow-sm"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Resident Information */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Resident Information</h2>
+              {request.submittedBy && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Name</p>
+                    <p className="text-gray-900">{request.submittedBy.firstName} {request.submittedBy.lastName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Unit</p>
+                    <p className="text-gray-900">{request.submittedBy.unit || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Email</p>
+                    <p className="text-gray-900">{request.submittedBy.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Phone</p>
+                    <p className="text-gray-900">{request.submittedBy.phone}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Timeline */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Timeline</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Request Timeline</h2>
               
               {request.timeline && request.timeline.length > 0 ? (
                 <div className="space-y-4">
                   {request.timeline.map((event, index) => (
                     <div key={index} className="flex gap-4">
                       <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-primary rounded-full"></div>
+                        <div className={`w-3 h-3 rounded-full ${
+                          index === 0 ? 'bg-success' : 'bg-primary'
+                        }`}></div>
                         {index !== request.timeline.length - 1 && (
                           <div className="w-0.5 h-full bg-gray-300 mt-1"></div>
                         )}
@@ -236,11 +293,10 @@ function RequestDetails() {
                       <div className="flex-1 pb-4">
                         <p className="font-semibold text-gray-900">{event.action}</p>
                         {event.note && (
-                          <p className="text-sm text-gray-600 mt-1">{event.note}</p>
+                          <p className="text-sm text-gray-600 mt-1 bg-blue-50 p-2 rounded">{event.note}</p>
                         )}
                         <p className="text-xs text-gray-500 mt-1">
                           {new Date(event.timestamp).toLocaleString()}
-                          {event.user && ` - ${event.user.firstName} ${event.user.lastName}`}
                         </p>
                       </div>
                     </div>
@@ -252,39 +308,14 @@ function RequestDetails() {
             </div>
           </div>
 
-          {/* Sidebar - Right Side */}
+          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Submitted By */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Submitted By</h3>
-              {request.submittedBy ? (
+            {/* Assigned Technician */}
+            {request.assignedTo && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Assigned Technician</h3>
                 <div>
-                  <p className="font-semibold text-gray-900">
-                    {request.submittedBy.firstName} {request.submittedBy.lastName}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-2">
-                    <span className="font-medium">Email:</span> {request.submittedBy.email}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    <span className="font-medium">Phone:</span> {request.submittedBy.phone}
-                  </p>
-                  {request.submittedBy.unit && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      <span className="font-medium">Unit:</span> {request.submittedBy.unit}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-gray-600">Unknown</p>
-              )}
-            </div>
-
-            {/* Assigned To */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Assigned Technician</h3>
-              {request.assignedTo ? (
-                <div>
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text-gray-900 text-lg">
                     {request.assignedTo.firstName} {request.assignedTo.lastName}
                   </p>
                   <p className="text-sm text-gray-600 mt-2">
@@ -297,23 +328,22 @@ function RequestDetails() {
                     <span className="font-medium">Email:</span> {request.assignedTo.email}
                   </p>
                 </div>
-              ) : (
-                <div>
-                  <p className="text-gray-600 mb-3">Not assigned yet</p>
-                  <button
-                    onClick={handleOpenAssignModal}
-                    className="w-full px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 font-medium"
-                  >
-                    Assign Technician
-                  </button>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Actions</h3>
               <div className="space-y-3">
+                {!request.assignedTo && (
+                  <button
+                    onClick={handleOpenAssignModal}
+                    className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 font-medium"
+                  >
+                    Assign Technician
+                  </button>
+                )}
+                
                 {request.assignedTo && request.status !== 'Completed' && (
                   <button
                     onClick={handleOpenAssignModal}
@@ -322,6 +352,19 @@ function RequestDetails() {
                     Reassign Technician
                   </button>
                 )}
+                
+                <button
+                  onClick={() => {
+                    const comment = prompt('Add admin note:');
+                    if (comment && comment.trim()) {
+                      handleAddComment(comment);
+                    }
+                  }}
+                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
+                >
+                  💬 Add Note
+                </button>
+                
                 <button
                   onClick={() => navigate('/admin/requests')}
                   className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"
@@ -329,6 +372,22 @@ function RequestDetails() {
                   Back to All Requests
                 </button>
               </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-blue-50 rounded-lg p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Quick Stats</h3>
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Created:</span> {new Date(request.createdAt).toLocaleDateString()}
+              </p>
+              <p className="text-sm text-gray-700 mt-1">
+                <span className="font-medium">Last Updated:</span> {new Date(request.updatedAt).toLocaleDateString()}
+              </p>
+              {request.completedDate && (
+                <p className="text-sm text-gray-700 mt-1">
+                  <span className="font-medium">Completed:</span> {new Date(request.completedDate).toLocaleDateString()}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -346,18 +405,19 @@ function RequestDetails() {
               <p className="text-sm text-gray-600 mb-1">Request:</p>
               <p className="font-semibold text-gray-900">#{request.requestId} {request.title}</p>
               <p className="text-sm text-gray-600 mt-2">Category: {request.category}</p>
+              <p className="text-sm text-gray-600">Priority: {request.priority}</p>
             </div>
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Technician *
+                Select Technician
               </label>
               <select
                 value={selectedTechnicianId}
                 onChange={(e) => setSelectedTechnicianId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">Choose a technician...</option>
+                <option value="">-- Select a technician --</option>
                 {technicians.map((tech) => (
                   <option key={tech._id} value={tech._id}>
                     {tech.firstName} {tech.lastName} - {tech.specialization}
@@ -368,10 +428,7 @@ function RequestDetails() {
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setShowAssignModal(false);
-                  setSelectedTechnicianId('');
-                }}
+                onClick={() => setShowAssignModal(false)}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Cancel
@@ -381,7 +438,7 @@ function RequestDetails() {
                 disabled={assignLoading || !selectedTechnicianId}
                 className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
               >
-                {assignLoading ? 'Assigning...' : 'Assign'}
+                {assignLoading ? 'Assigning...' : request.assignedTo ? 'Reassign' : 'Assign'}
               </button>
             </div>
           </div>
