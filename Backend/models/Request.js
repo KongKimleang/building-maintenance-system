@@ -63,8 +63,8 @@ const requestSchema = new mongoose.Schema({
   photo: {
     data: Buffer,
     contentType: String
-  }
-  
+  },
+
   // Timeline
   timeline: [{
     type: {
