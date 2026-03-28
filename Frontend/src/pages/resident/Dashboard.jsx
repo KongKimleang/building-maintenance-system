@@ -28,8 +28,8 @@ function ResidentDashboard() {
   // Calculate stats
   const stats = {
     total: requests.length,
-    pending: requests.filter(r => r?.status === 'Pending').length,
-    completed: requests.filter(r => r?.status === 'Completed').length
+    pending: requests.filter((r) => r?.status === 'Pending').length,
+    completed: requests.filter((r) => r?.status === 'Completed').length,
   };
 
   // Get recent requests (last 3)
@@ -40,15 +40,28 @@ function ResidentDashboard() {
       {/* Navbar */}
       <Navbar
         userInfo={{
-          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Resident',
-          subtitle: user.role === 'resident' ? `Resident - Unit ${user.unit}` : `${user.position}`,
+          name:
+            `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+            'Resident',
+          subtitle:
+            user.role === 'resident'
+              ? `Resident - Unit ${user.unit}`
+              : `${user.position}`,
           dashboardLink: '/resident/dashboard',
           navLinks: [
             { label: 'Dashboard', path: '/resident/dashboard', active: true },
-            { label: 'Submit Request', path: '/resident/submit-request', active: false },
-            { label: 'My Requests', path: '/resident/my-requests', active: false },
-            { label: 'History', path: '/resident/history', active: false }
-          ]
+            {
+              label: 'Submit Request',
+              path: '/resident/submit-request',
+              active: false,
+            },
+            {
+              label: 'My Requests',
+              path: '/resident/my-requests',
+              active: false,
+            },
+            { label: 'History', path: '/resident/history', active: false },
+          ],
         }}
         notificationCount={2}
       />
@@ -57,9 +70,13 @@ function ResidentDashboard() {
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user.firstName || 'Resident'}!</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome back, {user.firstName || 'Resident'}!
+          </h1>
           <p className="text-gray-600 mt-1">
-            {user.role === 'resident' ? `${user.unit ? `Unit ${user.unit}` : 'Unit not set'}${user.floor ? ` • Floor ${user.floor}` : ''}` : `${user.position || ''}${user.floor ? ` - Floor ${user.floor}` : ''}`}
+            {user.role === 'resident'
+              ? `${user.unit ? `Unit ${user.unit}` : 'Unit not set'}${user.floor ? ` • Floor ${user.floor}` : ''}`
+              : `${user.position || ''}${user.floor ? ` - Floor ${user.floor}` : ''}`}
           </p>
         </div>
 
@@ -69,8 +86,12 @@ function ResidentDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Requests
+                </p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
+                  {stats.total}
+                </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
                 <span className="text-2xl">📋</span>
@@ -83,7 +104,9 @@ function ResidentDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-3xl font-bold text-warning mt-2">{stats.pending}</p>
+                <p className="text-3xl font-bold text-warning mt-2">
+                  {stats.pending}
+                </p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">
                 <span className="text-2xl">⏰</span>
@@ -96,7 +119,9 @@ function ResidentDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-3xl font-bold text-success mt-2">{stats.completed}</p>
+                <p className="text-3xl font-bold text-success mt-2">
+                  {stats.completed}
+                </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
                 <span className="text-2xl">✅</span>
@@ -107,17 +132,24 @@ function ResidentDashboard() {
 
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">🔧 Need Maintenance?</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            🔧 Need Maintenance?
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition">
               <div className="text-center">
                 <span className="text-4xl mb-2 block">📸</span>
                 <p className="font-medium text-gray-900">Scan QR Code</p>
-                <p className="text-sm text-gray-500">Quick report by location</p>
+                <p className="text-sm text-gray-500">
+                  Quick report by location
+                </p>
               </div>
             </button>
-            
-            <Link to="/resident/submit-request" className="flex items-center justify-center p-6 border-2 border-primary bg-primary rounded-lg hover:bg-blue-700 transition">
+
+            <Link
+              to="/resident/submit-request"
+              className="flex items-center justify-center p-6 border-2 border-primary bg-primary rounded-lg hover:bg-blue-700 transition"
+            >
               <div className="text-center">
                 <span className="text-4xl mb-2 block text-white">📝</span>
                 <p className="font-medium text-white">Submit Request</p>
@@ -131,19 +163,24 @@ function ResidentDashboard() {
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-xl font-bold text-gray-900">Recent Requests</h2>
-            <Link to="/resident/my-requests" className="text-primary hover:text-blue-700 font-medium">
+            <Link
+              to="/resident/my-requests"
+              className="text-primary hover:text-blue-700 font-medium"
+            >
               View All →
             </Link>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {loading ? (
               <p className="text-gray-600 text-center py-8">Loading...</p>
             ) : recentRequests.length === 0 ? (
               <div className="p-8 text-center">
                 <span className="text-6xl mb-4 block">📭</span>
-                <p className="text-gray-600 mb-4">No requests yet. Submit your first request!</p>
-                <Link 
+                <p className="text-gray-600 mb-4">
+                  No requests yet. Submit your first request!
+                </p>
+                <Link
                   to="/resident/submit-request"
                   className="inline-block px-6 py-3 bg-primary text-white rounded-md hover:bg-blue-700"
                 >
@@ -156,32 +193,67 @@ function ResidentDashboard() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">#{request.requestId} {request.title}</h3>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full
-                          ${request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                            request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                            'bg-green-100 text-green-800'}`}>
-                          {request.status === 'Pending' ? '⏰' : request.status === 'In Progress' ? '🔵' : '✅'} {request.status}
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          #{request.requestId} {request.title}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full
+                          ${
+                            request.status === 'Pending'
+                              ? 'bg-gray-100 text-gray-800'
+                              : request.status === 'In Progress'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {request.status === 'Pending'
+                            ? '⏰'
+                            : request.status === 'In Progress'
+                              ? '🔵'
+                              : '✅'}{' '}
+                          {request.status}
                         </span>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full
-                          ${request.priority === 'High' ? 'bg-red-100 text-red-800' :
-                            request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-green-100 text-green-800'}`}>
-                          {request.priority === 'High' ? '🔴' : request.priority === 'Medium' ? '🟡' : '🟢'} {request.priority}
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full
+                          ${
+                            request.priority === 'High'
+                              ? 'bg-red-100 text-red-800'
+                              : request.priority === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {request.priority === 'High'
+                            ? '🔴'
+                            : request.priority === 'Medium'
+                              ? '🟡'
+                              : '🟢'}{' '}
+                          {request.priority}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mb-1">
-                        <span className="font-medium">Submitted:</span> {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : "-" }
+                        <span className="font-medium">Submitted:</span>{' '}
+                        {request.createdAt
+                          ? new Date(request.createdAt).toLocaleDateString()
+                          : '-'}
                       </p>
                       <p className="text-sm text-gray-600 mb-1">
-                        <span className="font-medium">Assigned to:</span> {request.assignedTo ? `${request.assignedTo.firstName} ${request.assignedTo.lastName}` : 'Not assigned yet'}
+                        <span className="font-medium">Assigned to:</span>{' '}
+                        {request.assignedTo
+                          ? `${request.assignedTo.firstName} ${request.assignedTo.lastName}`
+                          : 'Not assigned yet'}
                       </p>
                       <p className="text-sm text-gray-500">
-                        <span className="font-medium">Last update:</span> {request.updatedAt ? new Date(request.updatedAt).toLocaleString() : "-" }
+                        <span className="font-medium">Last update:</span>{' '}
+                        {request.updatedAt
+                          ? new Date(request.updatedAt).toLocaleString()
+                          : '-'}
                       </p>
                     </div>
-                    <button 
-                      onClick={() => navigate(`/resident/request-details/${request._id}`)}
+                    <button
+                      onClick={() =>
+                        navigate(`/resident/request-details/${request._id}`)
+                      }
                       className="ml-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition"
                     >
                       View Details

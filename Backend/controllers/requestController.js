@@ -15,14 +15,7 @@ const createNotification = async (userId, type, title, message, requestId) => {
 // @access  Private (Resident, Staff)
 const createRequest = async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      category,
-      priority,
-      floor,
-      unit
-    } = req.body;
+    const { title, description, category, priority, floor, unit } = req.body;
 
     // Create location string
     const location = `Unit ${unit} - Floor ${floor}`;
@@ -32,12 +25,12 @@ const createRequest = async (req, res) => {
     if (req.file) {
       photoData = {
         data: req.file.buffer,
-        contentType: req.file.mimetype
+        contentType: req.file.mimetype,
       };
     }
 
     const count = await Request.countDocuments();
-    const requestId = String(count + 1).padStart(3, "0");
+    const requestId = String(count + 1).padStart(3, '0');
 
     // Create request
     const request = await Request.create({
@@ -50,16 +43,18 @@ const createRequest = async (req, res) => {
       unit,
       location,
       submittedBy: req.user.id,
-      timeline: [{
-        type: 'created',
-        user: `${req.user.firstName} ${req.user.lastName} (${req.user.role})`,
-        action: 'Submitted maintenance request',
-        note: 'Initial request submitted',
-        timestamp: new Date()
-      }],
-      ...(photoData && { photo: photoData })
+      timeline: [
+        {
+          type: 'created',
+          user: `${req.user.firstName} ${req.user.lastName} (${req.user.role})`,
+          action: 'Submitted maintenance request',
+          note: 'Initial request submitted',
+          timestamp: new Date(),
+        },
+      ],
+      ...(photoData && { photo: photoData }),
     });
-    
+
     const admins = await User.find({ role: 'admin' });
     for (const admin of admins) {
       await createNotification(
@@ -71,14 +66,16 @@ const createRequest = async (req, res) => {
       );
     }
 
-    await request.populate('submittedBy', 'firstName lastName email phone unit');
+    await request.populate(
+      'submittedBy',
+      'firstName lastName email phone unit'
+    );
 
     res.status(201).json({
       success: true,
       message: 'Request created successfully',
-      request
+      request,
     });
-
   } catch (error) {
     console.error('Create request error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -96,7 +93,7 @@ const getAllRequests = async (req, res) => {
       .sort({ createdAt: -1 });
 
     // Convert photo buffers to base64
-    const requestsWithPhotos = requests.map(req => {
+    const requestsWithPhotos = requests.map((req) => {
       const reqObj = req.toObject();
       if (reqObj.photo && reqObj.photo.data) {
         reqObj.photo.data = reqObj.photo.data.toString('base64');
@@ -107,9 +104,8 @@ const getAllRequests = async (req, res) => {
     res.status(200).json({
       success: true,
       count: requestsWithPhotos.length,
-      requests: requestsWithPhotos
+      requests: requestsWithPhotos,
     });
-
   } catch (error) {
     console.error('Get all requests error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -122,21 +118,21 @@ const getAllRequests = async (req, res) => {
 const getMyRequests = async (req, res) => {
   try {
     const { status, priority, category, search } = req.query;
-    
+
     // CRITICAL: Always filter by current user
     let filter = { submittedBy: req.user._id };
-    
+
     // Add optional filters
-    if (status)   filter.status = status;
+    if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (category) filter.category = category;
-    
+
     if (search) {
       filter.$or = [
-        { title:       { $regex: search, $options: 'i' } },
+        { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
-        { requestId:   { $regex: search, $options: 'i' } },
-        { unit:        { $regex: search, $options: 'i' } }
+        { requestId: { $regex: search, $options: 'i' } },
+        { unit: { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -146,7 +142,7 @@ const getMyRequests = async (req, res) => {
       .sort({ createdAt: -1 });
 
     // Convert photo buffers to base64
-    const requestsWithPhotos = requests.map(req => {
+    const requestsWithPhotos = requests.map((req) => {
       const reqObj = req.toObject();
       if (reqObj.photo && reqObj.photo.data) {
         reqObj.photo.data = reqObj.photo.data.toString('base64');
@@ -157,9 +153,8 @@ const getMyRequests = async (req, res) => {
     res.status(200).json({
       success: true,
       count: requestsWithPhotos.length,
-      requests: requestsWithPhotos
+      requests: requestsWithPhotos,
     });
-
   } catch (error) {
     console.error('Get my requests error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -187,9 +182,8 @@ const getRequestById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      request: requestData
+      request: requestData,
     });
-
   } catch (error) {
     console.error('Get request error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -220,11 +214,11 @@ const assignTechnician = async (req, res) => {
       user: `${req.user.firstName} ${req.user.lastName}`,
       action: `Assigned to ${technician.firstName} ${technician.lastName} (${technician.specialization})`,
       note: `${request.priority} priority - needs attention`,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     await request.save();
-    
+
     await createNotification(
       technicianId,
       'assigned',
@@ -240,15 +234,17 @@ const assignTechnician = async (req, res) => {
       `Your request "${request.title}" has been assigned to a technician`,
       request._id
     );
-    
-    await request.populate('assignedTo', 'firstName lastName specialization phone email');
+
+    await request.populate(
+      'assignedTo',
+      'firstName lastName specialization phone email'
+    );
 
     res.status(200).json({
       success: true,
       message: 'Technician assigned successfully',
-      request
+      request,
     });
-
   } catch (error) {
     console.error('Assign technician error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -268,7 +264,7 @@ const updateStatus = async (req, res) => {
     }
 
     request.status = status;
-    
+
     if (status === 'Completed') {
       request.completedDate = new Date();
     }
@@ -278,11 +274,11 @@ const updateStatus = async (req, res) => {
       user: `${req.user.firstName} ${req.user.lastName} (${req.user.role})`,
       action: `Changed status to "${status}"`,
       note: notes || `Status updated to ${status}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     await request.save();
-    
+
     await createNotification(
       request.submittedBy,
       'status_update',
@@ -290,13 +286,12 @@ const updateStatus = async (req, res) => {
       `Your request "${request.title}" is now: ${status}`,
       request._id
     );
-    
+
     res.status(200).json({
       success: true,
       message: 'Status updated successfully',
-      request
+      request,
     });
-
   } catch (error) {
     console.error('Update status error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -308,19 +303,19 @@ const updateStatus = async (req, res) => {
 // @access  Private
 const getStats = async (req, res) => {
   try {
-    const total      = await Request.countDocuments();
-    const pending    = await Request.countDocuments({ status: 'Pending' });
-    const assigned   = await Request.countDocuments({ status: 'Assigned' });
+    const total = await Request.countDocuments();
+    const pending = await Request.countDocuments({ status: 'Pending' });
+    const assigned = await Request.countDocuments({ status: 'Assigned' });
     const inProgress = await Request.countDocuments({ status: 'In Progress' });
-    const completed  = await Request.countDocuments({ status: 'Completed' });
-    const cancelled  = await Request.countDocuments({ status: 'Cancelled' });
+    const completed = await Request.countDocuments({ status: 'Completed' });
+    const cancelled = await Request.countDocuments({ status: 'Cancelled' });
 
     const byCategory = await Request.aggregate([
-      { $group: { _id: '$category', count: { $sum: 1 } } }
+      { $group: { _id: '$category', count: { $sum: 1 } } },
     ]);
 
     const byPriority = await Request.aggregate([
-      { $group: { _id: '$priority', count: { $sum: 1 } } }
+      { $group: { _id: '$priority', count: { $sum: 1 } } },
     ]);
 
     const recent = await Request.find()
@@ -332,10 +327,16 @@ const getStats = async (req, res) => {
     res.status(200).json({
       success: true,
       stats: {
-        total, pending, assigned,
-        inProgress, completed, cancelled,
-        byCategory, byPriority, recent
-      }
+        total,
+        pending,
+        assigned,
+        inProgress,
+        completed,
+        cancelled,
+        byCategory,
+        byPriority,
+        recent,
+      },
     });
   } catch (error) {
     console.error('Get stats error:', error.message);
@@ -363,7 +364,7 @@ const addComment = async (req, res) => {
       user: `${req.user.firstName} ${req.user.lastName} (${req.user.role})`,
       action: 'Added a comment',
       note: comment,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     await request.save();
@@ -371,7 +372,7 @@ const addComment = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Comment added',
-      request
+      request,
     });
   } catch (error) {
     console.error('Add comment error:', error.message);
@@ -394,7 +395,7 @@ const getMyTasks = async (req, res) => {
       .sort({ createdAt: -1 });
 
     // Convert photo buffers to base64
-    const requestsWithPhotos = requests.map(req => {
+    const requestsWithPhotos = requests.map((req) => {
       const reqObj = req.toObject();
       if (reqObj.photo && reqObj.photo.data) {
         reqObj.photo.data = reqObj.photo.data.toString('base64');
@@ -405,7 +406,7 @@ const getMyTasks = async (req, res) => {
     res.status(200).json({
       success: true,
       count: requestsWithPhotos.length,
-      requests: requestsWithPhotos
+      requests: requestsWithPhotos,
     });
   } catch (error) {
     console.error('Get my tasks error:', error);
@@ -421,7 +422,7 @@ module.exports = {
   getRequestById,
   assignTechnician,
   updateStatus,
-  getStats,    
+  getStats,
   addComment,
-  createNotification   
+  createNotification,
 };

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import { registerUser, getAllUsers, deleteUser } from '../../services/api';
 
-
 function UserManagement() {
   const [activeTab, setActiveTab] = useState('residents');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -20,7 +19,7 @@ function UserManagement() {
     floor: '',
     unit: '',
     position: '',
-    specialization: ''
+    specialization: '',
   });
   const [formError, setFormError] = useState('');
   const [formLoading, setFormLoading] = useState(false);
@@ -36,9 +35,9 @@ function UserManagement() {
       setLoading(true);
       const data = await getAllUsers();
 
-      const formattedUsers = data.users.map(user => ({
+      const formattedUsers = data.users.map((user) => ({
         ...user,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim()
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
       }));
 
       setAllUsers(formattedUsers);
@@ -52,10 +51,10 @@ function UserManagement() {
 
   // Group users by role
   const users = {
-    residents: allUsers.filter(u => u.role === 'resident'),
-    staff: allUsers.filter(u => u.role === 'staff'),
-    technicians: allUsers.filter(u => u.role === 'technician'),
-    admins: allUsers.filter(u => u.role === 'admin')
+    residents: allUsers.filter((u) => u.role === 'resident'),
+    staff: allUsers.filter((u) => u.role === 'staff'),
+    technicians: allUsers.filter((u) => u.role === 'technician'),
+    admins: allUsers.filter((u) => u.role === 'admin'),
   };
 
   // Handle add user form submission
@@ -68,13 +67,13 @@ function UserManagement() {
     try {
       // Call backend API
       const data = await registerUser(newUser);
-      
+
       // Show success with credentials
       setCreatedUserCredentials(data.credentials);
 
       // Refresh user list
       await fetchUsers();
-      
+
       // Reset form
       setNewUser({
         firstName: '',
@@ -86,12 +85,11 @@ function UserManagement() {
         floor: '',
         unit: '',
         position: '',
-        specialization: ''
+        specialization: '',
       });
-      
+
       // Refresh page or update user list (for now, just show success)
       // In future, we'll add the new user to the list without refresh
-      
     } catch (error) {
       setFormError(error.message || 'Failed to create user');
     } finally {
@@ -101,7 +99,11 @@ function UserManagement() {
 
   // Handle delete user
   const handleDeleteUser = async (userId, userName) => {
-    if (!window.confirm(`Are you sure you want to delete ${userName}? This cannot be undone.`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${userName}? This cannot be undone.`
+      )
+    ) {
       return;
     }
 
@@ -118,9 +120,10 @@ function UserManagement() {
   const currentUsers = users[activeTab];
 
   // Filter users by search
-  const filteredUsers = currentUsers.filter(user =>
-    (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (user.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = currentUsers.filter(
+    (user) =>
+      (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.email || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -133,8 +136,8 @@ function UserManagement() {
           navLinks: [
             { label: 'Dashboard', path: '/admin/dashboard', active: false },
             { label: 'Users', path: '/admin/users', active: true },
-            { label: 'Requests', path: '/admin/requests', active: false }
-          ]
+            { label: 'Requests', path: '/admin/requests', active: false },
+          ],
         }}
         notificationCount={3}
       />
@@ -144,8 +147,12 @@ function UserManagement() {
         {/* Page Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600 mt-1">Create and manage all user accounts</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              User Management
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Create and manage all user accounts
+            </p>
           </div>
           <button
             onClick={() => setShowAddUserModal(true)}
@@ -154,7 +161,6 @@ function UserManagement() {
             + Add New User
           </button>
         </div>
-
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow mb-6">
@@ -214,12 +220,9 @@ function UserManagement() {
             />
           </div>
         </div>
-        
-        
 
         {/* Users Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-
           {loading && (
             <div className="p-12 text-center">
               <p className="text-gray-600">Loading users...</p>
@@ -238,9 +241,13 @@ function UserManagement() {
                 // Empty State
                 <div className="p-12 text-center">
                   <span className="text-6xl mb-4 block">👥</span>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No users found</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    No users found
+                  </h3>
                   <p className="text-gray-600 mb-6">
-                    {searchQuery ? 'Try adjusting your search' : `No ${activeTab} in the system yet`}
+                    {searchQuery
+                      ? 'Try adjusting your search'
+                      : `No ${activeTab} in the system yet`}
                   </p>
                   <button
                     onClick={() => setShowAddUserModal(true)}
@@ -265,7 +272,11 @@ function UserManagement() {
                           Phone
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          {activeTab === 'residents' ? 'Unit' : activeTab === 'staff' ? 'Position' : 'Specialization'}
+                          {activeTab === 'residents'
+                            ? 'Unit'
+                            : activeTab === 'staff'
+                              ? 'Position'
+                              : 'Specialization'}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
@@ -286,11 +297,13 @@ function UserManagement() {
                               <div className="flex-shrink-0 h-10 w-10 bg-primary rounded-full flex items-center justify-center text-white font-medium">
                                 {(user.name || '')
                                   .split(' ')
-                                  .map(n => n[0])
+                                  .map((n) => n[0])
                                   .join('')}
                               </div>
                               <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {user.name}
+                                </div>
                               </div>
                             </div>
                           </td>
@@ -304,15 +317,19 @@ function UserManagement() {
                             {activeTab === 'residents'
                               ? `Unit ${user.unit} - Floor ${user.floor}`
                               : activeTab === 'staff'
-                              ? user.position
-                              : activeTab === 'technicians'
-                              ? user.specialization
-                              : '-'}
+                                ? user.position
+                                : activeTab === 'technicians'
+                                  ? user.specialization
+                                  : '-'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
+                            <span
+                              className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                user.status === 'Active'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                            >
                               {user.status}
                             </span>
                           </td>
@@ -326,8 +343,10 @@ function UserManagement() {
                             <button className="text-warning hover:text-yellow-700">
                               Reset Password
                             </button>
-                            <button 
-                              onClick={() => handleDeleteUser(user._id, user.firstName)}
+                            <button
+                              onClick={() =>
+                                handleDeleteUser(user._id, user.firstName)
+                              }
                               className="text-danger hover:text-red-700"
                             >
                               Delete
@@ -348,8 +367,10 @@ function UserManagement() {
       {showAddUserModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
           <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 my-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New User</h2>
-            
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Add New User
+            </h2>
+
             <form onSubmit={handleAddUser}>
               <div className="space-y-4">
                 {/* Basic Information */}
@@ -362,7 +383,9 @@ function UserManagement() {
                       type="text"
                       required
                       value={newUser.firstName}
-                      onChange={(e) => setNewUser({...newUser, firstName: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, firstName: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -374,7 +397,9 @@ function UserManagement() {
                       type="text"
                       required
                       value={newUser.lastName}
-                      onChange={(e) => setNewUser({...newUser, lastName: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, lastName: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -388,7 +413,9 @@ function UserManagement() {
                   <select
                     required
                     value={newUser.sex}
-                    onChange={(e) => setNewUser({...newUser, sex: e.target.value})}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, sex: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Select sex</option>
@@ -407,7 +434,9 @@ function UserManagement() {
                       type="email"
                       required
                       value={newUser.email}
-                      onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, email: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -419,7 +448,9 @@ function UserManagement() {
                       type="tel"
                       required
                       value={newUser.phone}
-                      onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, phone: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -433,7 +464,9 @@ function UserManagement() {
                   <select
                     required
                     value={newUser.role}
-                    onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, role: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Select role</option>
@@ -454,7 +487,9 @@ function UserManagement() {
                       <select
                         required
                         value={newUser.floor}
-                        onChange={(e) => setNewUser({...newUser, floor: e.target.value})}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, floor: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       >
                         <option value="">Select floor</option>
@@ -473,7 +508,9 @@ function UserManagement() {
                         type="text"
                         required
                         value={newUser.unit}
-                        onChange={(e) => setNewUser({...newUser, unit: e.target.value})}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, unit: e.target.value })
+                        }
                         placeholder="e.g., 305"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       />
@@ -491,7 +528,9 @@ function UserManagement() {
                       <select
                         required
                         value={newUser.position}
-                        onChange={(e) => setNewUser({...newUser, position: e.target.value})}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, position: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       >
                         <option value="">Select position</option>
@@ -507,7 +546,9 @@ function UserManagement() {
                       <select
                         required
                         value={newUser.floor}
-                        onChange={(e) => setNewUser({...newUser, floor: e.target.value})}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, floor: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       >
                         <option value="">Select floor</option>
@@ -532,7 +573,12 @@ function UserManagement() {
                     <select
                       required
                       value={newUser.specialization}
-                      onChange={(e) => setNewUser({...newUser, specialization: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({
+                          ...newUser,
+                          specialization: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="">Select specialization</option>
@@ -540,7 +586,9 @@ function UserManagement() {
                       <option value="Electrician">Electrician</option>
                       <option value="HVAC Technician">HVAC Technician</option>
                       <option value="Carpenter">Carpenter</option>
-                      <option value="General Maintenance">General Maintenance</option>
+                      <option value="General Maintenance">
+                        General Maintenance
+                      </option>
                     </select>
                   </div>
                 )}
@@ -555,17 +603,25 @@ function UserManagement() {
                 {/* Success Message with Credentials */}
                 {createdUserCredentials && (
                   <div className="p-4 bg-green-100 border border-green-400 rounded">
-                    <p className="font-bold text-green-800 mb-2">✅ User Created Successfully!</p>
+                    <p className="font-bold text-green-800 mb-2">
+                      ✅ User Created Successfully!
+                    </p>
                     <div className="bg-white p-3 rounded border border-green-300">
-                      <p className="text-sm font-medium text-gray-700">Temporary Credentials:</p>
+                      <p className="text-sm font-medium text-gray-700">
+                        Temporary Credentials:
+                      </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">Username:</span> {createdUserCredentials.username}
+                        <span className="font-medium">Username:</span>{' '}
+                        {createdUserCredentials.username}
                       </p>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">Password:</span> {createdUserCredentials.tempPassword}
+                        <span className="font-medium">Password:</span>{' '}
+                        {createdUserCredentials.tempPassword}
                       </p>
                       <p className="text-xs text-gray-500 mt-2">
-                        ⚠️ Please save these credentials and provide them to the user. They will be required to change the password on first login.
+                        ⚠️ Please save these credentials and provide them to the
+                        user. They will be required to change the password on
+                        first login.
                       </p>
                     </div>
                   </div>
@@ -588,7 +644,7 @@ function UserManagement() {
                       floor: '',
                       unit: '',
                       position: '',
-                      specialization: ''
+                      specialization: '',
                     });
                     setFormError('');
                     setCreatedUserCredentials(null);

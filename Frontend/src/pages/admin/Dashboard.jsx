@@ -27,9 +27,9 @@ function AdminDashboard() {
   // Calculate stats
   const stats = {
     total: requests.length,
-    pending: requests.filter(r => r.status === 'Pending').length,
-    inProgress: requests.filter(r => r.status === 'In Progress').length,
-    completed: requests.filter(r => r.status === 'Completed').length
+    pending: requests.filter((r) => r.status === 'Pending').length,
+    inProgress: requests.filter((r) => r.status === 'In Progress').length,
+    completed: requests.filter((r) => r.status === 'Completed').length,
   };
 
   // Get recent requests (last 4)
@@ -45,8 +45,8 @@ function AdminDashboard() {
           navLinks: [
             { label: 'Dashboard', path: '/admin/dashboard', active: true },
             { label: 'Users', path: '/admin/users', active: false },
-            { label: 'Requests', path: '/admin/requests', active: false }
-          ]
+            { label: 'Requests', path: '/admin/requests', active: false },
+          ],
         }}
         notificationCount={3}
       />
@@ -55,8 +55,12 @@ function AdminDashboard() {
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-600 mt-1">Welcome back, Admin! Here's what's happening today.</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Dashboard Overview
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Welcome back, Admin! Here's what's happening today.
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -65,8 +69,12 @@ function AdminDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Requests
+                </p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
+                  {stats.total}
+                </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
                 <span className="text-2xl">📊</span>
@@ -79,7 +87,9 @@ function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-3xl font-bold text-warning mt-2">{stats.pending}</p>
+                <p className="text-3xl font-bold text-warning mt-2">
+                  {stats.pending}
+                </p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">
                 <span className="text-2xl">📋</span>
@@ -92,7 +102,9 @@ function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">In Progress</p>
-                <p className="text-3xl font-bold text-primary mt-2">{stats.inProgress}</p>
+                <p className="text-3xl font-bold text-primary mt-2">
+                  {stats.inProgress}
+                </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
                 <span className="text-2xl">⏰</span>
@@ -105,7 +117,9 @@ function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-3xl font-bold text-success mt-2">{stats.completed}</p>
+                <p className="text-3xl font-bold text-success mt-2">
+                  {stats.completed}
+                </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
                 <span className="text-2xl">✅</span>
@@ -117,12 +131,17 @@ function AdminDashboard() {
         {/* Recent Requests */}
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-900">Recent Maintenance Requests</h2>
-            <Link to="/admin/requests" className="text-primary hover:text-blue-700 font-medium">
+            <h2 className="text-xl font-bold text-gray-900">
+              Recent Maintenance Requests
+            </h2>
+            <Link
+              to="/admin/requests"
+              className="text-primary hover:text-blue-700 font-medium"
+            >
               View All →
             </Link>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -150,13 +169,19 @@ function AdminDashboard() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-gray-600">
+                    <td
+                      colSpan="6"
+                      className="px-6 py-8 text-center text-gray-600"
+                    >
                       Loading requests...
                     </td>
                   </tr>
                 ) : recentRequests.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-gray-600">
+                    <td
+                      colSpan="6"
+                      className="px-6 py-8 text-center text-gray-600"
+                    >
                       No requests yet
                     </td>
                   </tr>
@@ -173,26 +198,41 @@ function AdminDashboard() {
                         {request.location}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          request.priority === 'High' ? 'bg-red-100 text-red-800' :
-                          request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-green-100 text-green-800'
-                        }`}>
-                          {request.priority === 'High' ? '🔴' : request.priority === 'Medium' ? '🟡' : '🟢'} {request.priority}
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            request.priority === 'High'
+                              ? 'bg-red-100 text-red-800'
+                              : request.priority === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {request.priority === 'High'
+                            ? '🔴'
+                            : request.priority === 'Medium'
+                              ? '🟡'
+                              : '🟢'}{' '}
+                          {request.priority}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                          request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                          'bg-green-100 text-green-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            request.status === 'Pending'
+                              ? 'bg-gray-100 text-gray-800'
+                              : request.status === 'In Progress'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-green-100 text-green-800'
+                          }`}
+                        >
                           {request.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                        <button 
-                          onClick={() => navigate(`/admin/request-details/${request._id}`)}
+                        <button
+                          onClick={() =>
+                            navigate(`/admin/request-details/${request._id}`)
+                          }
                           className="text-primary hover:text-blue-700 font-medium"
                         >
                           View

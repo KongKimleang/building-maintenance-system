@@ -1,6 +1,5 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs'); 
-
+const bcrypt = require('bcryptjs');
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -14,9 +13,8 @@ const getAllUsers = async (req, res) => {
     res.status(200).json({
       success: true,
       count: users.length,
-      users
+      users,
     });
-
   } catch (error) {
     console.error('Get users error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -36,9 +34,8 @@ const getUserById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user
+      user,
     });
-
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -57,9 +54,20 @@ const updateUser = async (req, res) => {
     }
 
     // Update fields
-    const updateFields = ['firstName', 'lastName', 'sex', 'email', 'phone', 'floor', 'unit', 'position', 'specialization', 'isActive'];
-    
-    updateFields.forEach(field => {
+    const updateFields = [
+      'firstName',
+      'lastName',
+      'sex',
+      'email',
+      'phone',
+      'floor',
+      'unit',
+      'position',
+      'specialization',
+      'isActive',
+    ];
+
+    updateFields.forEach((field) => {
       if (req.body[field] !== undefined) {
         user[field] = req.body[field];
       }
@@ -70,9 +78,8 @@ const updateUser = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'User updated successfully',
-      user: await User.findById(user._id).select('-password')
+      user: await User.findById(user._id).select('-password'),
     });
-
   } catch (error) {
     console.error('Update user error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -94,9 +101,8 @@ const deleteUser = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'User deleted successfully'
+      message: 'User deleted successfully',
     });
-
   } catch (error) {
     console.error('Delete user error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -108,13 +114,23 @@ const deleteUser = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const {
-      firstName, lastName, email, username,
-      role, phone, sex,
-      floor, unit, specialization, position
+      firstName,
+      lastName,
+      email,
+      username,
+      role,
+      phone,
+      sex,
+      floor,
+      unit,
+      specialization,
+      position,
     } = req.body;
 
     if (!firstName || !lastName || !role) {
-      return res.status(400).json({ message: 'firstName, lastName and role are required' });
+      return res
+        .status(400)
+        .json({ message: 'firstName, lastName and role are required' });
     }
 
     // Check email exists
@@ -126,8 +142,8 @@ const createUser = async (req, res) => {
     }
 
     // Generate username if not provided
-    let finalUsername = username ||
-      `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
+    let finalUsername =
+      username || `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
 
     // Make sure username is unique
     const usernameExists = await User.findOne({ username: finalUsername });
@@ -141,13 +157,20 @@ const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
 
     const user = await User.create({
-      firstName, lastName, email,
+      firstName,
+      lastName,
+      email,
       username: finalUsername,
       password: hashedPassword,
-      role, phone, sex,
-      floor, unit, specialization, position,
+      role,
+      phone,
+      sex,
+      floor,
+      unit,
+      specialization,
+      position,
       requirePasswordChange: true,
-      isActive: true
+      isActive: true,
     });
 
     res.status(201).json({
@@ -156,7 +179,7 @@ const createUser = async (req, res) => {
       credentials: {
         username: finalUsername,
         tempPassword,
-        note: 'Give these credentials to the user. They must change password on first login.'
+        note: 'Give these credentials to the user. They must change password on first login.',
       },
       user: {
         _id: user._id,
@@ -164,8 +187,8 @@ const createUser = async (req, res) => {
         lastName: user.lastName,
         username: user.username,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error('Create user error:', error.message);
@@ -180,13 +203,13 @@ const getTechnicians = async (req, res) => {
   try {
     const technicians = await User.find({
       role: 'technician',
-      isActive: true
+      isActive: true,
     }).select('-password');
 
     res.status(200).json({
       success: true,
       count: technicians.length,
-      technicians
+      technicians,
     });
   } catch (error) {
     console.error('Get technicians error:', error.message);
@@ -213,7 +236,7 @@ const resetPassword = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Password reset successfully',
-      tempPassword
+      tempPassword,
     });
   } catch (error) {
     console.error('Reset password error:', error.message);
@@ -224,9 +247,9 @@ const resetPassword = async (req, res) => {
 module.exports = {
   getAllUsers,
   getUserById,
-  createUser, 
+  createUser,
   updateUser,
   deleteUser,
   getTechnicians,
-  resetPassword 
+  resetPassword,
 };

@@ -4,13 +4,14 @@ const Unit = require('../models/Unit');
 // GET /api/buildings — Get all buildings
 const getBuildings = async (req, res) => {
   try {
-    const buildings = await Building.find({ isActive: true })
-      .sort({ createdAt: -1 });
+    const buildings = await Building.find({ isActive: true }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({
       success: true,
       count: buildings.length,
-      buildings
+      buildings,
     });
   } catch (error) {
     console.error('Get buildings error:', error.message);
@@ -38,20 +39,22 @@ const createBuilding = async (req, res) => {
     const { name, address, totalFloors, description } = req.body;
 
     if (!name || !address || !totalFloors) {
-      return res.status(400).json({ message: 'Name, address and floors are required' });
+      return res
+        .status(400)
+        .json({ message: 'Name, address and floors are required' });
     }
 
     const building = await Building.create({
       name,
       address,
       totalFloors,
-      description
+      description,
     });
 
     res.status(201).json({
       success: true,
       message: 'Building created successfully',
-      building
+      building,
     });
   } catch (error) {
     console.error('Create building error:', error.message);
@@ -62,11 +65,9 @@ const createBuilding = async (req, res) => {
 // PUT /api/buildings/:id — Update building (admin)
 const updateBuilding = async (req, res) => {
   try {
-    const building = await Building.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const building = await Building.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
 
     if (!building) {
       return res.status(404).json({ message: 'Building not found' });
@@ -75,7 +76,7 @@ const updateBuilding = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Building updated',
-      building
+      building,
     });
   } catch (error) {
     console.error('Update building error:', error.message);
@@ -104,7 +105,7 @@ const getUnits = async (req, res) => {
     res.status(200).json({
       success: true,
       count: units.length,
-      units
+      units,
     });
   } catch (error) {
     console.error('Get units error:', error.message);
@@ -118,20 +119,22 @@ const createUnit = async (req, res) => {
     const { floor, unitNumber, type } = req.body;
 
     if (!floor || !unitNumber) {
-      return res.status(400).json({ message: 'Floor and unit number are required' });
+      return res
+        .status(400)
+        .json({ message: 'Floor and unit number are required' });
     }
 
     const unit = await Unit.create({
       building: req.params.id,
       floor,
       unitNumber,
-      type
+      type,
     });
 
     res.status(201).json({
       success: true,
       message: 'Unit created successfully',
-      unit
+      unit,
     });
   } catch (error) {
     console.error('Create unit error:', error.message);
@@ -148,7 +151,7 @@ const assignResident = async (req, res) => {
       req.params.unitId,
       {
         residentId,
-        isOccupied: residentId ? true : false
+        isOccupied: residentId ? true : false,
       },
       { new: true }
     ).populate('residentId', 'firstName lastName email');
@@ -160,7 +163,7 @@ const assignResident = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Resident assigned to unit',
-      unit
+      unit,
     });
   } catch (error) {
     console.error('Assign resident error:', error.message);
@@ -176,5 +179,5 @@ module.exports = {
   deleteBuilding,
   getUnits,
   createUnit,
-  assignResident
+  assignResident,
 };

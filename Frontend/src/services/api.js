@@ -33,12 +33,12 @@ export const login = async (email, password) => {
 export const registerUser = async (userData) => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(userData),
     });
@@ -59,11 +59,11 @@ export const registerUser = async (userData) => {
 export const getAllUsers = async () => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/users`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -83,11 +83,11 @@ export const getAllUsers = async () => {
 export const deleteUser = async (userId) => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/users/${userId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -107,12 +107,12 @@ export const deleteUser = async (userId) => {
 export const createRequest = async (requestData) => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(requestData),
     });
@@ -133,11 +133,11 @@ export const createRequest = async (requestData) => {
 export const getMyRequests = async () => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests/my-requests`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -157,11 +157,11 @@ export const getMyRequests = async () => {
 export const getAllRequests = async () => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -181,11 +181,11 @@ export const getAllRequests = async () => {
 export const getRequestById = async (id) => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests/${id}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -205,12 +205,12 @@ export const getRequestById = async (id) => {
 export const assignTechnician = async (requestId, technicianId) => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests/${requestId}/assign`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ technicianId }),
     });
@@ -231,11 +231,11 @@ export const assignTechnician = async (requestId, technicianId) => {
 export const getAllTechnicians = async () => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/users`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -246,8 +246,8 @@ export const getAllTechnicians = async () => {
     }
 
     // Filter only technicians
-    const technicians = data.users.filter(user => user.role === 'technician');
-    
+    const technicians = data.users.filter((user) => user.role === 'technician');
+
     return { technicians };
   } catch (error) {
     throw error;
@@ -258,12 +258,12 @@ export const getAllTechnicians = async () => {
 export const updateRequestStatus = async (requestId, status, notes = '') => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests/${requestId}/status`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ status, notes }),
     });
@@ -284,11 +284,11 @@ export const updateRequestStatus = async (requestId, status, notes = '') => {
 export const getMyTasks = async () => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests/my-tasks`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -308,11 +308,11 @@ export const getMyTasks = async () => {
 export const getRequestStats = async () => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests/stats`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -332,12 +332,12 @@ export const getRequestStats = async () => {
 export const addComment = async (requestId, comment) => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/requests/${requestId}/comment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ comment }),
     });

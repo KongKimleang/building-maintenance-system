@@ -20,7 +20,7 @@ function Login() {
     try {
       // Call backend API
       const data = await login(email, password);
-      
+
       // Save token to localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -62,11 +62,17 @@ function Login() {
         </div>
 
         {/* Login Form */}
-        <form className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" onSubmit={handleSubmit}>
+        <form
+          className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md"
+          onSubmit={handleSubmit}
+        >
           <div className="space-y-4">
             {/* Email Input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -88,7 +94,10 @@ function Login() {
 
             {/* Password Input */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
               <div className="relative">
@@ -127,13 +136,19 @@ function Login() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-700"
+              >
                 Remember me
               </label>
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-primary hover:text-blue-700">
+              <a
+                href="#"
+                className="font-medium text-primary hover:text-blue-700"
+              >
                 Forgot password?
               </a>
             </div>
@@ -155,7 +170,6 @@ function Login() {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
-
         </form>
       </div>
     </div>

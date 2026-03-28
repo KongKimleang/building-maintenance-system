@@ -19,15 +19,17 @@ const app = express();
 app.use(helmet());
 
 // 2. CORS — only allow your frontend
-app.use(cors({
-  origin: [
-    'http://localhost:3000',          // local development
-    'https://your-app.vercel.app'     // update when deployed
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000', // local development
+      'https://your-app.vercel.app', // update when deployed
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
 
 // 3. Body parser - MUST BE BEFORE ROUTES
 app.use(express.json({ limit: '10kb' }));
@@ -42,9 +44,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'Building Maintenance API is running! 🏢' });
 });
 
-app.use('/api/auth',          require('./routes/auth'));
-app.use('/api/users',         require('./routes/users'));
-app.use('/api/requests',      require('./routes/requests'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/requests', require('./routes/requests'));
 app.use('/api/notifications', require('./routes/notifications'));
 
 // ERROR HANDLING
@@ -57,7 +59,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
   res.status(err.status || 500).json({
-    message: err.message || 'Server error'
+    message: err.message || 'Server error',
   });
 });
 

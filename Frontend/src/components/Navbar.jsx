@@ -16,27 +16,31 @@ function Navbar({ userInfo, notificationCount = 0 }) {
         <div className="flex justify-between h-16">
           {/* Left side - Logo and Navigation Links */}
           <div className="flex items-center">
-            <Link to={userInfo.dashboardLink} className="text-2xl font-bold text-primary">
+            <Link
+              to={userInfo.dashboardLink}
+              className="text-2xl font-bold text-primary"
+            >
               🏢 BuildingMMS
             </Link>
-            
+
             <div className="hidden md:flex ml-10 space-x-8">
-              {userInfo.navLinks && userInfo.navLinks.map((link, index) => (
-                <Link
-                  key={index}
-                  to={link.path}
-                  className={`${
-                    link.active
-                      ? 'text-gray-900'
-                      : 'text-gray-600 hover:text-primary'
-                  } px-3 py-2 font-medium transition`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {userInfo.navLinks &&
+                userInfo.navLinks.map((link, index) => (
+                  <Link
+                    key={index}
+                    to={link.path}
+                    className={`${
+                      link.active
+                        ? 'text-gray-900'
+                        : 'text-gray-600 hover:text-primary'
+                    } px-3 py-2 font-medium transition`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
             </div>
           </div>
-          
+
           {/* Right side - Notifications and User Info */}
           <div className="flex items-center space-x-4">
             {/* Notification Bell */}
@@ -48,12 +52,14 @@ function Navbar({ userInfo, notificationCount = 0 }) {
                 </span>
               )}
             </button>
-            
+
             {/* User Info */}
             <div className="flex items-center space-x-2">
               {userInfo.name && (
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-gray-700">{userInfo.name}</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    {userInfo.name}
+                  </p>
                   {userInfo.subtitle && (
                     <p className="text-xs text-gray-500">{userInfo.subtitle}</p>
                   )}
@@ -63,7 +69,7 @@ function Navbar({ userInfo, notificationCount = 0 }) {
                 <span className="text-xl">👤</span>
               </button>
             </div>
-            
+
             {/* Logout Button */}
             <button
               onClick={handleLogout}

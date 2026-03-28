@@ -17,18 +17,20 @@ const registerUser = async (req, res) => {
       floor,
       unit,
       position,
-      specialization
+      specialization,
     } = req.body;
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'User with this email already exists' });
+      return res
+        .status(400)
+        .json({ message: 'User with this email already exists' });
     }
 
     // Generate username from name
     const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
-    
+
     // Check if username already exists
     const usernameExists = await User.findOne({ username });
     if (usernameExists) {
@@ -54,7 +56,7 @@ const registerUser = async (req, res) => {
       email,
       phone,
       role,
-      requirePasswordChange: true
+      requirePasswordChange: true,
     };
 
     // Add role-specific fields
@@ -81,15 +83,15 @@ const registerUser = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        role: user.role
+        role: user.role,
       },
       credentials: {
         username: user.username,
         tempPassword: tempPassword,
-        message: 'Please provide these credentials to the user. They will be required to change password on first login.'
-      }
+        message:
+          'Please provide these credentials to the user. They will be required to change password on first login.',
+      },
     });
-
   } catch (error) {
     console.error('Register error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -105,7 +107,9 @@ const loginUser = async (req, res) => {
 
     // Validate input
     if (!email || !password) {
-      return res.status(400).json({ message: 'Please provide email and password' });
+      return res
+        .status(400)
+        .json({ message: 'Please provide email and password' });
     }
 
     // Check if user exists
@@ -116,7 +120,9 @@ const loginUser = async (req, res) => {
 
     // Check if user is active
     if (!user.isActive) {
-      return res.status(401).json({ message: 'Account is disabled. Please contact administrator.' });
+      return res.status(401).json({
+        message: 'Account is disabled. Please contact administrator.',
+      });
     }
 
     // Check password
@@ -131,9 +137,9 @@ const loginUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
+      {
         id: user._id,
-        role: user.role 
+        role: user.role,
       },
       process.env.JWT_SECRET,
       { expiresIn: '7d' } // Token expires in 7 days
@@ -153,12 +159,11 @@ const loginUser = async (req, res) => {
         role: user.role,
         requirePasswordChange: user.requirePasswordChange,
         floor: user.floor, // add this
-        unit: user.unit,   // add this
-        position: user.position,         // optional, for staff
-        specialization: user.specialization // optional, for technician
-      }
+        unit: user.unit, // add this
+        position: user.position, // optional, for staff
+        specialization: user.specialization, // optional, for technician
+      },
     });
-
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -188,7 +193,9 @@ const changePassword = async (req, res) => {
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+      return res
+        .status(400)
+        .json({ message: 'New password must be at least 6 characters' });
     }
 
     const user = await User.findById(req.user._id);
@@ -207,7 +214,7 @@ const changePassword = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Password changed successfully'
+      message: 'Password changed successfully',
     });
   } catch (error) {
     console.error('Change password error:', error.message);
@@ -219,5 +226,5 @@ module.exports = {
   registerUser,
   loginUser,
   getMe,
-  changePassword
+  changePassword,
 };

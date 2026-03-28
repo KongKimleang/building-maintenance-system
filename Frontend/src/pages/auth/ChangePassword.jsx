@@ -8,7 +8,7 @@ function ChangePassword() {
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -16,7 +16,7 @@ function ChangePassword() {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
     setError('');
   };
@@ -26,7 +26,11 @@ function ChangePassword() {
     setError('');
 
     // Validation
-    if (!formData.currentPassword || !formData.newPassword || !formData.confirmPassword) {
+    if (
+      !formData.currentPassword ||
+      !formData.newPassword ||
+      !formData.confirmPassword
+    ) {
       setError('All fields are required');
       return;
     }
@@ -69,17 +73,20 @@ function ChangePassword() {
       setLoading(true);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword
-        })
-      });
+      const response = await fetch(
+        'http://localhost:5000/api/auth/change-password',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            currentPassword: formData.currentPassword,
+            newPassword: formData.newPassword,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -101,7 +108,6 @@ function ChangePassword() {
       } else if (user.role === 'technician') {
         navigate('/technician/dashboard');
       }
-
     } catch (err) {
       setError(err.message || 'Failed to change password');
     } finally {
@@ -123,9 +129,12 @@ function ChangePassword() {
           <div className="inline-block bg-white rounded-full p-4 mb-4">
             <span className="text-5xl">🔐</span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Change Password Required</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Change Password Required
+          </h1>
           <p className="text-blue-100">
-            For security reasons, you must change your temporary password before accessing the system.
+            For security reasons, you must change your temporary password before
+            accessing the system.
           </p>
         </div>
 
@@ -141,7 +150,10 @@ function ChangePassword() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Current Password */}
             <div>
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="currentPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Current Password (Temporary)
               </label>
               <input
@@ -158,7 +170,10 @@ function ChangePassword() {
 
             {/* New Password */}
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 New Password
               </label>
               <input
@@ -172,13 +187,17 @@ function ChangePassword() {
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                Minimum 8 characters, must include uppercase, lowercase, and number
+                Minimum 8 characters, must include uppercase, lowercase, and
+                number
               </p>
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Confirm New Password
               </label>
               <input

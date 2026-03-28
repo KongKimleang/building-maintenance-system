@@ -1,0 +1,33 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "axios",
+    "backend",
+    "bcrypt",
+    "dotenv",
+    "frontend",
+    "HVAC",
+    "jsonwebtoken",
+    "Kimleang",
+    "middleware",
+    "mongodb",
+    "mongoose",
+    "nodemon",
+    "tailwind",
+    "TTFB",
+    "useEffect",
+    "useState",
+    "vite",
+    "wrongpassword"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "Frontend/node_modules/**",
+    "Backend/node_modules/**",
+    "dist/**",
+    "build/**",
+    "*.lock",
+    "package-lock.json"
+  ]
+}

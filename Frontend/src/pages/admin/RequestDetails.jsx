@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import { getRequestById, assignTechnician, getAllTechnicians, addComment } from '../../services/api';
+import {
+  getRequestById,
+  assignTechnician,
+  getAllTechnicians,
+  addComment,
+} from '../../services/api';
 
 function RequestDetails() {
   const { id } = useParams();
@@ -59,10 +64,14 @@ function RequestDetails() {
     try {
       setAssignLoading(true);
       await assignTechnician(request._id, selectedTechnicianId);
-      
-      const selectedTech = technicians.find(t => t._id === selectedTechnicianId);
-      alert(`✅ Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}!`);
-      
+
+      const selectedTech = technicians.find(
+        (t) => t._id === selectedTechnicianId
+      );
+      alert(
+        `✅ Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}!`
+      );
+
       setShowAssignModal(false);
       await fetchRequestDetails(); // Refresh to show updated assignment
     } catch (error) {
@@ -94,8 +103,8 @@ function RequestDetails() {
             navLinks: [
               { label: 'Dashboard', path: '/admin/dashboard', active: false },
               { label: 'All Requests', path: '/admin/requests', active: true },
-              { label: 'Users', path: '/admin/users', active: false }
-            ]
+              { label: 'Users', path: '/admin/users', active: false },
+            ],
           }}
           notificationCount={8}
         />
@@ -119,8 +128,8 @@ function RequestDetails() {
             navLinks: [
               { label: 'Dashboard', path: '/admin/dashboard', active: false },
               { label: 'All Requests', path: '/admin/requests', active: true },
-              { label: 'Users', path: '/admin/users', active: false }
-            ]
+              { label: 'Users', path: '/admin/users', active: false },
+            ],
           }}
           notificationCount={8}
         />
@@ -149,8 +158,8 @@ function RequestDetails() {
           navLinks: [
             { label: 'Dashboard', path: '/admin/dashboard', active: false },
             { label: 'All Requests', path: '/admin/requests', active: true },
-            { label: 'Users', path: '/admin/users', active: false }
-          ]
+            { label: 'Users', path: '/admin/users', active: false },
+          ],
         }}
         notificationCount={8}
       />
@@ -175,21 +184,35 @@ function RequestDetails() {
             </div>
             <div className="flex gap-3 flex-wrap">
               {/* Status Badge */}
-              <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
-                request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                request.status === 'Assigned' ? 'bg-purple-100 text-purple-800' :
-                request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                'bg-green-100 text-green-800'
-              }`}>
+              <span
+                className={`px-4 py-2 text-sm font-semibold rounded-full ${
+                  request.status === 'Pending'
+                    ? 'bg-gray-100 text-gray-800'
+                    : request.status === 'Assigned'
+                      ? 'bg-purple-100 text-purple-800'
+                      : request.status === 'In Progress'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                }`}
+              >
                 {request.status}
               </span>
               {/* Priority Badge */}
-              <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
-                request.priority === 'High' ? 'bg-red-100 text-red-800' :
-                request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-green-100 text-green-800'
-              }`}>
-                {request.priority === 'High' ? '🔴' : request.priority === 'Medium' ? '🟡' : '🟢'} {request.priority}
+              <span
+                className={`px-4 py-2 text-sm font-semibold rounded-full ${
+                  request.priority === 'High'
+                    ? 'bg-red-100 text-red-800'
+                    : request.priority === 'Medium'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-green-100 text-green-800'
+                }`}
+              >
+                {request.priority === 'High'
+                  ? '🔴'
+                  : request.priority === 'Medium'
+                    ? '🟡'
+                    : '🟢'}{' '}
+                {request.priority}
               </span>
             </div>
           </div>
@@ -200,8 +223,10 @@ function RequestDetails() {
           <div className="lg:col-span-2 space-y-6">
             {/* Request Details */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Request Details</h2>
-              
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Request Details
+              </h2>
+
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-sm text-gray-600 font-medium">Category</p>
@@ -220,27 +245,41 @@ function RequestDetails() {
                   <p className="text-gray-900">{request.unit}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Submitted Date</p>
-                  <p className="text-gray-900">{new Date(request.createdAt).toLocaleString()}</p>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Submitted Date
+                  </p>
+                  <p className="text-gray-900">
+                    {new Date(request.createdAt).toLocaleString()}
+                  </p>
                 </div>
                 {request.completedDate && (
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Completed Date</p>
-                    <p className="text-gray-900">{new Date(request.completedDate).toLocaleString()}</p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Completed Date
+                    </p>
+                    <p className="text-gray-900">
+                      {new Date(request.completedDate).toLocaleString()}
+                    </p>
                   </div>
                 )}
               </div>
 
               <div className="mb-4">
-                <p className="text-sm text-gray-600 font-medium mb-2">Description</p>
-                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">{request.description}</p>
+                <p className="text-sm text-gray-600 font-medium mb-2">
+                  Description
+                </p>
+                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">
+                  {request.description}
+                </p>
               </div>
 
               {/* Photo */}
               {request.photo && request.photo.data && (
                 <div className="mb-4">
-                  <p className="text-sm text-gray-600 font-medium mb-2">Attached Photo</p>
-                  <img 
+                  <p className="text-sm text-gray-600 font-medium mb-2">
+                    Attached Photo
+                  </p>
+                  <img
                     src={`data:${request.photo.contentType};base64,${request.photo.data}`}
                     alt="Request photo"
                     className="max-w-md rounded-lg border-2 border-gray-300 shadow-sm"
@@ -251,16 +290,23 @@ function RequestDetails() {
 
             {/* Resident Information */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Resident Information</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Resident Information
+              </h2>
               {request.submittedBy && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600 font-medium">Name</p>
-                    <p className="text-gray-900">{request.submittedBy.firstName} {request.submittedBy.lastName}</p>
+                    <p className="text-gray-900">
+                      {request.submittedBy.firstName}{' '}
+                      {request.submittedBy.lastName}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 font-medium">Unit</p>
-                    <p className="text-gray-900">{request.submittedBy.unit || 'N/A'}</p>
+                    <p className="text-gray-900">
+                      {request.submittedBy.unit || 'N/A'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 font-medium">Email</p>
@@ -276,24 +322,32 @@ function RequestDetails() {
 
             {/* Timeline */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Request Timeline</h2>
-              
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Request Timeline
+              </h2>
+
               {request.timeline && request.timeline.length > 0 ? (
                 <div className="space-y-4">
                   {request.timeline.map((event, index) => (
                     <div key={index} className="flex gap-4">
                       <div className="flex flex-col items-center">
-                        <div className={`w-3 h-3 rounded-full ${
-                          index === 0 ? 'bg-success' : 'bg-primary'
-                        }`}></div>
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            index === 0 ? 'bg-success' : 'bg-primary'
+                          }`}
+                        ></div>
                         {index !== request.timeline.length - 1 && (
                           <div className="w-0.5 h-full bg-gray-300 mt-1"></div>
                         )}
                       </div>
                       <div className="flex-1 pb-4">
-                        <p className="font-semibold text-gray-900">{event.action}</p>
+                        <p className="font-semibold text-gray-900">
+                          {event.action}
+                        </p>
                         {event.note && (
-                          <p className="text-sm text-gray-600 mt-1 bg-blue-50 p-2 rounded">{event.note}</p>
+                          <p className="text-sm text-gray-600 mt-1 bg-blue-50 p-2 rounded">
+                            {event.note}
+                          </p>
                         )}
                         <p className="text-xs text-gray-500 mt-1">
                           {new Date(event.timestamp).toLocaleString()}
@@ -313,19 +367,24 @@ function RequestDetails() {
             {/* Assigned Technician */}
             {request.assignedTo && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Assigned Technician</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Assigned Technician
+                </h3>
                 <div>
                   <p className="font-semibold text-gray-900 text-lg">
                     {request.assignedTo.firstName} {request.assignedTo.lastName}
                   </p>
                   <p className="text-sm text-gray-600 mt-2">
-                    <span className="font-medium">Specialization:</span> {request.assignedTo.specialization}
+                    <span className="font-medium">Specialization:</span>{' '}
+                    {request.assignedTo.specialization}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">
-                    <span className="font-medium">Phone:</span> {request.assignedTo.phone}
+                    <span className="font-medium">Phone:</span>{' '}
+                    {request.assignedTo.phone}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">
-                    <span className="font-medium">Email:</span> {request.assignedTo.email}
+                    <span className="font-medium">Email:</span>{' '}
+                    {request.assignedTo.email}
                   </p>
                 </div>
               </div>
@@ -343,7 +402,7 @@ function RequestDetails() {
                     Assign Technician
                   </button>
                 )}
-                
+
                 {request.assignedTo && request.status !== 'Completed' && (
                   <button
                     onClick={handleOpenAssignModal}
@@ -352,7 +411,7 @@ function RequestDetails() {
                     Reassign Technician
                   </button>
                 )}
-                
+
                 <button
                   onClick={() => {
                     const comment = prompt('Add admin note:');
@@ -364,7 +423,7 @@ function RequestDetails() {
                 >
                   💬 Add Note
                 </button>
-                
+
                 <button
                   onClick={() => navigate('/admin/requests')}
                   className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"
@@ -376,16 +435,21 @@ function RequestDetails() {
 
             {/* Quick Stats */}
             <div className="bg-blue-50 rounded-lg p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Quick Stats</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Quick Stats
+              </h3>
               <p className="text-sm text-gray-700">
-                <span className="font-medium">Created:</span> {new Date(request.createdAt).toLocaleDateString()}
+                <span className="font-medium">Created:</span>{' '}
+                {new Date(request.createdAt).toLocaleDateString()}
               </p>
               <p className="text-sm text-gray-700 mt-1">
-                <span className="font-medium">Last Updated:</span> {new Date(request.updatedAt).toLocaleDateString()}
+                <span className="font-medium">Last Updated:</span>{' '}
+                {new Date(request.updatedAt).toLocaleDateString()}
               </p>
               {request.completedDate && (
                 <p className="text-sm text-gray-700 mt-1">
-                  <span className="font-medium">Completed:</span> {new Date(request.completedDate).toLocaleDateString()}
+                  <span className="font-medium">Completed:</span>{' '}
+                  {new Date(request.completedDate).toLocaleDateString()}
                 </p>
               )}
             </div>
@@ -400,12 +464,18 @@ function RequestDetails() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               {request.assignedTo ? 'Reassign Technician' : 'Assign Technician'}
             </h2>
-            
+
             <div className="mb-4 p-4 bg-gray-50 rounded">
               <p className="text-sm text-gray-600 mb-1">Request:</p>
-              <p className="font-semibold text-gray-900">#{request.requestId} {request.title}</p>
-              <p className="text-sm text-gray-600 mt-2">Category: {request.category}</p>
-              <p className="text-sm text-gray-600">Priority: {request.priority}</p>
+              <p className="font-semibold text-gray-900">
+                #{request.requestId} {request.title}
+              </p>
+              <p className="text-sm text-gray-600 mt-2">
+                Category: {request.category}
+              </p>
+              <p className="text-sm text-gray-600">
+                Priority: {request.priority}
+              </p>
             </div>
 
             <div className="mb-6">
@@ -438,7 +508,11 @@ function RequestDetails() {
                 disabled={assignLoading || !selectedTechnicianId}
                 className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
               >
-                {assignLoading ? 'Assigning...' : request.assignedTo ? 'Reassign' : 'Assign'}
+                {assignLoading
+                  ? 'Assigning...'
+                  : request.assignedTo
+                    ? 'Reassign'
+                    : 'Assign'}
               </button>
             </div>
           </div>
