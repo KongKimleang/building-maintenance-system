@@ -353,3 +353,75 @@ export const addComment = async (requestId, comment) => {
     throw error;
   }
 };
+
+// Get user's notifications
+export const getNotifications = async () => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/notifications`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch notifications');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Mark notification as read
+export const markNotificationAsRead = async (notificationId) => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/notifications/${notificationId}/read`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to mark notification as read');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Mark all notifications as read
+export const markAllNotificationsAsRead = async () => {
+  try {
+    const token = getToken();
+    
+    const response = await fetch(`${API_URL}/notifications/mark-all-read`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to mark all notifications as read');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
