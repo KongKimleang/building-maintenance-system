@@ -353,7 +353,6 @@ export const addComment = async (requestId, comment) => {
     throw error;
   }
 };
-<<<<<<< HEAD
 
 // Get user's notifications
 export const getNotifications = async () => {
@@ -426,5 +425,3 @@ export const markAllNotificationsAsRead = async () => {
     throw error;
   }
 };
-=======
->>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
