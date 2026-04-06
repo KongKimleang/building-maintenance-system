@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../services/api';
+import {
+  getNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from '../services/api';
 
 function NotificationDropdown({ isOpen, onClose, userRole }) {
   const navigate = useNavigate();
@@ -73,22 +77,22 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
 
   const getTimeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    
+
     let interval = seconds / 31536000;
     if (interval > 1) return Math.floor(interval) + ' years ago';
-    
+
     interval = seconds / 2592000;
     if (interval > 1) return Math.floor(interval) + ' months ago';
-    
+
     interval = seconds / 86400;
     if (interval > 1) return Math.floor(interval) + ' days ago';
-    
+
     interval = seconds / 3600;
     if (interval > 1) return Math.floor(interval) + ' hours ago';
-    
+
     interval = seconds / 60;
     if (interval > 1) return Math.floor(interval) + ' minutes ago';
-    
+
     return 'Just now';
   };
 
@@ -97,17 +101,14 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 z-40" 
-        onClick={onClose}
-      ></div>
+      <div className="fixed inset-0 z-40" onClick={onClose}></div>
 
       {/* Dropdown */}
       <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[600px] flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
-          {notifications.some(n => !n.read) && (
+          {notifications.some((n) => !n.read) && (
             <button
               onClick={handleMarkAllAsRead}
               className="text-sm text-primary hover:text-blue-700 font-medium"
@@ -143,9 +144,11 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
                       {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium text-gray-900 ${
-                        !notification.read ? 'font-bold' : ''
-                      }`}>
+                      <p
+                        className={`text-sm font-medium text-gray-900 ${
+                          !notification.read ? 'font-bold' : ''
+                        }`}
+                      >
                         {notification.title}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">

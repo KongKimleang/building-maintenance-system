@@ -39,8 +39,10 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
         <div className="flex justify-between h-16">
           {/* Logo and Brand */}
           <div className="flex items-center">
-
-            <Link to={userInfo.dashboardLink || '/dashboard'} className="flex items-center space-x-3">
+            <Link
+              to={userInfo.dashboardLink || '/dashboard'}
+              className="flex items-center space-x-3"
+            >
               <span className="text-3xl">🏢</span>
               <div>
                 <h1 className="text-xl font-bold text-white">BuildingMMS</h1>
@@ -102,8 +104,12 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
                 className="flex items-center space-x-3 text-white hover:bg-blue-600 px-3 py-2 rounded-md transition"
               >
                 <div className="text-right">
-                  <p className="text-sm font-medium">{userInfo.name || 'User'}</p>
-                  <p className="text-xs text-blue-100">{userInfo.subtitle || ''}</p>
+                  <p className="text-sm font-medium">
+                    {userInfo.name || 'User'}
+                  </p>
+                  <p className="text-xs text-blue-100">
+                    {userInfo.subtitle || ''}
+                  </p>
                 </div>
                 <span className="text-2xl">👤</span>
               </button>
@@ -127,7 +133,6 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
                 </div>
               )}
             </div>
-
           </div>
         </div>
       </div>
@@ -157,4 +162,3 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
 }
 
 export default Navbar;
-

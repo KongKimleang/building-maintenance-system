@@ -22,7 +22,6 @@ function RequestDetails() {
   const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
   const [assignLoading, setAssignLoading] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchRequestDetails();
     fetchTechnicians();

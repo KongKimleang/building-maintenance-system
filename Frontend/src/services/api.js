@@ -358,11 +358,11 @@ export const addComment = async (requestId, comment) => {
 export const getNotifications = async () => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/notifications`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -382,13 +382,16 @@ export const getNotifications = async () => {
 export const markNotificationAsRead = async (notificationId) => {
   try {
     const token = getToken();
-    
-    const response = await fetch(`${API_URL}/notifications/${notificationId}/read`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-    });
+
+    const response = await fetch(
+      `${API_URL}/notifications/${notificationId}/read`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     const data = await response.json();
 
@@ -406,18 +409,20 @@ export const markNotificationAsRead = async (notificationId) => {
 export const markAllNotificationsAsRead = async () => {
   try {
     const token = getToken();
-    
+
     const response = await fetch(`${API_URL}/notifications/mark-all-read`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to mark all notifications as read');
+      throw new Error(
+        data.message || 'Failed to mark all notifications as read'
+      );
     }
 
     return data;

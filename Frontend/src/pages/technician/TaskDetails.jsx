@@ -21,7 +21,6 @@ function TaskDetails() {
   const [statusNotes, setStatusNotes] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchTaskDetails();
   }, [id]);
