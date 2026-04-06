@@ -5,10 +5,20 @@ import { getAllRequests, getAllTechnicians, assignTechnician } from '../../servi
 
 function AllRequests() {
   const navigate = useNavigate();
+<<<<<<< HEAD
   const user = JSON.parse(localStorage.getItem('user'));
 
   const [requests, setRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
+=======
+
+  // Filters state
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [priorityFilter, setPriorityFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [allRequests, setAllRequests] = useState([]);
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -112,6 +122,7 @@ function AllRequests() {
     setShowDeleteModal(true);
   };
 
+<<<<<<< HEAD
   const handleDeleteRequest = async () => {
     try {
       setDeleteLoading(true);
@@ -140,22 +151,78 @@ function AllRequests() {
       setDeleteLoading(false);
     }
   };
+=======
+  // Status filter
+  if (statusFilter !== 'All') {
+    filteredRequests = filteredRequests.filter(
+      (req) => req.status === statusFilter
+    );
+  }
+
+  // Priority filter
+  if (priorityFilter !== 'All') {
+    filteredRequests = filteredRequests.filter(
+      (req) => req.priority === priorityFilter
+    );
+  }
+
+  // Category filter
+  if (categoryFilter !== 'All') {
+    filteredRequests = filteredRequests.filter(
+      (req) => req.category === categoryFilter
+    );
+  }
+
+  // Search filter (need to change tittle & location if error occur)
+  if (searchQuery) {
+    filteredRequests = filteredRequests.filter(
+      (req) =>
+        (req.requestId || '')
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        req.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (req.submittedBy &&
+          `${req.submittedBy.firstName} ${req.submittedBy.lastName}`
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()))
+    );
+  }
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
 
   const statusCounts = {
+<<<<<<< HEAD
     all: requests.length,
     pending: requests.filter(r => r.status === 'Pending').length,
     assigned: requests.filter(r => r.status === 'Assigned').length,
     inProgress: requests.filter(r => r.status === 'In Progress').length,
     completed: requests.filter(r => r.status === 'Completed').length
+=======
+    all: allRequests.length,
+    pending: allRequests.filter((r) => r.status === 'Pending').length,
+    assigned: allRequests.filter((r) => r.status === 'Assigned').length,
+    inProgress: allRequests.filter((r) => r.status === 'In Progress').length,
+    completed: allRequests.filter((r) => r.status === 'Completed').length,
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar
         userInfo={{
+<<<<<<< HEAD
           name: `${user.firstName} ${user.lastName}`,
           subtitle: 'Administrator',
           dashboardLink: '/admin/dashboard'
+=======
+          name: 'Admin',
+          dashboardLink: '/admin/dashboard',
+          navLinks: [
+            { label: 'Dashboard', path: '/admin/dashboard', active: false },
+            { label: 'Users', path: '/admin/users', active: false },
+            { label: 'Requests', path: '/admin/requests', active: true },
+          ],
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
         }}
         navLinks={[
           { label: 'Dashboard', path: '/admin/dashboard', active: false },
@@ -166,8 +233,17 @@ function AllRequests() {
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
+<<<<<<< HEAD
           <h1 className="text-3xl font-bold text-gray-900">All Maintenance Requests</h1>
           <p className="text-gray-600 mt-1">Manage and assign maintenance requests</p>
+=======
+          <h1 className="text-3xl font-bold text-gray-900">
+            All Maintenance Requests
+          </h1>
+          <p className="text-gray-600 mt-1">
+            View and manage all requests from residents and staff
+          </p>
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
         </div>
 
         {/* Stats Cards */}
@@ -175,51 +251,95 @@ function AllRequests() {
           <button
             onClick={() => setFilterStatus('All')}
             className={`p-4 rounded-lg border-2 transition ${
+<<<<<<< HEAD
               filterStatus === 'All' ? 'border-primary bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
             }`}
           >
             <p className="text-sm font-medium text-gray-600">All Requests</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{statusCounts.all}</p>
+=======
+              statusFilter === 'All'
+                ? 'border-primary bg-blue-50'
+                : 'border-gray-200 bg-white hover:border-gray-300'
+            }`}
+          >
+            <p className="text-sm font-medium text-gray-600">All</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {statusCounts.all}
+            </p>
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
           </button>
 
           <button
             onClick={() => setFilterStatus('Pending')}
             className={`p-4 rounded-lg border-2 transition ${
+<<<<<<< HEAD
               filterStatus === 'Pending' ? 'border-warning bg-yellow-50' : 'border-gray-200 bg-white hover:border-gray-300'
+=======
+              statusFilter === 'Pending'
+                ? 'border-warning bg-yellow-50'
+                : 'border-gray-200 bg-white hover:border-gray-300'
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
             }`}
           >
             <p className="text-sm font-medium text-gray-600">Pending</p>
-            <p className="text-2xl font-bold text-warning mt-1">{statusCounts.pending}</p>
+            <p className="text-2xl font-bold text-warning mt-1">
+              {statusCounts.pending}
+            </p>
           </button>
 
           <button
             onClick={() => setFilterStatus('Assigned')}
             className={`p-4 rounded-lg border-2 transition ${
+<<<<<<< HEAD
               filterStatus === 'Assigned' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 bg-white hover:border-gray-300'
+=======
+              statusFilter === 'Assigned'
+                ? 'border-purple-500 bg-purple-50'
+                : 'border-gray-200 bg-white hover:border-gray-300'
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
             }`}
           >
             <p className="text-sm font-medium text-gray-600">Assigned</p>
-            <p className="text-2xl font-bold text-purple-600 mt-1">{statusCounts.assigned}</p>
+            <p className="text-2xl font-bold text-purple-600 mt-1">
+              {statusCounts.assigned}
+            </p>
           </button>
 
           <button
             onClick={() => setFilterStatus('In Progress')}
             className={`p-4 rounded-lg border-2 transition ${
+<<<<<<< HEAD
               filterStatus === 'In Progress' ? 'border-primary bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
+=======
+              statusFilter === 'In Progress'
+                ? 'border-primary bg-blue-50'
+                : 'border-gray-200 bg-white hover:border-gray-300'
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
             }`}
           >
             <p className="text-sm font-medium text-gray-600">In Progress</p>
-            <p className="text-2xl font-bold text-primary mt-1">{statusCounts.inProgress}</p>
+            <p className="text-2xl font-bold text-primary mt-1">
+              {statusCounts.inProgress}
+            </p>
           </button>
 
           <button
             onClick={() => setFilterStatus('Completed')}
             className={`p-4 rounded-lg border-2 transition ${
+<<<<<<< HEAD
               filterStatus === 'Completed' ? 'border-success bg-green-50' : 'border-gray-200 bg-white hover:border-gray-300'
+=======
+              statusFilter === 'Completed'
+                ? 'border-success bg-green-50'
+                : 'border-gray-200 bg-white hover:border-gray-300'
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
             }`}
           >
             <p className="text-sm font-medium text-gray-600">Completed</p>
-            <p className="text-2xl font-bold text-success mt-1">{statusCounts.completed}</p>
+            <p className="text-2xl font-bold text-success mt-1">
+              {statusCounts.completed}
+            </p>
           </button>
         </div>
 
@@ -251,7 +371,54 @@ function AllRequests() {
               </select>
             </div>
 
+<<<<<<< HEAD
             <div className="flex items-end">
+=======
+            {/* Category Filter */}
+            <div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="All">All Categories</option>
+                <option value="Plumbing">Plumbing</option>
+                <option value="Electrical">Electrical</option>
+                <option value="HVAC">HVAC</option>
+                <option value="Mechanical">Mechanical</option>
+                <option value="Carpentry">Carpentry</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Active Filters Display */}
+          {(statusFilter !== 'All' ||
+            priorityFilter !== 'All' ||
+            categoryFilter !== 'All' ||
+            searchQuery) && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-gray-600">Active filters:</span>
+              {statusFilter !== 'All' && (
+                <span className="px-3 py-1 bg-primary text-white text-sm rounded-full">
+                  Status: {statusFilter}
+                </span>
+              )}
+              {priorityFilter !== 'All' && (
+                <span className="px-3 py-1 bg-primary text-white text-sm rounded-full">
+                  Priority: {priorityFilter}
+                </span>
+              )}
+              {categoryFilter !== 'All' && (
+                <span className="px-3 py-1 bg-primary text-white text-sm rounded-full">
+                  Category: {categoryFilter}
+                </span>
+              )}
+              {searchQuery && (
+                <span className="px-3 py-1 bg-primary text-white text-sm rounded-full">
+                  Search: "{searchQuery}"
+                </span>
+              )}
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
               <button
                 onClick={() => {
                   setFilterStatus('All');
@@ -276,6 +443,7 @@ function AllRequests() {
             <div className="p-4 bg-red-100 text-red-700 rounded">
               Error: {error}
             </div>
+<<<<<<< HEAD
           ) : filteredRequests.length === 0 ? (
             <div className="p-12 text-center">
               <span className="text-6xl mb-4 block">📭</span>
@@ -283,6 +451,23 @@ function AllRequests() {
               <p className="text-gray-600">Try adjusting your filters</p>
             </div>
           ) : (
+=======
+          )}
+          {!loading && !error && filteredRequests.length === 0 && (
+            // Empty State
+            <div className="p-12 text-center">
+              <span className="text-6xl mb-4 block">📭</span>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No requests found
+              </h3>
+              <p className="text-gray-600">
+                Try adjusting your filters or search query
+              </p>
+            </div>
+          )}
+          {/* Table */}
+          {!loading && !error && filteredRequests.length > 0 && (
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -303,6 +488,7 @@ function AllRequests() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         #{request.requestId}
                       </td>
+<<<<<<< HEAD
                       <td className="px-6 py-4 text-sm text-gray-900">{request.title}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{request.category}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -311,20 +497,75 @@ function AllRequests() {
                           request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-green-100 text-green-800'
                         }`}>
+=======
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        <div className="font-medium">{request.title}</div>
+                        <div className="text-gray-500 text-xs">
+                          {request.category}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {request.location}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <div>
+                          {request.submittedBy
+                            ? `${request.submittedBy.firstName} ${request.submittedBy.lastName}`
+                            : 'Unknown'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {request.submittedBy?.unit
+                            ? `Unit ${request.submittedBy.unit}`
+                            : ''}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${
+                            request.priority === 'High'
+                              ? 'bg-red-100 text-red-800'
+                              : request.priority === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {request.priority === 'High'
+                            ? '🔴'
+                            : request.priority === 'Medium'
+                              ? '🟡'
+                              : '🟢'}{' '}
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
                           {request.priority}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+<<<<<<< HEAD
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                           request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
                           request.status === 'Assigned' ? 'bg-purple-100 text-purple-800' :
                           request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
                           'bg-green-100 text-green-800'
                         }`}>
+=======
+                        <span
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                          ${
+                            request.status === 'Pending'
+                              ? 'bg-gray-100 text-gray-800'
+                              : request.status === 'Assigned'
+                                ? 'bg-purple-100 text-purple-800'
+                                : request.status === 'In Progress'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
                           {request.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+<<<<<<< HEAD
                         {request.assignedTo 
                           ? `${request.assignedTo.firstName} ${request.assignedTo.lastName}` 
                           : <span className="text-gray-400 italic">Not assigned</span>
@@ -351,6 +592,35 @@ function AllRequests() {
                           className="text-red-600 hover:text-red-800 font-medium"
                         >
                           Delete
+=======
+                        {request.assignedTo ? (
+                          `${request.assignedTo.firstName} ${request.assignedTo.lastName}`
+                        ) : (
+                          <span className="text-gray-400 italic">
+                            Not assigned
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button
+                          onClick={() =>
+                            navigate(`/admin/request-details/${request._id}`)
+                          }
+                          className="text-primary hover:text-blue-700"
+                        >
+                          View
+                        </button>
+                        {!request.assignedTo && (
+                          <button
+                            onClick={() => handleOpenAssignModal(request)}
+                            className="text-success hover:text-green-700 font-medium"
+                          >
+                            Assign
+                          </button>
+                        )}
+                        <button className="text-secondary hover:text-gray-700">
+                          Edit
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
                         </button>
                       </td>
                     </tr>
@@ -367,14 +637,24 @@ function AllRequests() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
+<<<<<<< HEAD
               {selectedRequest.assignedTo ? 'Reassign Technician' : 'Assign Technician'}
+=======
+              Assign Technician
+>>>>>>> 47ba629d0712c0f86dfa355af9a3cfdce371f971
             </h2>
 
             <div className="mb-4 p-4 bg-gray-50 rounded">
               <p className="text-sm text-gray-600 mb-1">Request:</p>
-              <p className="font-semibold text-gray-900">#{selectedRequest.requestId} {selectedRequest.title}</p>
-              <p className="text-sm text-gray-600 mt-2">Category: {selectedRequest.category}</p>
-              <p className="text-sm text-gray-600">Priority: {selectedRequest.priority}</p>
+              <p className="font-semibold text-gray-900">
+                #{selectedRequest.requestId} {selectedRequest.title}
+              </p>
+              <p className="text-sm text-gray-600 mt-2">
+                Category: {selectedRequest.category}
+              </p>
+              <p className="text-sm text-gray-600">
+                Priority: {selectedRequest.priority}
+              </p>
             </div>
 
             <div className="mb-6">

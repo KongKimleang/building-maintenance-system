@@ -8,16 +8,20 @@ const submitFeedback = async (req, res) => {
     const { requestId, rating, comment, technicianId } = req.body;
 
     if (!requestId || !rating) {
-      return res.status(400).json({ message: 'RequestId and rating are required' });
+      return res
+        .status(400)
+        .json({ message: 'RequestId and rating are required' });
     }
 
     // Check already submitted
     const existing = await Feedback.findOne({
       requestId,
-      userId: req.user._id
+      userId: req.user._id,
     });
     if (existing) {
-      return res.status(400).json({ message: 'You already submitted feedback for this request' });
+      return res
+        .status(400)
+        .json({ message: 'You already submitted feedback for this request' });
     }
 
     const feedback = await Feedback.create({
@@ -25,13 +29,13 @@ const submitFeedback = async (req, res) => {
       userId: req.user._id,
       rating,
       comment,
-      technicianId
+      technicianId,
     });
 
     res.status(201).json({
       success: true,
       message: 'Feedback submitted successfully',
-      feedback
+      feedback,
     });
   } catch (error) {
     console.error('Submit feedback error:', error.message);
@@ -45,7 +49,7 @@ const submitFeedback = async (req, res) => {
 const getFeedback = async (req, res) => {
   try {
     const feedback = await Feedback.findOne({
-      requestId: req.params.requestId
+      requestId: req.params.requestId,
     })
       .populate('userId', 'firstName lastName')
       .populate('technicianId', 'firstName lastName specialization');
@@ -72,15 +76,18 @@ const getAllFeedback = async (req, res) => {
       .populate('requestId', 'title requestId')
       .sort({ createdAt: -1 });
 
-    const avgRating = feedback.length > 0
-      ? (feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length).toFixed(1)
-      : 0;
+    const avgRating =
+      feedback.length > 0
+        ? (
+            feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length
+          ).toFixed(1)
+        : 0;
 
     res.status(200).json({
       success: true,
       count: feedback.length,
       avgRating,
-      feedback
+      feedback,
     });
   } catch (error) {
     console.error('Get all feedback error:', error.message);
@@ -91,5 +98,5 @@ const getAllFeedback = async (req, res) => {
 module.exports = {
   submitFeedback,
   getFeedback,
-  getAllFeedback
+  getAllFeedback,
 };

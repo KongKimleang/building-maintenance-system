@@ -11,28 +11,28 @@ function Register() {
     role: 'resident',
     building: '',
     unit: '',
-    agreeToTerms: false
+    agreeToTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match!');
       return;
     }
-    
+
     if (!formData.agreeToTerms) {
       alert('Please agree to Terms & Conditions');
       return;
@@ -60,13 +60,18 @@ function Register() {
         </div>
 
         {/* Register Form */}
-        <form className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" onSubmit={handleSubmit}>
+        <form
+          className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md"
+          onSubmit={handleSubmit}
+        >
           <div className="space-y-4">
-            
             {/* First Name & Last Name */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   First Name *
                 </label>
                 <input
@@ -82,7 +87,10 @@ function Register() {
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Last Name *
                 </label>
                 <input
@@ -100,7 +108,10 @@ function Register() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email Address *
               </label>
               <div className="relative">
@@ -122,7 +133,10 @@ function Register() {
 
             {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Phone Number *
               </label>
               <div className="relative">
@@ -144,7 +158,10 @@ function Register() {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password *
               </label>
               <div className="relative">
@@ -173,7 +190,10 @@ function Register() {
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Confirm Password *
               </label>
               <div className="relative">
@@ -234,7 +254,10 @@ function Register() {
             {/* Building & Unit */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="building" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="building"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Select Building *
                 </label>
                 <select
@@ -253,7 +276,10 @@ function Register() {
               </div>
 
               <div>
-                <label htmlFor="unit" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="unit"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Select Unit *
                 </label>
                 <select
@@ -283,9 +309,15 @@ function Register() {
                 onChange={handleChange}
                 className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mt-1"
               />
-              <label htmlFor="agreeToTerms" className="ml-2 block text-sm text-gray-700">
+              <label
+                htmlFor="agreeToTerms"
+                className="ml-2 block text-sm text-gray-700"
+              >
                 I agree to the{' '}
-                <a href="#" className="text-primary hover:text-blue-700 font-medium">
+                <a
+                  href="#"
+                  className="text-primary hover:text-blue-700 font-medium"
+                >
                   Terms & Conditions
                 </a>
               </label>
@@ -306,7 +338,10 @@ function Register() {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              <a href="#" className="font-medium text-primary hover:text-blue-700">
+              <a
+                href="#"
+                className="font-medium text-primary hover:text-blue-700"
+              >
                 Login
               </a>
             </p>

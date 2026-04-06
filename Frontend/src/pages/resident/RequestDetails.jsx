@@ -47,13 +47,28 @@ function RequestDetails() {
         <Navbar
           userInfo={{
             name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-            subtitle: user.role === 'resident' ? `Resident - Unit ${user.unit || ''}` : `${user.position || 'Staff'}`,
+            subtitle:
+              user.role === 'resident'
+                ? `Resident - Unit ${user.unit || ''}`
+                : `${user.position || 'Staff'}`,
             dashboardLink: '/resident/dashboard',
             navLinks: [
-              { label: 'Dashboard', path: '/resident/dashboard', active: false },
-              { label: 'Submit Request', path: '/resident/submit-request', active: false },
-              { label: 'My Requests', path: '/resident/my-requests', active: true }
-            ]
+              {
+                label: 'Dashboard',
+                path: '/resident/dashboard',
+                active: false,
+              },
+              {
+                label: 'Submit Request',
+                path: '/resident/submit-request',
+                active: false,
+              },
+              {
+                label: 'My Requests',
+                path: '/resident/my-requests',
+                active: true,
+              },
+            ],
           }}
           notificationCount={2}
         />
@@ -72,13 +87,28 @@ function RequestDetails() {
         <Navbar
           userInfo={{
             name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-            subtitle: user.role === 'resident' ? `Resident - Unit ${user.unit || ''}` : `${user.position || 'Staff'}`,
+            subtitle:
+              user.role === 'resident'
+                ? `Resident - Unit ${user.unit || ''}`
+                : `${user.position || 'Staff'}`,
             dashboardLink: '/resident/dashboard',
             navLinks: [
-              { label: 'Dashboard', path: '/resident/dashboard', active: false },
-              { label: 'Submit Request', path: '/resident/submit-request', active: false },
-              { label: 'My Requests', path: '/resident/my-requests', active: true }
-            ]
+              {
+                label: 'Dashboard',
+                path: '/resident/dashboard',
+                active: false,
+              },
+              {
+                label: 'Submit Request',
+                path: '/resident/submit-request',
+                active: false,
+              },
+              {
+                label: 'My Requests',
+                path: '/resident/my-requests',
+                active: true,
+              },
+            ],
           }}
           notificationCount={2}
         />
@@ -102,13 +132,24 @@ function RequestDetails() {
       <Navbar
         userInfo={{
           name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-          subtitle: user.role === 'resident' ? `Resident - Unit ${user.unit || ''}` : `${user.position || 'Staff'}`,
+          subtitle:
+            user.role === 'resident'
+              ? `Resident - Unit ${user.unit || ''}`
+              : `${user.position || 'Staff'}`,
           dashboardLink: '/resident/dashboard',
           navLinks: [
             { label: 'Dashboard', path: '/resident/dashboard', active: false },
-            { label: 'Submit Request', path: '/resident/submit-request', active: false },
-            { label: 'My Requests', path: '/resident/my-requests', active: true }
-          ]
+            {
+              label: 'Submit Request',
+              path: '/resident/submit-request',
+              active: false,
+            },
+            {
+              label: 'My Requests',
+              path: '/resident/my-requests',
+              active: true,
+            },
+          ],
         }}
         notificationCount={2}
       />
@@ -133,21 +174,35 @@ function RequestDetails() {
             </div>
             <div className="flex gap-3 flex-wrap">
               {/* Status Badge */}
-              <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
-                request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                request.status === 'Assigned' ? 'bg-purple-100 text-purple-800' :
-                request.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                'bg-green-100 text-green-800'
-              }`}>
+              <span
+                className={`px-4 py-2 text-sm font-semibold rounded-full ${
+                  request.status === 'Pending'
+                    ? 'bg-gray-100 text-gray-800'
+                    : request.status === 'Assigned'
+                      ? 'bg-purple-100 text-purple-800'
+                      : request.status === 'In Progress'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                }`}
+              >
                 {request.status}
               </span>
               {/* Priority Badge */}
-              <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
-                request.priority === 'High' ? 'bg-red-100 text-red-800' :
-                request.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-green-100 text-green-800'
-              }`}>
-                {request.priority === 'High' ? '🔴' : request.priority === 'Medium' ? '🟡' : '🟢'} {request.priority}
+              <span
+                className={`px-4 py-2 text-sm font-semibold rounded-full ${
+                  request.priority === 'High'
+                    ? 'bg-red-100 text-red-800'
+                    : request.priority === 'Medium'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-green-100 text-green-800'
+                }`}
+              >
+                {request.priority === 'High'
+                  ? '🔴'
+                  : request.priority === 'Medium'
+                    ? '🟡'
+                    : '🟢'}{' '}
+                {request.priority}
               </span>
             </div>
           </div>
@@ -158,8 +213,10 @@ function RequestDetails() {
           <div className="lg:col-span-2 space-y-6">
             {/* Request Details */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Request Details</h2>
-              
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Request Details
+              </h2>
+
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-sm text-gray-600 font-medium">Category</p>
@@ -178,27 +235,41 @@ function RequestDetails() {
                   <p className="text-gray-900">{request.unit}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Submitted Date</p>
-                  <p className="text-gray-900">{new Date(request.createdAt).toLocaleString()}</p>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Submitted Date
+                  </p>
+                  <p className="text-gray-900">
+                    {new Date(request.createdAt).toLocaleString()}
+                  </p>
                 </div>
                 {request.completedDate && (
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Completed Date</p>
-                    <p className="text-gray-900">{new Date(request.completedDate).toLocaleString()}</p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Completed Date
+                    </p>
+                    <p className="text-gray-900">
+                      {new Date(request.completedDate).toLocaleString()}
+                    </p>
                   </div>
                 )}
               </div>
 
               <div className="mb-4">
-                <p className="text-sm text-gray-600 font-medium mb-2">Description</p>
-                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">{request.description}</p>
+                <p className="text-sm text-gray-600 font-medium mb-2">
+                  Description
+                </p>
+                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">
+                  {request.description}
+                </p>
               </div>
 
               {/* Photo */}
               {request.photo && request.photo.data && (
                 <div className="mb-4">
-                  <p className="text-sm text-gray-600 font-medium mb-2">Attached Photo</p>
-                  <img 
+                  <p className="text-sm text-gray-600 font-medium mb-2">
+                    Attached Photo
+                  </p>
+                  <img
                     src={`data:${request.photo.contentType};base64,${request.photo.data}`}
                     alt="Request photo"
                     className="max-w-md rounded-lg border-2 border-gray-300 shadow-sm"
@@ -209,30 +280,41 @@ function RequestDetails() {
 
             {/* Status Information */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Status Information</h2>
-              
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Status Information
+              </h2>
+
               {request.status === 'Pending' && (
                 <div className="bg-yellow-50 border-l-4 border-warning p-4">
-                  <p className="font-semibold text-gray-900">⏰ Pending Assignment</p>
+                  <p className="font-semibold text-gray-900">
+                    ⏰ Pending Assignment
+                  </p>
                   <p className="text-sm text-gray-700 mt-1">
-                    Your request has been received and is waiting to be assigned to a technician.
+                    Your request has been received and is waiting to be assigned
+                    to a technician.
                   </p>
                 </div>
               )}
 
               {request.status === 'Assigned' && request.assignedTo && (
                 <div className="bg-purple-50 border-l-4 border-purple-500 p-4">
-                  <p className="font-semibold text-gray-900">👤 Assigned to Technician</p>
+                  <p className="font-semibold text-gray-900">
+                    👤 Assigned to Technician
+                  </p>
                   <p className="text-sm text-gray-700 mt-1">
-                    Your request has been assigned to {request.assignedTo.firstName} {request.assignedTo.lastName} ({request.assignedTo.specialization}).
-                    The technician will contact you soon.
+                    Your request has been assigned to{' '}
+                    {request.assignedTo.firstName} {request.assignedTo.lastName}{' '}
+                    ({request.assignedTo.specialization}). The technician will
+                    contact you soon.
                   </p>
                 </div>
               )}
 
               {request.status === 'In Progress' && (
                 <div className="bg-blue-50 border-l-4 border-primary p-4">
-                  <p className="font-semibold text-gray-900">🔵 Work In Progress</p>
+                  <p className="font-semibold text-gray-900">
+                    🔵 Work In Progress
+                  </p>
                   <p className="text-sm text-gray-700 mt-1">
                     The technician is currently working on your request.
                   </p>
@@ -241,7 +323,9 @@ function RequestDetails() {
 
               {request.status === 'Completed' && (
                 <div className="bg-green-50 border-l-4 border-success p-4">
-                  <p className="font-semibold text-gray-900">✅ Work Completed</p>
+                  <p className="font-semibold text-gray-900">
+                    ✅ Work Completed
+                  </p>
                   <p className="text-sm text-gray-700 mt-1">
                     Your maintenance request has been completed successfully!
                   </p>
@@ -251,24 +335,32 @@ function RequestDetails() {
 
             {/* Timeline */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Request Timeline</h2>
-              
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Request Timeline
+              </h2>
+
               {request.timeline && request.timeline.length > 0 ? (
                 <div className="space-y-4">
                   {request.timeline.map((event, index) => (
                     <div key={index} className="flex gap-4">
                       <div className="flex flex-col items-center">
-                        <div className={`w-3 h-3 rounded-full ${
-                          index === 0 ? 'bg-success' : 'bg-primary'
-                        }`}></div>
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            index === 0 ? 'bg-success' : 'bg-primary'
+                          }`}
+                        ></div>
                         {index !== request.timeline.length - 1 && (
                           <div className="w-0.5 h-full bg-gray-300 mt-1"></div>
                         )}
                       </div>
                       <div className="flex-1 pb-4">
-                        <p className="font-semibold text-gray-900">{event.action}</p>
+                        <p className="font-semibold text-gray-900">
+                          {event.action}
+                        </p>
                         {event.note && (
-                          <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded">{event.note}</p>
+                          <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded">
+                            {event.note}
+                          </p>
                         )}
                         <p className="text-xs text-gray-500 mt-1">
                           {new Date(event.timestamp).toLocaleString()}
@@ -288,21 +380,26 @@ function RequestDetails() {
             {/* Assigned Technician */}
             {request.assignedTo && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Assigned Technician</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Assigned Technician
+                </h3>
                 <div>
                   <p className="font-semibold text-gray-900 text-lg">
                     {request.assignedTo.firstName} {request.assignedTo.lastName}
                   </p>
                   <p className="text-sm text-gray-600 mt-2">
-                    <span className="font-medium">Specialization:</span> {request.assignedTo.specialization}
+                    <span className="font-medium">Specialization:</span>{' '}
+                    {request.assignedTo.specialization}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">
-                    <span className="font-medium">Phone:</span> {request.assignedTo.phone}
+                    <span className="font-medium">Phone:</span>{' '}
+                    {request.assignedTo.phone}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">
-                    <span className="font-medium">Email:</span> {request.assignedTo.email}
+                    <span className="font-medium">Email:</span>{' '}
+                    {request.assignedTo.email}
                   </p>
-                  
+
                   <div className="mt-4 pt-4 border-t">
                     <a
                       href={`tel:${request.assignedTo.phone}`}
@@ -317,7 +414,9 @@ function RequestDetails() {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Quick Actions
+              </h3>
               <div className="space-y-3">
                 {request.status !== 'Completed' && (
                   <button
@@ -349,12 +448,19 @@ function RequestDetails() {
 
             {/* Need Help */}
             <div className="bg-blue-50 rounded-lg p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Need Help?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Need Help?
+              </h3>
               <p className="text-sm text-gray-700 mb-4">
-                If you have questions about this request, contact building management.
+                If you have questions about this request, contact building
+                management.
               </p>
-              <p className="text-sm font-medium text-gray-900">📞 Management: +1234567890</p>
-              <p className="text-sm font-medium text-gray-900">📧 Email: admin@building.com</p>
+              <p className="text-sm font-medium text-gray-900">
+                📞 Management: +1234567890
+              </p>
+              <p className="text-sm font-medium text-gray-900">
+                📧 Email: admin@building.com
+              </p>
             </div>
           </div>
         </div>

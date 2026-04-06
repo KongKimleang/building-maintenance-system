@@ -6,7 +6,7 @@ import { createRequest } from '../../services/api';
 function SubmitRequest() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  
+
   // State to store form data
   const [formData, setFormData] = useState({
     title: '',
@@ -15,7 +15,7 @@ function SubmitRequest() {
     floor: '',
     unit: '',
     description: '',
-    photo: null
+    photo: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -24,18 +24,18 @@ function SubmitRequest() {
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === 'floor' ? { unit: '' } : {})
+      ...(name === 'floor' ? { unit: '' } : {}),
     }));
   };
 
   // Handle file upload
   const handleFileChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      photo: e.target.files[0]
+      photo: e.target.files[0],
     }));
   };
 
@@ -44,10 +44,16 @@ function SubmitRequest() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     // Validation
-    if (!formData.title || !formData.category || !formData.priority || 
-        !formData.floor || !formData.unit || !formData.description) {
+    if (
+      !formData.title ||
+      !formData.category ||
+      !formData.priority ||
+      !formData.floor ||
+      !formData.unit ||
+      !formData.description
+    ) {
       alert('Please fill all required fields!');
       setLoading(false);
       return;
@@ -61,12 +67,14 @@ function SubmitRequest() {
         category: formData.category,
         priority: formData.priority,
         floor: Number(formData.floor),
-        unit: formData.unit
+        unit: formData.unit,
       });
 
       // Show success with REAL request ID
-      alert(`✅ Request submitted successfully!\n\nRequest ID: #${data.request.requestId}\n\nYou can track this request in "My Requests" page.`);
-      
+      alert(
+        `✅ Request submitted successfully!\n\nRequest ID: #${data.request.requestId}\n\nYou can track this request in "My Requests" page.`
+      );
+
       // Reset form
       setFormData({
         title: '',
@@ -75,12 +83,11 @@ function SubmitRequest() {
         floor: '',
         unit: '',
         description: '',
-        photo: null
+        photo: null,
       });
-      
+
       // Redirect to My Requests page
       navigate('/resident/my-requests');
-
     } catch (err) {
       setError(err.message || 'Failed to submit request');
       alert('❌ Error: ' + (err.message || 'Failed to submit request'));
@@ -94,15 +101,27 @@ function SubmitRequest() {
       {/* Navbar */}
       <Navbar
         userInfo={{
-          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User',
-          subtitle: user.role === 'resident' ? `Resident - Unit ${user.unit || ''}` : `${user.position || 'Staff'} - ${user.floor || ''}`,
+          name:
+            `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User',
+          subtitle:
+            user.role === 'resident'
+              ? `Resident - Unit ${user.unit || ''}`
+              : `${user.position || 'Staff'} - ${user.floor || ''}`,
           dashboardLink: '/resident/dashboard',
           navLinks: [
             { label: 'Dashboard', path: '/resident/dashboard', active: false },
-            { label: 'Submit Request', path: '/resident/submit-request', active: true },
-            { label: 'My Requests', path: '/resident/my-requests', active: false },
-            { label: 'History', path: '/resident/history', active: false }
-          ]
+            {
+              label: 'Submit Request',
+              path: '/resident/submit-request',
+              active: true,
+            },
+            {
+              label: 'My Requests',
+              path: '/resident/my-requests',
+              active: false,
+            },
+            { label: 'History', path: '/resident/history', active: false },
+          ],
         }}
         notificationCount={2}
       />
@@ -111,16 +130,25 @@ function SubmitRequest() {
       <main className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Submit Maintenance Request</h1>
-          <p className="text-gray-600 mt-1">Fill out the form below to report a maintenance issue</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Submit Maintenance Request
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Fill out the form below to report a maintenance issue
+          </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
-          
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-lg shadow p-6 space-y-6"
+        >
           {/* Request Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Request Title *
             </label>
             <input
@@ -139,7 +167,10 @@ function SubmitRequest() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Category */}
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Category *
               </label>
               <select
@@ -162,7 +193,10 @@ function SubmitRequest() {
 
             {/* Priority */}
             <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="priority"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Priority *
               </label>
               <select
@@ -176,7 +210,9 @@ function SubmitRequest() {
                 <option value="">Select priority</option>
                 <option value="Low">🟢 Low - Can wait a few days</option>
                 <option value="Medium">🟡 Medium - Should be fixed soon</option>
-                <option value="High">🔴 High - Urgent, needs immediate attention</option>
+                <option value="High">
+                  🔴 High - Urgent, needs immediate attention
+                </option>
               </select>
             </div>
           </div>
@@ -185,7 +221,10 @@ function SubmitRequest() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Floor */}
             <div>
-              <label htmlFor="floor" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="floor"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Floor *
               </label>
               <select
@@ -208,7 +247,10 @@ function SubmitRequest() {
 
             {/* Unit */}
             <div>
-              <label htmlFor="unit" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="unit"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Unit/Room *
               </label>
               <select
@@ -222,16 +264,36 @@ function SubmitRequest() {
                 <option value="">Select unit</option>
                 {formData.floor && formData.floor !== 'Ground' && (
                   <>
-                    <option value={`${formData.floor}01`}>Unit {formData.floor}01</option>
-                    <option value={`${formData.floor}02`}>Unit {formData.floor}02</option>
-                    <option value={`${formData.floor}03`}>Unit {formData.floor}03</option>
-                    <option value={`${formData.floor}04`}>Unit {formData.floor}04</option>
-                    <option value={`${formData.floor}05`}>Unit {formData.floor}05</option>
-                    <option value={`${formData.floor}06`}>Unit {formData.floor}06</option>
-                    <option value={`${formData.floor}07`}>Unit {formData.floor}07</option>
-                    <option value={`${formData.floor}08`}>Unit {formData.floor}08</option>
-                    <option value={`${formData.floor}09`}>Unit {formData.floor}09</option>
-                    <option value={`${formData.floor}10`}>Unit {formData.floor}10</option>
+                    <option value={`${formData.floor}01`}>
+                      Unit {formData.floor}01
+                    </option>
+                    <option value={`${formData.floor}02`}>
+                      Unit {formData.floor}02
+                    </option>
+                    <option value={`${formData.floor}03`}>
+                      Unit {formData.floor}03
+                    </option>
+                    <option value={`${formData.floor}04`}>
+                      Unit {formData.floor}04
+                    </option>
+                    <option value={`${formData.floor}05`}>
+                      Unit {formData.floor}05
+                    </option>
+                    <option value={`${formData.floor}06`}>
+                      Unit {formData.floor}06
+                    </option>
+                    <option value={`${formData.floor}07`}>
+                      Unit {formData.floor}07
+                    </option>
+                    <option value={`${formData.floor}08`}>
+                      Unit {formData.floor}08
+                    </option>
+                    <option value={`${formData.floor}09`}>
+                      Unit {formData.floor}09
+                    </option>
+                    <option value={`${formData.floor}10`}>
+                      Unit {formData.floor}10
+                    </option>
                   </>
                 )}
                 {formData.floor === 'Ground' && (
@@ -248,7 +310,10 @@ function SubmitRequest() {
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Detailed Description *
             </label>
             <textarea
@@ -265,7 +330,10 @@ function SubmitRequest() {
 
           {/* Photo Upload */}
           <div>
-            <label htmlFor="photo" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="photo"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Attach Photo (Optional)
             </label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-primary transition">
@@ -290,7 +358,9 @@ function SubmitRequest() {
                 </div>
                 <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                 {formData.photo && (
-                  <p className="text-sm text-success font-medium">✓ {formData.photo.name}</p>
+                  <p className="text-sm text-success font-medium">
+                    ✓ {formData.photo.name}
+                  </p>
                 )}
               </div>
             </div>

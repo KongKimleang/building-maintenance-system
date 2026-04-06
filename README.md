@@ -9,9 +9,9 @@ A full-stack web application for managing maintenance requests in residential ap
 
 ## 🌐 Live Demo
 
-| Service | URL |
-|---------|-----|
-| 🎨 Frontend | [https://your-app.vercel.app](https://your-app.vercel.app) |
+| Service        | URL                                                          |
+| -------------- | ------------------------------------------------------------ |
+| 🎨 Frontend    | [https://your-app.vercel.app](https://your-app.vercel.app)   |
 | ⚙️ Backend API | [https://your-app.railway.app](https://your-app.railway.app) |
 
 > Replace these URLs with your real deployed URLs after deployment!
@@ -20,10 +20,10 @@ A full-stack web application for managing maintenance requests in residential ap
 
 ## 👥 Team Members
 
-| Name | Role | Student ID |
-|------|------|------------|
-| Kong Kimleang | Frontend Developer & Integration Lead | 2023491 |
-| Phann Chanthariroza | Backend Developer & Database Architect | 2023430 |
+| Name                | Role                                   | Student ID |
+| ------------------- | -------------------------------------- | ---------- |
+| Kong Kimleang       | Frontend Developer & Integration Lead  | 2023491    |
+| Phann Chanthariroza | Backend Developer & Database Architect | 2023430    |
 
 **Instructor:** Chandan Mukherjee
 **Course:** FYP 401 001 - Final Year Project I
@@ -48,9 +48,11 @@ A full-stack web application for managing maintenance requests in residential ap
 The Building Maintenance Management System is a comprehensive web-based application designed to streamline and digitize the maintenance request and management process for residential apartment buildings.
 
 ### Problem Statement
+
 Traditional maintenance management relies on manual processes such as phone calls, paper forms, or verbal complaints. These methods lead to lost requests, delayed responses, and lack of transparency.
 
 ### Solution
+
 A centralized digital platform connecting residents, administrators, and technicians through an efficient workflow system.
 
 ---
@@ -58,12 +60,14 @@ A centralized digital platform connecting residents, administrators, and technic
 ## ✨ Features
 
 ### 👤 Authentication & Authorization
+
 - Secure login with JWT tokens
 - Role-based access control (Admin, Resident, Staff, Technician)
 - Password hashing with bcrypt
 - First-login password change requirement
 
 ### 🔧 Maintenance Requests
+
 - Submit requests with title, description, category, priority and location
 - Auto-generated unique request IDs (#001, #002...)
 - Photo upload support
@@ -71,6 +75,7 @@ A centralized digital platform connecting residents, administrators, and technic
 - Filter and search by status, priority, category
 
 ### 👑 Admin Features
+
 - View all maintenance requests
 - Assign technicians to requests
 - Create and manage user accounts
@@ -78,18 +83,21 @@ A centralized digital platform connecting residents, administrators, and technic
 - Manage buildings and units
 
 ### 🏠 Resident Features
+
 - Submit maintenance requests
 - View personal request history
 - Track request status in real-time
 - Submit feedback and ratings
 
 ### 👷 Technician Features
+
 - View assigned tasks
 - Update request status (In Progress, Completed)
 - Add work notes and timeline updates
 - View resident contact information
 
 ### 🔔 Notifications
+
 - Real-time notifications for status updates
 - Notification bell with unread count
 - Mark as read / mark all as read
@@ -99,35 +107,39 @@ A centralized digital platform connecting residents, administrators, and technic
 ## 🛠️ Tech Stack
 
 ### Frontend
-| Technology | Purpose |
-|------------|---------|
-| React.js | UI framework |
-| Tailwind CSS | Styling |
-| React Router | Navigation |
-| Axios | API calls |
+
+| Technology   | Purpose      |
+| ------------ | ------------ |
+| React.js     | UI framework |
+| Tailwind CSS | Styling      |
+| React Router | Navigation   |
+| Axios        | API calls    |
 
 ### Backend
-| Technology | Purpose |
-|------------|---------|
-| Node.js | Runtime environment |
-| Express.js | Web framework |
-| JWT | Authentication |
-| Bcrypt.js | Password hashing |
-| Multer | File uploads |
-| Helmet | Security headers |
+
+| Technology         | Purpose                |
+| ------------------ | ---------------------- |
+| Node.js            | Runtime environment    |
+| Express.js         | Web framework          |
+| JWT                | Authentication         |
+| Bcrypt.js          | Password hashing       |
+| Multer             | File uploads           |
+| Helmet             | Security headers       |
 | Express Rate Limit | Brute force protection |
 
 ### Database
-| Technology | Purpose |
-|------------|---------|
+
+| Technology    | Purpose        |
+| ------------- | -------------- |
 | MongoDB Atlas | Cloud database |
-| Mongoose | ODM |
+| Mongoose      | ODM            |
 
 ### Deployment
-| Service | Purpose |
-|---------|---------|
-| Vercel | Frontend hosting |
-| Railway | Backend hosting |
+
+| Service       | Purpose          |
+| ------------- | ---------------- |
+| Vercel        | Frontend hosting |
+| Railway       | Backend hosting  |
 | MongoDB Atlas | Database hosting |
 
 ---
@@ -135,6 +147,7 @@ A centralized digital platform connecting residents, administrators, and technic
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js v18+
 - npm or yarn
 - MongoDB Atlas account
@@ -143,18 +156,21 @@ A centralized digital platform connecting residents, administrators, and technic
 ### Installation
 
 **1. Clone the repository**
+
 ```bash
 git clone https://github.com/KongKimleang/building-maintenance-system.git
 cd building-maintenance-system
 ```
 
 **2. Setup Backend**
+
 ```bash
 cd Backend
 npm install
 ```
 
 Create `.env` file in `Backend/` folder:
+
 ```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
@@ -164,27 +180,32 @@ NODE_ENV=development
 ```
 
 Run backend:
+
 ```bash
 npm run dev
 ```
 
 **3. Setup Frontend**
+
 ```bash
 cd Frontend
 npm install
 ```
 
 Create `.env` file in `Frontend/` folder:
+
 ```env
 REACT_APP_API_URL=http://localhost:5000
 ```
 
 Run frontend:
+
 ```bash
 npm start
 ```
 
 **4. Open in browser**
+
 ```
 http://localhost:3000
 ```
@@ -232,12 +253,15 @@ building-maintenance-system/
 ## 📡 API Documentation
 
 ### Base URL
+
 ```
 http://localhost:5000/api
 ```
 
 ### Authentication
+
 All protected routes require:
+
 ```
 Authorization: Bearer <token>
 ```
@@ -245,62 +269,68 @@ Authorization: Bearer <token>
 ### Endpoints
 
 #### 🔐 Auth
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/auth/login` | Login user | Public |
-| POST | `/auth/register` | Register user | Admin |
-| GET | `/auth/me` | Get current user | Private |
-| POST | `/auth/change-password` | Change password | Private |
+
+| Method | Endpoint                | Description      | Access  |
+| ------ | ----------------------- | ---------------- | ------- |
+| POST   | `/auth/login`           | Login user       | Public  |
+| POST   | `/auth/register`        | Register user    | Admin   |
+| GET    | `/auth/me`              | Get current user | Private |
+| POST   | `/auth/change-password` | Change password  | Private |
 
 #### 👤 Users
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/users` | Get all users | Admin |
-| POST | `/users` | Create user | Admin |
-| GET | `/users/:id` | Get single user | Admin |
-| PUT | `/users/:id` | Update user | Admin |
-| DELETE | `/users/:id` | Delete user | Admin |
-| GET | `/users/technicians` | Get technicians | Admin |
-| PUT | `/users/:id/reset-password` | Reset password | Admin |
+
+| Method | Endpoint                    | Description     | Access |
+| ------ | --------------------------- | --------------- | ------ |
+| GET    | `/users`                    | Get all users   | Admin  |
+| POST   | `/users`                    | Create user     | Admin  |
+| GET    | `/users/:id`                | Get single user | Admin  |
+| PUT    | `/users/:id`                | Update user     | Admin  |
+| DELETE | `/users/:id`                | Delete user     | Admin  |
+| GET    | `/users/technicians`        | Get technicians | Admin  |
+| PUT    | `/users/:id/reset-password` | Reset password  | Admin  |
 
 #### 🔧 Requests
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/requests` | Get all requests | Admin, Technician |
-| POST | `/requests` | Create request | Resident, Staff |
-| GET | `/requests/stats` | Get statistics | Private |
-| GET | `/requests/my-requests` | Get my requests | Resident, Staff |
-| GET | `/requests/my-tasks` | Get my tasks | Technician |
-| GET | `/requests/:id` | Get single request | Private |
-| PUT | `/requests/:id/assign` | Assign technician | Admin |
-| PUT | `/requests/:id/status` | Update status | Admin, Technician |
-| POST | `/requests/:id/comment` | Add comment | Private |
+
+| Method | Endpoint                | Description        | Access            |
+| ------ | ----------------------- | ------------------ | ----------------- |
+| GET    | `/requests`             | Get all requests   | Admin, Technician |
+| POST   | `/requests`             | Create request     | Resident, Staff   |
+| GET    | `/requests/stats`       | Get statistics     | Private           |
+| GET    | `/requests/my-requests` | Get my requests    | Resident, Staff   |
+| GET    | `/requests/my-tasks`    | Get my tasks       | Technician        |
+| GET    | `/requests/:id`         | Get single request | Private           |
+| PUT    | `/requests/:id/assign`  | Assign technician  | Admin             |
+| PUT    | `/requests/:id/status`  | Update status      | Admin, Technician |
+| POST   | `/requests/:id/comment` | Add comment        | Private           |
 
 #### 🔔 Notifications
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/notifications` | Get my notifications | Private |
-| PUT | `/notifications/read-all` | Mark all read | Private |
-| PUT | `/notifications/:id/read` | Mark one read | Private |
-| DELETE | `/notifications/:id` | Delete notification | Private |
+
+| Method | Endpoint                  | Description          | Access  |
+| ------ | ------------------------- | -------------------- | ------- |
+| GET    | `/notifications`          | Get my notifications | Private |
+| PUT    | `/notifications/read-all` | Mark all read        | Private |
+| PUT    | `/notifications/:id/read` | Mark one read        | Private |
+| DELETE | `/notifications/:id`      | Delete notification  | Private |
 
 #### 🏢 Buildings
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/buildings` | Get all buildings | Private |
-| POST | `/buildings` | Create building | Admin |
-| GET | `/buildings/:id` | Get single building | Private |
-| PUT | `/buildings/:id` | Update building | Admin |
-| DELETE | `/buildings/:id` | Delete building | Admin |
-| GET | `/buildings/:id/units` | Get units | Private |
-| POST | `/buildings/:id/units` | Create unit | Admin |
+
+| Method | Endpoint               | Description         | Access  |
+| ------ | ---------------------- | ------------------- | ------- |
+| GET    | `/buildings`           | Get all buildings   | Private |
+| POST   | `/buildings`           | Create building     | Admin   |
+| GET    | `/buildings/:id`       | Get single building | Private |
+| PUT    | `/buildings/:id`       | Update building     | Admin   |
+| DELETE | `/buildings/:id`       | Delete building     | Admin   |
+| GET    | `/buildings/:id/units` | Get units           | Private |
+| POST   | `/buildings/:id/units` | Create unit         | Admin   |
 
 #### ⭐ Feedback
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/feedback` | Submit feedback | Resident |
-| GET | `/feedback` | Get all feedback | Admin |
-| GET | `/feedback/:requestId` | Get request feedback | Private |
+
+| Method | Endpoint               | Description          | Access   |
+| ------ | ---------------------- | -------------------- | -------- |
+| POST   | `/feedback`            | Submit feedback      | Resident |
+| GET    | `/feedback`            | Get all feedback     | Admin    |
+| GET    | `/feedback/:requestId` | Get request feedback | Private  |
 
 ---
 
@@ -319,18 +349,19 @@ Authorization: Bearer <token>
 
 ## 👥 User Roles
 
-| Role | Permissions |
-|------|-------------|
-| **Admin** | Full access — manage users, buildings, requests, view analytics |
-| **Resident** | Submit requests, view own requests, submit feedback |
-| **Staff** | Same as resident |
-| **Technician** | View assigned tasks, update status, add notes |
+| Role           | Permissions                                                     |
+| -------------- | --------------------------------------------------------------- |
+| **Admin**      | Full access — manage users, buildings, requests, view analytics |
+| **Resident**   | Submit requests, view own requests, submit feedback             |
+| **Staff**      | Same as resident                                                |
+| **Technician** | View assigned tasks, update status, add notes                   |
 
 ---
 
 ## 📊 Database Schema
 
 ### Collections
+
 - **users** — User accounts with role-based fields
 - **requests** — Maintenance requests with timeline
 - **notifications** — User notifications
@@ -342,19 +373,19 @@ Authorization: Bearer <token>
 
 ## 🎯 Project Status
 
-| Feature | Status |
-|---------|--------|
-| Authentication | ✅ Complete |
-| User Management | ✅ Complete |
-| Request Submission | ✅ Complete |
-| Request Workflow | ✅ Complete |
-| Notifications | ✅ Complete |
-| Buildings Management | ✅ Complete |
-| Feedback System | ✅ Complete |
-| Security | ✅ Complete |
-| Frontend UI | 🔄 In Progress |
-| Deployment | 🔄 In Progress |
-| Documentation | 🔄 In Progress |
+| Feature              | Status         |
+| -------------------- | -------------- |
+| Authentication       | ✅ Complete    |
+| User Management      | ✅ Complete    |
+| Request Submission   | ✅ Complete    |
+| Request Workflow     | ✅ Complete    |
+| Notifications        | ✅ Complete    |
+| Buildings Management | ✅ Complete    |
+| Feedback System      | ✅ Complete    |
+| Security             | ✅ Complete    |
+| Frontend UI          | 🔄 In Progress |
+| Deployment           | 🔄 In Progress |
+| Documentation        | 🔄 In Progress |
 
 ---
 
@@ -367,6 +398,7 @@ This project is for academic purposes — Final Year Project at AUPP.
 ## 🌿 Git Commands — Daily Workflow
 
 ### First Time Setup
+
 ```bash
 # Clone the project
 git clone https://github.com/KongKimleang/building-maintenance-system.git
@@ -381,6 +413,7 @@ git status
 ---
 
 ### Every Day Workflow
+
 ```bash
 # Step 1 — Always pull latest code first before starting work
 git pull origin main
@@ -404,6 +437,7 @@ git push origin main
 ---
 
 ### Good Commit Message Examples
+
 ```bash
 # ✅ Good — clear and specific
 git commit -m "Fix submit request bug in requestController"
@@ -421,6 +455,7 @@ git commit -m "changes"
 ---
 
 ### Check History
+
 ```bash
 # See all commits
 git log
@@ -435,6 +470,7 @@ git diff Backend/server.js
 ---
 
 ### Undo Mistakes
+
 ```bash
 # Undo changes in a file (before commit)
 git checkout -- filename.js
@@ -448,7 +484,7 @@ git branch
 
 ---
 
-##  Acknowledgements
+## Acknowledgements
 
 - [React Documentation](https://react.dev/)
 - [Node.js Documentation](https://nodejs.org/docs/)
