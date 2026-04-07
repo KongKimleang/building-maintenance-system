@@ -108,19 +108,53 @@ export const createRequest = async (requestData) => {
   try {
     const token = getToken();
 
+    const formData = new FormData();
+    formData.append('title', requestData.title);
+    formData.append('description', requestData.description);
+    formData.append('category', requestData.category);
+    formData.append('priority', requestData.priority);
+    formData.append('floor', requestData.floor);
+    formData.append('unit', requestData.unit);
+
+    if (requestData.photo) {
+      formData.append('photo', requestData.photo);
+    }
+
     const response = await fetch(`${API_URL}/requests`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(requestData),
+      body: formData,
     });
 
     const data = await response.json();
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to create request');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getCurrentUser = async () => {
+  try {
+    const token = getToken();
+
+    const response = await fetch(`${API_URL}/auth/me`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch profile');
     }
 
     return data;

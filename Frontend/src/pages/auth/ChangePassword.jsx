@@ -98,7 +98,7 @@ function ChangePassword() {
       const updatedUser = { ...user, requirePasswordChange: false };
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      alert('✅ Password changed successfully!');
+      alert('Password changed successfully.');
 
       // Redirect to appropriate dashboard
       if (user.role === 'admin') {
@@ -122,122 +122,105 @@ function ChangePassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-block bg-white rounded-full p-4 mb-4">
-            <span className="text-5xl">🔐</span>
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Change Password Required
-          </h1>
-          <p className="text-blue-100">
-            For security reasons, you must change your temporary password before
-            accessing the system.
-          </p>
-        </div>
-
-        {/* Form Card */}
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <div className="mb-6">
-            <p className="text-sm text-gray-600">Logged in as:</p>
-            <p className="font-semibold text-gray-900">
-              {user.firstName} {user.lastName} ({user.email})
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Current Password */}
-            <div>
-              <label
-                htmlFor="currentPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Current Password (Temporary)
-              </label>
-              <input
-                type="password"
-                id="currentPassword"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Enter your temporary password"
-                required
-              />
-            </div>
-
-            {/* New Password */}
-            <div>
-              <label
-                htmlFor="newPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                New Password
-              </label>
-              <input
-                type="password"
-                id="newPassword"
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Create a new password"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Minimum 8 characters, must include uppercase, lowercase, and
-                number
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#d9e8ff_0,_transparent_42%),radial-gradient(circle_at_bottom_right,_#cdeee8_0,_transparent_40%)] px-4 py-10 dark:bg-[radial-gradient(circle_at_top_left,_#1b3156_0,_transparent_42%),radial-gradient(circle_at_bottom_right,_#173735_0,_transparent_40%)]">
+      <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-[0_30px_80px_rgba(15,23,42,0.18)] backdrop-blur dark:border-slate-700/60 dark:bg-slate-900/80">
+        <div className="grid md:grid-cols-5">
+          <section className="relative bg-gradient-to-br from-slate-800 via-slate-700 to-blue-700 p-7 text-white md:col-span-2 md:p-10">
+            <div className="absolute inset-0 opacity-20 [background:radial-gradient(circle_at_25%_25%,#fff,transparent_40%),radial-gradient(circle_at_80%_70%,#9ee8ff,transparent_35%)]" />
+            <div className="relative">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">Security Update</p>
+              <h1 className="mt-3 text-3xl font-black tracking-tight">Change Password Required</h1>
+              <p className="mt-3 text-sm leading-relaxed text-white/85">
+                For account protection, update your temporary password before entering the system.
               </p>
-            </div>
 
-            {/* Confirm Password */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Confirm New Password
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Re-enter your new password"
-                required
-              />
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {error}
+              <div className="mt-8 rounded-2xl border border-white/20 bg-white/10 p-4 text-sm backdrop-blur">
+                <p className="text-white/80">Logged in as</p>
+                <p className="mt-1 font-semibold">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="text-white/80">{user.email}</p>
               </div>
-            )}
+            </div>
+          </section>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary text-white py-3 rounded-md font-medium hover:bg-blue-700 transition disabled:bg-gray-400"
-            >
-              {loading ? 'Changing Password...' : 'Change Password'}
-            </button>
-          </form>
+          <section className="p-6 sm:p-8 md:col-span-3 md:p-10">
+            <form onSubmit={handleSubmit} className="mx-auto w-full max-w-md space-y-5">
+              <div>
+                <label htmlFor="currentPassword" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  Current Password (Temporary)
+                </label>
+                <input
+                  type="password"
+                  id="currentPassword"
+                  name="currentPassword"
+                  value={formData.currentPassword}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-300 bg-white/95 px-4 py-2.5 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
+                  placeholder="Enter your temporary password"
+                  required
+                />
+              </div>
 
-          {/* Logout Option */}
-          <div className="mt-6 pt-6 border-t text-center">
-            <button
-              onClick={handleLogout}
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Logout and return to login page
-            </button>
-          </div>
+              <div>
+                <label htmlFor="newPassword" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  id="newPassword"
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-300 bg-white/95 px-4 py-2.5 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
+                  placeholder="Create a new password"
+                  required
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Minimum 8 characters with uppercase, lowercase, and a number.
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-300 bg-white/95 px-4 py-2.5 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
+                  placeholder="Re-enter your new password"
+                  required
+                />
+              </div>
+
+              {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loading ? 'Changing Password...' : 'Change Password'}
+              </button>
+
+              <div className="pt-2 text-center">
+                <button
+                  onClick={handleLogout}
+                  className="text-sm font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                >
+                  Logout and return to login page
+                </button>
+              </div>
+            </form>
+          </section>
         </div>
       </div>
     </div>

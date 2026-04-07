@@ -51,13 +51,15 @@ function Dashboard() {
           { label: 'Dashboard', path: '/admin/dashboard', active: true },
           { label: 'All Requests', path: '/admin/requests', active: false },
           { label: 'Users', path: '/admin/users', active: false },
+          { label: 'History', path: '/admin/history', active: false },
         ]}
       />
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+        <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow">
+          <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Operations Overview</p>
+          <h1 className="text-3xl font-bold text-gray-900 mt-1">Admin Dashboard</h1>
           <p className="text-gray-600 mt-1">
             Welcome back, {user.firstName}! Here's your system overview.
           </p>
@@ -72,67 +74,42 @@ function Dashboard() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
               {/* Total Requests */}
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-blue-100 text-sm font-medium">
-                      Total Requests
-                    </p>
-                    <p className="text-3xl font-bold mt-2">{stats.total}</p>
-                  </div>
-                  <span className="text-5xl opacity-50">📊</span>
+              <div className="bg-white rounded-lg shadow p-5 border-t-4 border-blue-600">
+                <div>
+                  <p className="text-gray-600 text-sm font-medium">Total Requests</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
                 </div>
               </div>
 
               {/* Pending */}
-              <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg shadow-lg p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-100 text-sm font-medium">Pending</p>
-                    <p className="text-3xl font-bold mt-2">{stats.pending}</p>
-                  </div>
-                  <span className="text-5xl opacity-50">⏰</span>
+              <div className="bg-white rounded-lg shadow p-5 border-t-4 border-slate-500">
+                <div>
+                  <p className="text-gray-600 text-sm font-medium">Pending</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.pending}</p>
                 </div>
               </div>
 
               {/* Assigned */}
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-100 text-sm font-medium">
-                      Assigned
-                    </p>
-                    <p className="text-3xl font-bold mt-2">{stats.assigned}</p>
-                  </div>
-                  <span className="text-5xl opacity-50">👷</span>
+              <div className="bg-white rounded-lg shadow p-5 border-t-4 border-violet-500">
+                <div>
+                  <p className="text-gray-600 text-sm font-medium">Assigned</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.assigned}</p>
                 </div>
               </div>
 
               {/* In Progress */}
-              <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-lg p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-yellow-100 text-sm font-medium">
-                      In Progress
-                    </p>
-                    <p className="text-3xl font-bold mt-2">
-                      {stats.inProgress}
-                    </p>
-                  </div>
-                  <span className="text-5xl opacity-50">🔧</span>
+              <div className="bg-white rounded-lg shadow p-5 border-t-4 border-amber-500">
+                <div>
+                  <p className="text-gray-600 text-sm font-medium">In Progress</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.inProgress}</p>
                 </div>
               </div>
 
               {/* Completed */}
-              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-green-100 text-sm font-medium">
-                      Completed
-                    </p>
-                    <p className="text-3xl font-bold mt-2">{stats.completed}</p>
-                  </div>
-                  <span className="text-5xl opacity-50">✅</span>
+              <div className="bg-white rounded-lg shadow p-5 border-t-4 border-emerald-600">
+                <div>
+                  <p className="text-gray-600 text-sm font-medium">Completed</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.completed}</p>
                 </div>
               </div>
             </div>
@@ -196,12 +173,16 @@ function Dashboard() {
                       return (
                         <div key={index}>
                           <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-700">
-                              {item._id === 'High'
-                                ? '🔴'
-                                : item._id === 'Medium'
-                                  ? '🟡'
-                                  : '🟢'}{' '}
+                            <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                              <span
+                                className={`inline-block h-2.5 w-2.5 rounded-full ${
+                                  item._id === 'High'
+                                    ? 'bg-red-500'
+                                    : item._id === 'Medium'
+                                      ? 'bg-amber-500'
+                                      : 'bg-emerald-500'
+                                }`}
+                              ></span>
                               {item._id || 'Unknown'}
                             </span>
                             <span className="text-sm font-medium text-gray-900">
@@ -234,7 +215,7 @@ function Dashboard() {
                   onClick={() => navigate('/admin/requests')}
                   className="text-primary hover:text-blue-700 font-medium text-sm"
                 >
-                  View All →
+                  View all requests
                 </button>
               </div>
 

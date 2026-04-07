@@ -62,13 +62,12 @@ function TechnicianDashboard() {
           name: `${user.firstName} ${user.lastName}`,
           subtitle: user.specialization,
           dashboardLink: '/technician/dashboard',
-          navLinks: [
-            { label: 'Dashboard', path: '/technician/dashboard', active: true },
-            { label: 'My Tasks', path: '/technician/tasks', active: false },
-            { label: 'History', path: '/technician/history', active: false },
-          ],
         }}
-        notificationCount={5}
+        navLinks={[
+          { label: 'Dashboard', path: '/technician/dashboard' },
+          { label: 'My Tasks', path: '/technician/tasks' },
+          { label: 'History', path: '/technician/history' },
+        ]}
       />
 
       {/* Main Content */}
@@ -94,9 +93,7 @@ function TechnicianDashboard() {
                   {stats.tasksToday}
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <span className="text-2xl">📋</span>
-              </div>
+              <div className="h-10 w-10 rounded-lg bg-blue-100"></div>
             </div>
           </div>
 
@@ -139,7 +136,7 @@ function TechnicianDashboard() {
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-xl font-bold text-gray-900">
-                  🔥 My Assigned Tasks
+                  My Assigned Tasks
                 </h2>
               </div>
 
@@ -179,11 +176,6 @@ function TechnicianDashboard() {
                                       : 'bg-green-100 text-green-800'
                                 }`}
                               >
-                                {task.priority === 'High'
-                                  ? '🔴'
-                                  : task.priority === 'Medium'
-                                    ? '🟡'
-                                    : '🟢'}{' '}
                                 {task.priority}
                               </span>
 
@@ -206,21 +198,21 @@ function TechnicianDashboard() {
                         {/* Details */}
                         <div className="space-y-1 mb-3">
                           <p className="text-sm text-gray-600">
-                            <span className="font-medium">📍 Location:</span>{' '}
+                            <span className="font-medium">Location:</span>{' '}
                             {task.location}
                           </p>
                           <p className="text-sm text-gray-600">
-                            <span className="font-medium">👤 Resident:</span>{' '}
+                            <span className="font-medium">Resident:</span>{' '}
                             {task.submittedBy
                               ? `${task.submittedBy.firstName} ${task.submittedBy.lastName}`
                               : 'Unknown'}
                           </p>
                           <p className="text-sm text-gray-600">
-                            <span className="font-medium">📞</span>{' '}
+                            <span className="font-medium">Phone:</span>{' '}
                             {task.submittedBy?.phone || 'N/A'}
                           </p>
                           <p className="text-sm text-gray-600">
-                            <span className="font-medium">📅 Assigned:</span>{' '}
+                            <span className="font-medium">Assigned:</span>{' '}
                             {new Date(task.createdAt).toLocaleDateString()}
                           </p>
                         </div>
@@ -238,7 +230,7 @@ function TechnicianDashboard() {
                           {(task.status === 'Pending' ||
                             task.status === 'Assigned') && (
                             <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition text-sm font-medium">
-                              🚀 Start Task
+                              Start Task
                             </button>
                           )}
                           {task.status === 'In Progress' && (
@@ -247,7 +239,7 @@ function TechnicianDashboard() {
                                 ✅ Mark Complete
                               </button>
                               <button className="px-4 py-2 bg-warning text-white rounded-md hover:bg-yellow-600 transition text-sm font-medium">
-                                💬 Add Update
+                                Add Update
                               </button>
                             </>
                           )}
@@ -257,7 +249,7 @@ function TechnicianDashboard() {
                             }
                             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition text-sm font-medium"
                           >
-                            👁️ View Details
+                            View Details
                           </button>
                         </div>
                       </div>

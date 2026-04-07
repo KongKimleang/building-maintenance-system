@@ -3,6 +3,7 @@ import Navbar from '../../components/Navbar';
 import { registerUser, getAllUsers, deleteUser } from '../../services/api';
 
 function UserManagement() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
   const [activeTab, setActiveTab] = useState('residents');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -131,21 +132,24 @@ function UserManagement() {
       {/* Navbar */}
       <Navbar
         userInfo={{
-          name: 'Admin',
+          name:
+            `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+            'Administrator',
+          subtitle: 'Administrator',
           dashboardLink: '/admin/dashboard',
-          navLinks: [
-            { label: 'Dashboard', path: '/admin/dashboard', active: false },
-            { label: 'Users', path: '/admin/users', active: true },
-            { label: 'Requests', path: '/admin/requests', active: false },
-          ],
         }}
-        notificationCount={3}
+        navLinks={[
+          { label: 'Dashboard', path: '/admin/dashboard' },
+          { label: 'All Requests', path: '/admin/requests' },
+          { label: 'Users', path: '/admin/users' },
+          { label: 'History', path: '/admin/history' },
+        ]}
       />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="mb-8 flex justify-between items-center">
+        <div className="mb-8 flex justify-between items-center rounded-xl border border-gray-200 bg-white p-6 shadow">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               User Management
@@ -158,7 +162,7 @@ function UserManagement() {
             onClick={() => setShowAddUserModal(true)}
             className="px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-blue-700 transition"
           >
-            + Add New User
+            Add New User
           </button>
         </div>
 
@@ -174,7 +178,7 @@ function UserManagement() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                👥 Residents ({users.residents.length})
+                Residents ({users.residents.length})
               </button>
               <button
                 onClick={() => setActiveTab('staff')}
@@ -184,7 +188,7 @@ function UserManagement() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                👔 Staff ({users.staff.length})
+                Staff ({users.staff.length})
               </button>
               <button
                 onClick={() => setActiveTab('technicians')}
@@ -194,7 +198,7 @@ function UserManagement() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                🔧 Technicians ({users.technicians.length})
+                Technicians ({users.technicians.length})
               </button>
               <button
                 onClick={() => setActiveTab('admins')}
@@ -204,7 +208,7 @@ function UserManagement() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                👨‍💼 Admins ({users.admins.length})
+                Admins ({users.admins.length})
               </button>
             </nav>
           </div>
@@ -213,7 +217,7 @@ function UserManagement() {
           <div className="p-4">
             <input
               type="text"
-              placeholder="🔍 Search by name or email..."
+              placeholder="Search by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -240,7 +244,6 @@ function UserManagement() {
               {filteredUsers.length === 0 ? (
                 // Empty State
                 <div className="p-12 text-center">
-                  <span className="text-6xl mb-4 block">👥</span>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     No users found
                   </h3>
@@ -253,7 +256,7 @@ function UserManagement() {
                     onClick={() => setShowAddUserModal(true)}
                     className="px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-blue-700 transition"
                   >
-                    + Add New User
+                    Add New User
                   </button>
                 </div>
               ) : (
@@ -604,7 +607,7 @@ function UserManagement() {
                 {createdUserCredentials && (
                   <div className="p-4 bg-green-100 border border-green-400 rounded">
                     <p className="font-bold text-green-800 mb-2">
-                      ✅ User Created Successfully!
+                      User Created Successfully
                     </p>
                     <div className="bg-white p-3 rounded border border-green-300">
                       <p className="text-sm font-medium text-gray-700">
@@ -619,7 +622,7 @@ function UserManagement() {
                         {createdUserCredentials.tempPassword}
                       </p>
                       <p className="text-xs text-gray-500 mt-2">
-                        ⚠️ Please save these credentials and provide them to the
+                        Please save these credentials and provide them to the
                         user. They will be required to change the password on
                         first login.
                       </p>

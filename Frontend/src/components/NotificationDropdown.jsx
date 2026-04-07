@@ -62,16 +62,16 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
     }
   };
 
-  const getNotificationIcon = (type) => {
+  const getNotificationTag = (type) => {
     switch (type) {
       case 'new_request':
-        return '📝';
+        return { label: 'NEW', className: 'bg-blue-100 text-blue-700' };
       case 'assigned':
-        return '👷';
+        return { label: 'ASSIGN', className: 'bg-purple-100 text-purple-700' };
       case 'status_update':
-        return '🔄';
+        return { label: 'UPDATE', className: 'bg-emerald-100 text-emerald-700' };
       default:
-        return '🔔';
+        return { label: 'INFO', className: 'bg-gray-100 text-gray-700' };
     }
   };
 
@@ -126,12 +126,17 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center">
-              <span className="text-5xl mb-2 block">🔔</span>
+              <span className="inline-flex h-12 w-12 mx-auto rounded-full bg-gray-100 items-center justify-center text-gray-600 text-xl mb-2">
+                N
+              </span>
               <p className="text-gray-600">No notifications yet</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
               {notifications.map((notification) => (
+                (() => {
+                  const tag = getNotificationTag(notification.type);
+                  return (
                 <button
                   key={notification._id}
                   onClick={() => handleNotificationClick(notification)}
@@ -140,8 +145,10 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
                   }`}
                 >
                   <div className="flex gap-3">
-                    <div className="text-2xl flex-shrink-0">
-                      {getNotificationIcon(notification.type)}
+                    <div
+                      className={`text-xs font-semibold px-2 py-1 rounded-md h-fit flex-shrink-0 ${tag.className}`}
+                    >
+                      {tag.label}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
@@ -163,6 +170,8 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
                     )}
                   </div>
                 </button>
+                  );
+                })()
               ))}
             </div>
           )}

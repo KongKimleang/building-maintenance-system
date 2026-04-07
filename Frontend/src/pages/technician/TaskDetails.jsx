@@ -56,7 +56,7 @@ function TaskDetails() {
 
       const statusMessage =
         newStatus === 'In Progress' ? 'Task started!' : 'Task completed!';
-      alert(`✅ ${statusMessage}`);
+      alert(statusMessage);
 
       setShowStatusModal(false);
       setStatusNotes('');
@@ -72,7 +72,7 @@ function TaskDetails() {
   const handleAddComment = async (comment) => {
     try {
       await addComment(request._id, comment);
-      alert('✅ Note added successfully!');
+      alert('Note added successfully.');
       await fetchTaskDetails(); // Refresh
     } catch (error) {
       alert('Error: ' + (error.message || 'Failed to add note'));
@@ -87,16 +87,12 @@ function TaskDetails() {
             name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
             subtitle: user.specialization || 'Technician',
             dashboardLink: '/technician/dashboard',
-            navLinks: [
-              {
-                label: 'Dashboard',
-                path: '/technician/dashboard',
-                active: false,
-              },
-              { label: 'My Tasks', path: '/technician/tasks', active: true },
-            ],
           }}
-          notificationCount={5}
+          navLinks={[
+            { label: 'Dashboard', path: '/technician/dashboard' },
+            { label: 'My Tasks', path: '/technician/tasks' },
+            { label: 'History', path: '/technician/history' },
+          ]}
         />
         <main className="max-w-7xl mx-auto py-6 px-4">
           <div className="bg-white rounded-lg shadow p-12 text-center">
@@ -115,16 +111,12 @@ function TaskDetails() {
             name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
             subtitle: user.specialization || 'Technician',
             dashboardLink: '/technician/dashboard',
-            navLinks: [
-              {
-                label: 'Dashboard',
-                path: '/technician/dashboard',
-                active: false,
-              },
-              { label: 'My Tasks', path: '/technician/tasks', active: true },
-            ],
           }}
-          notificationCount={5}
+          navLinks={[
+            { label: 'Dashboard', path: '/technician/dashboard' },
+            { label: 'My Tasks', path: '/technician/tasks' },
+            { label: 'History', path: '/technician/history' },
+          ]}
         />
         <main className="max-w-7xl mx-auto py-6 px-4">
           <div className="bg-red-100 text-red-700 p-4 rounded-lg">
@@ -134,7 +126,7 @@ function TaskDetails() {
             onClick={() => navigate('/technician/tasks')}
             className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
           >
-            ← Back to My Tasks
+            Back to My Tasks
           </button>
         </main>
       </div>
@@ -148,16 +140,12 @@ function TaskDetails() {
           name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
           subtitle: user.specialization || 'Technician',
           dashboardLink: '/technician/dashboard',
-          navLinks: [
-            {
-              label: 'Dashboard',
-              path: '/technician/dashboard',
-              active: false,
-            },
-            { label: 'My Tasks', path: '/technician/tasks', active: true },
-          ],
         }}
-        notificationCount={5}
+        navLinks={[
+          { label: 'Dashboard', path: '/technician/dashboard' },
+          { label: 'My Tasks', path: '/technician/tasks' },
+          { label: 'History', path: '/technician/history' },
+        ]}
       />
 
       <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -166,7 +154,7 @@ function TaskDetails() {
           onClick={() => navigate('/technician/tasks')}
           className="mb-4 flex items-center text-primary hover:text-blue-700 font-medium"
         >
-          ← Back to My Tasks
+          Back to My Tasks
         </button>
 
         {/* Header */}
@@ -201,11 +189,6 @@ function TaskDetails() {
                       : 'bg-green-100 text-green-800'
                 }`}
               >
-                {request.priority === 'High'
-                  ? '🔴'
-                  : request.priority === 'Medium'
-                    ? '🟡'
-                    : '🟢'}{' '}
                 {request.priority}
               </span>
             </div>
@@ -333,7 +316,7 @@ function TaskDetails() {
                       onClick={() => handleOpenStatusModal('In Progress')}
                       className="px-6 py-3 bg-success text-white rounded-md hover:bg-green-700 font-medium"
                     >
-                      🚀 Start Task
+                      Start Task
                     </button>
                   )}
 
@@ -342,7 +325,7 @@ function TaskDetails() {
                       onClick={() => handleOpenStatusModal('Completed')}
                       className="px-6 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-medium"
                     >
-                      ✅ Mark Complete
+                      Mark Complete
                     </button>
                   )}
 
@@ -355,7 +338,7 @@ function TaskDetails() {
                     }}
                     className="px-6 py-3 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
                   >
-                    💬 Add Note
+                    Add Note
                   </button>
                 </div>
               </div>
@@ -393,13 +376,13 @@ function TaskDetails() {
                       href={`tel:${request.submittedBy.phone}`}
                       className="block w-full text-center px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 font-medium"
                     >
-                      📞 Call Resident
+                      Call Resident
                     </a>
                     <a
                       href={`mailto:${request.submittedBy.email}`}
                       className="block w-full text-center px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"
                     >
-                      📧 Send Email
+                      Send Email
                     </a>
                   </div>
                 </div>
@@ -413,7 +396,7 @@ function TaskDetails() {
               {request.status === 'Assigned' && (
                 <div className="bg-purple-50 border-l-4 border-purple-500 p-4">
                   <p className="font-semibold text-gray-900">
-                    ⏰ Ready to Start
+                    Ready to Start
                   </p>
                   <p className="text-sm text-gray-700 mt-1">
                     This task has been assigned to you. Click "Start Task" when
@@ -424,7 +407,7 @@ function TaskDetails() {
 
               {request.status === 'In Progress' && (
                 <div className="bg-blue-50 border-l-4 border-primary p-4">
-                  <p className="font-semibold text-gray-900">🔵 In Progress</p>
+                  <p className="font-semibold text-gray-900">In Progress</p>
                   <p className="text-sm text-gray-700 mt-1">
                     You're currently working on this task. Mark it complete when
                     finished.
@@ -434,7 +417,7 @@ function TaskDetails() {
 
               {request.status === 'Completed' && (
                 <div className="bg-green-50 border-l-4 border-success p-4">
-                  <p className="font-semibold text-gray-900">✅ Completed</p>
+                  <p className="font-semibold text-gray-900">Completed</p>
                   <p className="text-sm text-gray-700 mt-1">
                     This task has been completed successfully!
                   </p>

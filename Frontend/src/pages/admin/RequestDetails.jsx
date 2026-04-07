@@ -68,7 +68,7 @@ function RequestDetails() {
         (t) => t._id === selectedTechnicianId
       );
       alert(
-        `✅ Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}!`
+        `Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}.`
       );
 
       setShowAssignModal(false);
@@ -84,7 +84,7 @@ function RequestDetails() {
   const handleAddComment = async (comment) => {
     try {
       await addComment(request._id, comment);
-      alert('✅ Note added successfully!');
+      alert('Note added successfully.');
       await fetchRequestDetails(); // Refresh
     } catch (error) {
       alert('Error: ' + (error.message || 'Failed to add note'));
@@ -99,13 +99,13 @@ function RequestDetails() {
             name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
             subtitle: 'Administrator',
             dashboardLink: '/admin/dashboard',
-            navLinks: [
-              { label: 'Dashboard', path: '/admin/dashboard', active: false },
-              { label: 'All Requests', path: '/admin/requests', active: true },
-              { label: 'Users', path: '/admin/users', active: false },
-            ],
           }}
-          notificationCount={8}
+          navLinks={[
+            { label: 'Dashboard', path: '/admin/dashboard' },
+            { label: 'All Requests', path: '/admin/requests' },
+            { label: 'Users', path: '/admin/users' },
+            { label: 'History', path: '/admin/history' },
+          ]}
         />
         <main className="max-w-7xl mx-auto py-6 px-4">
           <div className="bg-white rounded-lg shadow p-12 text-center">
@@ -124,13 +124,13 @@ function RequestDetails() {
             name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
             subtitle: 'Administrator',
             dashboardLink: '/admin/dashboard',
-            navLinks: [
-              { label: 'Dashboard', path: '/admin/dashboard', active: false },
-              { label: 'All Requests', path: '/admin/requests', active: true },
-              { label: 'Users', path: '/admin/users', active: false },
-            ],
           }}
-          notificationCount={8}
+          navLinks={[
+            { label: 'Dashboard', path: '/admin/dashboard' },
+            { label: 'All Requests', path: '/admin/requests' },
+            { label: 'Users', path: '/admin/users' },
+            { label: 'History', path: '/admin/history' },
+          ]}
         />
         <main className="max-w-7xl mx-auto py-6 px-4">
           <div className="bg-red-100 text-red-700 p-4 rounded-lg">
@@ -140,7 +140,7 @@ function RequestDetails() {
             onClick={() => navigate('/admin/requests')}
             className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
           >
-            ← Back to All Requests
+            Back to All Requests
           </button>
         </main>
       </div>
@@ -154,13 +154,13 @@ function RequestDetails() {
           name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
           subtitle: 'Administrator',
           dashboardLink: '/admin/dashboard',
-          navLinks: [
-            { label: 'Dashboard', path: '/admin/dashboard', active: false },
-            { label: 'All Requests', path: '/admin/requests', active: true },
-            { label: 'Users', path: '/admin/users', active: false },
-          ],
         }}
-        notificationCount={8}
+        navLinks={[
+          { label: 'Dashboard', path: '/admin/dashboard' },
+          { label: 'All Requests', path: '/admin/requests' },
+          { label: 'Users', path: '/admin/users' },
+          { label: 'History', path: '/admin/history' },
+        ]}
       />
 
       <main className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -169,7 +169,7 @@ function RequestDetails() {
           onClick={() => navigate('/admin/requests')}
           className="mb-4 flex items-center text-primary hover:text-blue-700 font-medium"
         >
-          ← Back to All Requests
+          Back to All Requests
         </button>
 
         {/* Header */}
@@ -206,11 +206,6 @@ function RequestDetails() {
                       : 'bg-green-100 text-green-800'
                 }`}
               >
-                {request.priority === 'High'
-                  ? '🔴'
-                  : request.priority === 'Medium'
-                    ? '🟡'
-                    : '🟢'}{' '}
                 {request.priority}
               </span>
             </div>
@@ -420,7 +415,7 @@ function RequestDetails() {
                   }}
                   className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
                 >
-                  💬 Add Note
+                  Add Note
                 </button>
 
                 <button
@@ -433,7 +428,7 @@ function RequestDetails() {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-blue-50 rounded-lg p-6">
+            <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-2">
                 Quick Stats
               </h3>

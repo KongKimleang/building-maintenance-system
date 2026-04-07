@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -44,34 +45,21 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto h-20 w-20 bg-primary rounded-full flex items-center justify-center mb-4">
-            <span className="text-white text-3xl font-bold">🏢</span>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#d9e8ff_0,_transparent_42%),radial-gradient(circle_at_bottom_right,_#cdeee8_0,_transparent_40%)] px-4 py-10 dark:bg-[radial-gradient(circle_at_top_left,_#1b3156_0,_transparent_42%),radial-gradient(circle_at_bottom_right,_#173735_0,_transparent_40%)] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
+        <div className="overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-[0_30px_80px_rgba(15,23,42,0.18)] backdrop-blur dark:border-slate-700/60 dark:bg-slate-900/80">
+          <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 px-6 py-7 text-white sm:px-10">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/85">New Account</p>
+            <h1 className="mt-2 text-3xl font-black tracking-tight">Create Your Account</h1>
+            <p className="mt-2 max-w-2xl text-sm text-white/85">
+              Set up your profile to submit and track building maintenance requests in one place.
+            </p>
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900">
-            Create Your Account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join our Building Maintenance System
-          </p>
-        </div>
 
-        {/* Register Form */}
-        <form
-          className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md"
-          onSubmit={handleSubmit}
-        >
-          <div className="space-y-4">
-            {/* First Name & Last Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form className="space-y-6 p-6 sm:p-8 md:p-10" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label
-                  htmlFor="firstName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="firstName" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
                   First Name *
                 </label>
                 <input
@@ -81,16 +69,13 @@ function Register() {
                   required
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full rounded-xl border border-gray-300 bg-white/95 px-3 py-2.5 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
                   placeholder="John"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="lastName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="lastName" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Last Name *
                 </label>
                 <input
@@ -100,24 +85,18 @@ function Register() {
                   required
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full rounded-xl border border-gray-300 bg-white/95 px-3 py-2.5 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
                   placeholder="Doe"
                 />
               </div>
             </div>
 
-            {/* Email */}
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
                 Email Address *
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                  📧
-                </span>
+                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">@</span>
                 <input
                   id="email"
                   name="email"
@@ -125,24 +104,18 @@ function Register() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full rounded-xl border border-gray-300 bg-white/95 py-2.5 pl-10 pr-3 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
                   placeholder="john.doe@example.com"
                 />
               </div>
             </div>
 
-            {/* Phone */}
             <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="phone" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
                 Phone Number *
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                  📱
-                </span>
+                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">#</span>
                 <input
                   id="phone"
                   name="phone"
@@ -150,114 +123,97 @@ function Register() {
                   required
                   value={formData.phone}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full rounded-xl border border-gray-300 bg-white/95 py-2.5 pl-10 pr-3 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
                   placeholder="+1234567890"
                 />
               </div>
             </div>
 
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password *
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                  🔒
-                </span>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Enter password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
-                </button>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  Password *
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">*</span>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="block w-full rounded-xl border border-gray-300 bg-white/95 py-2.5 pl-10 pr-16 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
+                    placeholder="Create password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 text-sm font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  Confirm Password *
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">*</span>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="block w-full rounded-xl border border-gray-300 bg-white/95 py-2.5 pl-10 pr-16 text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
+                    placeholder="Repeat password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 text-sm font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"
+                  >
+                    {showConfirmPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Confirm Password *
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                  🔒
-                </span>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Confirm password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                >
-                  {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-                </button>
-              </div>
-            </div>
-
-            {/* Role Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Role *
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center">
+              <label className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-200">Select Role *</label>
+              <div className="flex flex-wrap gap-3">
+                <label className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/70">
                   <input
                     type="radio"
                     name="role"
                     value="resident"
                     checked={formData.role === 'resident'}
                     onChange={handleChange}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                    className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Resident</span>
+                  <span className="text-gray-700 dark:text-gray-200">Resident</span>
                 </label>
-                <label className="flex items-center">
+                <label className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/70">
                   <input
                     type="radio"
                     name="role"
                     value="staff"
                     checked={formData.role === 'staff'}
                     onChange={handleChange}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                    className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Staff</span>
+                  <span className="text-gray-700 dark:text-gray-200">Staff</span>
                 </label>
               </div>
             </div>
 
-            {/* Building & Unit */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label
-                  htmlFor="building"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="building" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Select Building *
                 </label>
                 <select
@@ -266,7 +222,7 @@ function Register() {
                   required
                   value={formData.building}
                   onChange={handleChange}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full rounded-xl border border-gray-300 bg-white/95 px-3 py-2.5 text-gray-900 outline-none ring-0 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
                 >
                   <option value="">Choose building</option>
                   <option value="Building A">Building A</option>
@@ -276,10 +232,7 @@ function Register() {
               </div>
 
               <div>
-                <label
-                  htmlFor="unit"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="unit" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Select Unit *
                 </label>
                 <select
@@ -288,7 +241,7 @@ function Register() {
                   required
                   value={formData.unit}
                   onChange={handleChange}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full rounded-xl border border-gray-300 bg-white/95 px-3 py-2.5 text-gray-900 outline-none ring-0 focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-100"
                 >
                   <option value="">Choose unit</option>
                   <option value="101">Unit 101</option>
@@ -299,54 +252,35 @@ function Register() {
               </div>
             </div>
 
-            {/* Terms & Conditions */}
-            <div className="flex items-start">
+            <label htmlFor="agreeToTerms" className="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-200">
               <input
                 id="agreeToTerms"
                 name="agreeToTerms"
                 type="checkbox"
                 checked={formData.agreeToTerms}
                 onChange={handleChange}
-                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mt-1"
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
-              <label
-                htmlFor="agreeToTerms"
-                className="ml-2 block text-sm text-gray-700"
-              >
-                I agree to the{' '}
-                <a
-                  href="#"
-                  className="text-primary hover:text-blue-700 font-medium"
-                >
-                  Terms & Conditions
-                </a>
-              </label>
-            </div>
-          </div>
+              <span>
+                I agree to the <span className="font-semibold text-primary">Terms & Conditions</span>
+              </span>
+            </label>
 
-          {/* Register Button */}
-          <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150"
+              className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Create Account
             </button>
-          </div>
 
-          {/* Login Link */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-center text-sm text-gray-600 dark:text-gray-300">
               Already have an account?{' '}
-              <a
-                href="#"
-                className="font-medium text-primary hover:text-blue-700"
-              >
+              <Link to="/login" className="font-semibold text-primary hover:underline">
                 Login
-              </a>
+              </Link>
             </p>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

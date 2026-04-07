@@ -34,7 +34,7 @@ function MyRequests() {
   const handleAddComment = async (requestId, comment) => {
     try {
       await addComment(requestId, comment);
-      alert('✅ Comment added successfully!');
+      alert('Comment added successfully.');
       await fetchMyRequests(); // Refresh list
     } catch (error) {
       alert('Error: ' + (error.message || 'Failed to add comment'));
@@ -66,28 +66,20 @@ function MyRequests() {
               ? `Resident - Unit ${user.unit}`
               : `${user.position}`,
           dashboardLink: '/resident/dashboard',
-          navLinks: [
-            { label: 'Dashboard', path: '/resident/dashboard', active: false },
-            {
-              label: 'Submit Request',
-              path: '/resident/submit-request',
-              active: false,
-            },
-            {
-              label: 'My Requests',
-              path: '/resident/my-requests',
-              active: true,
-            },
-            { label: 'History', path: '/resident/history', active: false },
-          ],
         }}
-        notificationCount={2}
+        navLinks={[
+          { label: 'Dashboard', path: '/resident/dashboard' },
+          { label: 'Submit Request', path: '/resident/submit-request' },
+          { label: 'My Requests', path: '/resident/my-requests' },
+          { label: 'History', path: '/resident/history' },
+        ]}
       />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="mb-8">
+        <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow">
+          <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Request Tracking</p>
           <h1 className="text-3xl font-bold text-gray-900">
             My Maintenance Requests
           </h1>
@@ -188,7 +180,6 @@ function MyRequests() {
           {!loading && !error && filteredRequests.length === 0 ? (
             // Empty State
             <div className="bg-white rounded-lg shadow p-12 text-center">
-              <span className="text-6xl mb-4 block">📭</span>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 No {filter !== 'All' ? filter.toLowerCase() : ''} requests found
               </h3>
@@ -232,13 +223,6 @@ function MyRequests() {
                                   : 'bg-green-100 text-green-800'
                           }`}
                         >
-                          {request.status === 'Pending'
-                            ? '⏰'
-                            : request.status === 'Assigned'
-                              ? '👤'
-                              : request.status === 'In Progress'
-                                ? '🔵'
-                                : '✅'}{' '}
                           {request.status}
                         </span>
 
@@ -252,11 +236,6 @@ function MyRequests() {
                                 : 'bg-green-100 text-green-800'
                           }`}
                         >
-                          {request.priority === 'High'
-                            ? '🔴'
-                            : request.priority === 'Medium'
-                              ? '🟡'
-                              : '🟢'}{' '}
                           {request.priority}
                         </span>
 
@@ -272,29 +251,29 @@ function MyRequests() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">📍 Location:</span>{' '}
+                        <span className="font-medium">Location:</span>{' '}
                         {request.location}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">📅 Submitted:</span>{' '}
+                        <span className="font-medium">Submitted:</span>{' '}
                         {new Date(request.createdAt).toLocaleDateString()}
                       </p>
                       {request.completedDate && (
                         <p className="text-sm text-gray-600 mt-1">
-                          <span className="font-medium">✅ Completed:</span>{' '}
+                          <span className="font-medium">Completed:</span>{' '}
                           {new Date(request.completedDate).toLocaleDateString()}
                         </p>
                       )}
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">👷 Assigned to:</span>{' '}
+                        <span className="font-medium">Assigned to:</span>{' '}
                         {request.assignedTo
                           ? `${request.assignedTo.firstName} ${request.assignedTo.lastName} (${request.assignedTo.specialization})`
                           : 'Not assigned yet'}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">🕐 Last update:</span>{' '}
+                        <span className="font-medium">Last update:</span>{' '}
                         {new Date(request.updatedAt).toLocaleString()}
                       </p>
                     </div>
@@ -310,11 +289,24 @@ function MyRequests() {
                     </p>
                   </div>
 
+                  {request.photo && request.photo.data && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-gray-700 mb-1">
+                        Uploaded Photo:
+                      </p>
+                      <img
+                        src={`data:${request.photo.contentType};base64,${request.photo.data}`}
+                        alt="Request"
+                        className="w-full max-w-sm rounded-lg border border-gray-300 object-cover"
+                      />
+                    </div>
+                  )}
+
                   {/* Latest Update */}
                   {request.timeline && request.timeline.length > 0 && (
                     <div className="bg-blue-50 border-l-4 border-primary p-4 mb-4">
                       <p className="text-sm font-medium text-gray-900 mb-1">
-                        💬 Latest Update:
+                        Latest Update:
                       </p>
                       <p className="text-sm text-gray-700">
                         {request.timeline[request.timeline.length - 1].action}
@@ -347,12 +339,12 @@ function MyRequests() {
                         }}
                         className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm"
                       >
-                        💬 Add Comment
+                        Add Comment
                       </button>
                     )}
                     {request.status === 'Completed' && (
                       <button className="px-4 py-2 bg-warning text-white rounded-md hover:bg-yellow-600 transition font-medium text-sm">
-                        ⭐ Rate Service
+                        Rate Service
                       </button>
                     )}
                   </div>
@@ -369,7 +361,7 @@ function MyRequests() {
               to="/resident/submit-request"
               className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-blue-700 transition"
             >
-              + Submit New Request
+              Submit New Request
             </Link>
           </div>
         )}

@@ -105,7 +105,7 @@ function AllRequests() {
         (t) => t._id === selectedTechnicianId
       );
       alert(
-        `✅ Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}!`
+        `Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}.`
       );
 
       setShowAssignModal(false);
@@ -143,7 +143,7 @@ function AllRequests() {
         throw new Error(data.message || 'Failed to delete request');
       }
 
-      alert('✅ Request deleted successfully!');
+      alert('Request deleted successfully.');
       setShowDeleteModal(false);
       setRequestToDelete(null);
       await fetchRequests();
@@ -174,11 +174,13 @@ function AllRequests() {
           { label: 'Dashboard', path: '/admin/dashboard', active: false },
           { label: 'All Requests', path: '/admin/requests', active: true },
           { label: 'Users', path: '/admin/users', active: false },
+          { label: 'History', path: '/admin/history', active: false },
         ]}
       />
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow">
+          <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Request Operations</p>
           <h1 className="text-3xl font-bold text-gray-900">
             All Maintenance Requests
           </h1>
@@ -319,7 +321,6 @@ function AllRequests() {
             </div>
           ) : filteredRequests.length === 0 ? (
             <div className="p-12 text-center">
-              <span className="text-6xl mb-4 block">📭</span>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 No requests found
               </h3>

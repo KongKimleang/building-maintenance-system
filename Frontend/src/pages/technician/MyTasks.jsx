@@ -98,17 +98,12 @@ function MyTasks() {
           name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
           subtitle: user.specialization || 'Technician',
           dashboardLink: '/technician/dashboard',
-          navLinks: [
-            {
-              label: 'Dashboard',
-              path: '/technician/dashboard',
-              active: false,
-            },
-            { label: 'My Tasks', path: '/technician/tasks', active: true },
-            { label: 'History', path: '/technician/history', active: false },
-          ],
         }}
-        notificationCount={5}
+        navLinks={[
+          { label: 'Dashboard', path: '/technician/dashboard' },
+          { label: 'My Tasks', path: '/technician/tasks' },
+          { label: 'History', path: '/technician/history' },
+        ]}
       />
 
       {/* Main Content */}
@@ -215,7 +210,6 @@ function MyTasks() {
         {/* Empty State */}
         {!loading && !error && filteredTasks.length === 0 && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
-            <span className="text-6xl mb-4 block">📭</span>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               No {filter !== 'All' ? filter.toLowerCase() : ''} tasks found
             </h3>
@@ -267,11 +261,6 @@ function MyTasks() {
                                 : 'bg-green-100 text-green-800'
                           }`}
                         >
-                          {task.priority === 'High'
-                            ? '🔴'
-                            : task.priority === 'Medium'
-                              ? '🟡'
-                              : '🟢'}{' '}
                           {task.priority}
                         </span>
 
@@ -287,7 +276,7 @@ function MyTasks() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">📍 Location:</span>{' '}
+                        <span className="font-medium">Location:</span>{' '}
                         {task.location}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
@@ -296,19 +285,19 @@ function MyTasks() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">👤 Resident:</span>{' '}
+                        <span className="font-medium">Resident:</span>{' '}
                         {task.submittedBy
                           ? `${task.submittedBy.firstName} ${task.submittedBy.lastName}`
                           : 'Unknown'}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">📞</span>{' '}
+                        <span className="font-medium">Phone:</span>{' '}
                         {task.submittedBy?.phone || 'N/A'}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">📅 Created:</span>{' '}
+                        <span className="font-medium">Created:</span>{' '}
                         {new Date(task.createdAt).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
@@ -335,7 +324,7 @@ function MyTasks() {
                       }
                       className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition font-medium text-sm"
                     >
-                      📋 View Details
+                      View Details
                     </button>
 
                     {task.status === 'Assigned' && (
@@ -345,7 +334,7 @@ function MyTasks() {
                         }
                         className="px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 transition font-medium text-sm"
                       >
-                        🚀 Start Task
+                        Start Task
                       </button>
                     )}
 
@@ -354,7 +343,7 @@ function MyTasks() {
                         onClick={() => handleOpenStatusModal(task, 'Completed')}
                         className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition font-medium text-sm"
                       >
-                        ✅ Mark Complete
+                        Mark Complete
                       </button>
                     )}
                   </div>

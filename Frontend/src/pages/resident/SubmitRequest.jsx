@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import { createRequest } from '../../services/api';
@@ -20,6 +20,19 @@ function SubmitRequest() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [photoPreview, setPhotoPreview] = useState('');
+
+  useEffect(() => {
+    if (!formData.photo) {
+      setPhotoPreview('');
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(formData.photo);
+    setPhotoPreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [formData.photo]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -68,6 +81,7 @@ function SubmitRequest() {
         priority: formData.priority,
         floor: Number(formData.floor),
         unit: formData.unit,
+        photo: formData.photo,
       });
 
       // Show success with REAL request ID
@@ -85,6 +99,7 @@ function SubmitRequest() {
         description: '',
         photo: null,
       });
+      setPhotoPreview('');
 
       // Redirect to My Requests page
       navigate('/resident/my-requests');
@@ -108,22 +123,13 @@ function SubmitRequest() {
               ? `Resident - Unit ${user.unit || ''}`
               : `${user.position || 'Staff'} - ${user.floor || ''}`,
           dashboardLink: '/resident/dashboard',
-          navLinks: [
-            { label: 'Dashboard', path: '/resident/dashboard', active: false },
-            {
-              label: 'Submit Request',
-              path: '/resident/submit-request',
-              active: true,
-            },
-            {
-              label: 'My Requests',
-              path: '/resident/my-requests',
-              active: false,
-            },
-            { label: 'History', path: '/resident/history', active: false },
-          ],
         }}
-        notificationCount={2}
+        navLinks={[
+          { label: 'Dashboard', path: '/resident/dashboard' },
+          { label: 'Submit Request', path: '/resident/submit-request' },
+          { label: 'My Requests', path: '/resident/my-requests' },
+          { label: 'History', path: '/resident/history' },
+        ]}
       />
 
       {/* Main Content */}
@@ -208,10 +214,10 @@ function SubmitRequest() {
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">Select priority</option>
-                <option value="Low">🟢 Low - Can wait a few days</option>
-                <option value="Medium">🟡 Medium - Should be fixed soon</option>
+                <option value="Low">Low - Can wait a few days</option>
+                <option value="Medium">Medium - Should be fixed soon</option>
                 <option value="High">
-                  🔴 High - Urgent, needs immediate attention
+                  High - Urgent, needs immediate attention
                 </option>
               </select>
             </div>
@@ -338,7 +344,7 @@ function SubmitRequest() {
             </label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-primary transition">
               <div className="space-y-1 text-center">
-                <span className="text-4xl">📸</span>
+                <span className="inline-flex h-10 w-10 rounded-lg bg-blue-100"></span>
                 <div className="flex text-sm text-gray-600">
                   <label
                     htmlFor="photo"
@@ -364,6 +370,19 @@ function SubmitRequest() {
                 )}
               </div>
             </div>
+
+            {photoPreview && (
+              <div className="mt-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Image Preview
+                </p>
+                <img
+                  src={photoPreview}
+                  alt="Upload preview"
+                  className="w-full max-w-md rounded-lg border border-gray-300 object-cover"
+                />
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}

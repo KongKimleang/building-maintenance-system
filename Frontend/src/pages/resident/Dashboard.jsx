@@ -48,28 +48,20 @@ function ResidentDashboard() {
               ? `Resident - Unit ${user.unit}`
               : `${user.position}`,
           dashboardLink: '/resident/dashboard',
-          navLinks: [
-            { label: 'Dashboard', path: '/resident/dashboard', active: true },
-            {
-              label: 'Submit Request',
-              path: '/resident/submit-request',
-              active: false,
-            },
-            {
-              label: 'My Requests',
-              path: '/resident/my-requests',
-              active: false,
-            },
-            { label: 'History', path: '/resident/history', active: false },
-          ],
         }}
-        notificationCount={2}
+        navLinks={[
+          { label: 'Dashboard', path: '/resident/dashboard' },
+          { label: 'Submit Request', path: '/resident/submit-request' },
+          { label: 'My Requests', path: '/resident/my-requests' },
+          { label: 'History', path: '/resident/history' },
+        ]}
       />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Welcome Section */}
-        <div className="mb-8">
+        <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow">
+          <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Resident Portal</p>
           <h1 className="text-3xl font-bold text-gray-900">
             Welcome back, {user.firstName || 'Resident'}!
           </h1>
@@ -93,9 +85,7 @@ function ResidentDashboard() {
                   {stats.total}
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <span className="text-2xl">📋</span>
-              </div>
+              <div className="h-10 w-10 rounded-lg bg-blue-100"></div>
             </div>
           </div>
 
@@ -108,9 +98,7 @@ function ResidentDashboard() {
                   {stats.pending}
                 </p>
               </div>
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <span className="text-2xl">⏰</span>
-              </div>
+              <div className="h-10 w-10 rounded-lg bg-yellow-100"></div>
             </div>
           </div>
 
@@ -123,22 +111,17 @@ function ResidentDashboard() {
                   {stats.completed}
                 </p>
               </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <span className="text-2xl">✅</span>
-              </div>
+              <div className="h-10 w-10 rounded-lg bg-green-100"></div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            🔧 Need Maintenance?
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Need Maintenance?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition">
               <div className="text-center">
-                <span className="text-4xl mb-2 block">📸</span>
                 <p className="font-medium text-gray-900">Scan QR Code</p>
                 <p className="text-sm text-gray-500">
                   Quick report by location
@@ -151,7 +134,6 @@ function ResidentDashboard() {
               className="flex items-center justify-center p-6 border-2 border-primary bg-primary rounded-lg hover:bg-blue-700 transition"
             >
               <div className="text-center">
-                <span className="text-4xl mb-2 block text-white">📝</span>
                 <p className="font-medium text-white">Submit Request</p>
                 <p className="text-sm text-blue-100">Fill detailed form</p>
               </div>
@@ -167,7 +149,7 @@ function ResidentDashboard() {
               to="/resident/my-requests"
               className="text-primary hover:text-blue-700 font-medium"
             >
-              View All →
+              View all requests
             </Link>
           </div>
 
@@ -176,7 +158,6 @@ function ResidentDashboard() {
               <p className="text-gray-600 text-center py-8">Loading...</p>
             ) : recentRequests.length === 0 ? (
               <div className="p-8 text-center">
-                <span className="text-6xl mb-4 block">📭</span>
                 <p className="text-gray-600 mb-4">
                   No requests yet. Submit your first request!
                 </p>
@@ -206,11 +187,6 @@ function ResidentDashboard() {
                                 : 'bg-green-100 text-green-800'
                           }`}
                         >
-                          {request.status === 'Pending'
-                            ? '⏰'
-                            : request.status === 'In Progress'
-                              ? '🔵'
-                              : '✅'}{' '}
                           {request.status}
                         </span>
                         <span
@@ -223,11 +199,6 @@ function ResidentDashboard() {
                                 : 'bg-green-100 text-green-800'
                           }`}
                         >
-                          {request.priority === 'High'
-                            ? '🔴'
-                            : request.priority === 'Medium'
-                              ? '🟡'
-                              : '🟢'}{' '}
                           {request.priority}
                         </span>
                       </div>

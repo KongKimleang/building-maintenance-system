@@ -51,25 +51,13 @@ function RequestDetails() {
                 ? `Resident - Unit ${user.unit || ''}`
                 : `${user.position || 'Staff'}`,
             dashboardLink: '/resident/dashboard',
-            navLinks: [
-              {
-                label: 'Dashboard',
-                path: '/resident/dashboard',
-                active: false,
-              },
-              {
-                label: 'Submit Request',
-                path: '/resident/submit-request',
-                active: false,
-              },
-              {
-                label: 'My Requests',
-                path: '/resident/my-requests',
-                active: true,
-              },
-            ],
           }}
-          notificationCount={2}
+          navLinks={[
+            { label: 'Dashboard', path: '/resident/dashboard' },
+            { label: 'Submit Request', path: '/resident/submit-request' },
+            { label: 'My Requests', path: '/resident/my-requests' },
+            { label: 'History', path: '/resident/history' },
+          ]}
         />
         <main className="max-w-7xl mx-auto py-6 px-4">
           <div className="bg-white rounded-lg shadow p-12 text-center">
@@ -91,25 +79,13 @@ function RequestDetails() {
                 ? `Resident - Unit ${user.unit || ''}`
                 : `${user.position || 'Staff'}`,
             dashboardLink: '/resident/dashboard',
-            navLinks: [
-              {
-                label: 'Dashboard',
-                path: '/resident/dashboard',
-                active: false,
-              },
-              {
-                label: 'Submit Request',
-                path: '/resident/submit-request',
-                active: false,
-              },
-              {
-                label: 'My Requests',
-                path: '/resident/my-requests',
-                active: true,
-              },
-            ],
           }}
-          notificationCount={2}
+          navLinks={[
+            { label: 'Dashboard', path: '/resident/dashboard' },
+            { label: 'Submit Request', path: '/resident/submit-request' },
+            { label: 'My Requests', path: '/resident/my-requests' },
+            { label: 'History', path: '/resident/history' },
+          ]}
         />
         <main className="max-w-7xl mx-auto py-6 px-4">
           <div className="bg-red-100 text-red-700 p-4 rounded-lg">
@@ -136,21 +112,13 @@ function RequestDetails() {
               ? `Resident - Unit ${user.unit || ''}`
               : `${user.position || 'Staff'}`,
           dashboardLink: '/resident/dashboard',
-          navLinks: [
-            { label: 'Dashboard', path: '/resident/dashboard', active: false },
-            {
-              label: 'Submit Request',
-              path: '/resident/submit-request',
-              active: false,
-            },
-            {
-              label: 'My Requests',
-              path: '/resident/my-requests',
-              active: true,
-            },
-          ],
         }}
-        notificationCount={2}
+        navLinks={[
+          { label: 'Dashboard', path: '/resident/dashboard' },
+          { label: 'Submit Request', path: '/resident/submit-request' },
+          { label: 'My Requests', path: '/resident/my-requests' },
+          { label: 'History', path: '/resident/history' },
+        ]}
       />
 
       <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -196,11 +164,6 @@ function RequestDetails() {
                       : 'bg-green-100 text-green-800'
                 }`}
               >
-                {request.priority === 'High'
-                  ? '🔴'
-                  : request.priority === 'Medium'
-                    ? '🟡'
-                    : '🟢'}{' '}
                 {request.priority}
               </span>
             </div>
@@ -286,7 +249,7 @@ function RequestDetails() {
               {request.status === 'Pending' && (
                 <div className="bg-yellow-50 border-l-4 border-warning p-4">
                   <p className="font-semibold text-gray-900">
-                    ⏰ Pending Assignment
+                    Pending Assignment
                   </p>
                   <p className="text-sm text-gray-700 mt-1">
                     Your request has been received and is waiting to be assigned
@@ -298,7 +261,7 @@ function RequestDetails() {
               {request.status === 'Assigned' && request.assignedTo && (
                 <div className="bg-purple-50 border-l-4 border-purple-500 p-4">
                   <p className="font-semibold text-gray-900">
-                    👤 Assigned to Technician
+                    Assigned to Technician
                   </p>
                   <p className="text-sm text-gray-700 mt-1">
                     Your request has been assigned to{' '}
@@ -311,9 +274,7 @@ function RequestDetails() {
 
               {request.status === 'In Progress' && (
                 <div className="bg-blue-50 border-l-4 border-primary p-4">
-                  <p className="font-semibold text-gray-900">
-                    🔵 Work In Progress
-                  </p>
+                  <p className="font-semibold text-gray-900">Work In Progress</p>
                   <p className="text-sm text-gray-700 mt-1">
                     The technician is currently working on your request.
                   </p>
@@ -322,9 +283,7 @@ function RequestDetails() {
 
               {request.status === 'Completed' && (
                 <div className="bg-green-50 border-l-4 border-success p-4">
-                  <p className="font-semibold text-gray-900">
-                    ✅ Work Completed
-                  </p>
+                  <p className="font-semibold text-gray-900">Work Completed</p>
                   <p className="text-sm text-gray-700 mt-1">
                     Your maintenance request has been completed successfully!
                   </p>
@@ -404,7 +363,7 @@ function RequestDetails() {
                       href={`tel:${request.assignedTo.phone}`}
                       className="block w-full text-center px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 font-medium"
                     >
-                      📞 Call Technician
+                      Call Technician
                     </a>
                   </div>
                 </div>
@@ -427,7 +386,7 @@ function RequestDetails() {
                     }}
                     className="w-full px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 font-medium"
                   >
-                    💬 Add Comment
+                    Add Comment
                   </button>
                 )}
                 <button
@@ -455,10 +414,10 @@ function RequestDetails() {
                 management.
               </p>
               <p className="text-sm font-medium text-gray-900">
-                📞 Management: +1234567890
+                Management: +1234567890
               </p>
               <p className="text-sm font-medium text-gray-900">
-                📧 Email: admin@building.com
+                Email: admin@building.com
               </p>
             </div>
           </div>

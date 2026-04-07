@@ -2,17 +2,210 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+:root {
+  --bg: #f3f6fb;
+  --bg-elevated: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --border: #dbe3ef;
+  --brand: #1d4ed8;
+  --accent: #1d4ed8;
+  --accent-strong: #1e40af;
+  --accent-soft: #dbeafe;
+  --accent-soft-text: #1e3a8a;
+}
+
+.dark {
+  --bg: #081126;
+  --bg-elevated: #0f1a31;
+  --text: #e5edff;
+  --muted: #9fb0d1;
+  --border: #253454;
+  --brand: #5b8cff;
+  --accent-soft: rgba(33, 58, 107, 0.5);
+  --accent-soft-text: #c7d8ff;
+}
+
+html[data-role='admin'] {
+  --accent: #1d4ed8;
+  --accent-strong: #1e40af;
+  --accent-soft: #dbeafe;
+  --accent-soft-text: #1e3a8a;
+}
+
+html[data-role='technician'] {
+  --accent: #d97706;
+  --accent-strong: #b45309;
+  --accent-soft: #ffedd5;
+  --accent-soft-text: #9a3412;
+}
+
+html[data-role='resident'] {
+  --accent: #0f766e;
+  --accent-strong: #115e59;
+  --accent-soft: #ccfbf1;
+  --accent-soft-text: #134e4a;
+}
+
+html[data-role='staff'] {
+  --accent: #4338ca;
+  --accent-strong: #3730a3;
+  --accent-soft: #e0e7ff;
+  --accent-soft-text: #312e81;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fafc;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(29, 78, 216, 0.1), transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.08), transparent
+          42%),
+    var(--bg);
+  color: var(--text);
+  transition: background-color 220ms ease;
+}
+
+.bg-white {
+  background-color: var(--bg-elevated) !important;
+}
+
+.bg-gray-50 {
+  background-color: transparent !important;
+}
+
+.text-gray-900 {
+  color: var(--text) !important;
+}
+
+.text-gray-700,
+.text-gray-600,
+.text-gray-500 {
+  color: var(--muted) !important;
+}
+
+.text-primary {
+  color: var(--accent) !important;
+}
+
+.bg-primary {
+  background-color: var(--accent) !important;
+}
+
+.border-primary {
+  border-color: var(--accent) !important;
+}
+
+.bg-blue-50 {
+  background-color: var(--accent-soft) !important;
+}
+
+.text-blue-700 {
+  color: var(--accent-strong) !important;
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: var(--accent-strong) !important;
+}
+
+.focus\:ring-primary:focus {
+  --tw-ring-color: var(--accent) !important;
+}
+
+.border-gray-200,
+.border-gray-300 {
+  border-color: var(--border) !important;
+}
+
+.dark .bg-blue-50,
+.dark .bg-green-50,
+.dark .bg-yellow-50,
+.dark .bg-red-50,
+.dark .bg-purple-50,
+.dark .bg-gray-100,
+.dark .bg-gray-50 {
+  background-color: rgba(20, 32, 56, 0.78) !important;
+}
+
+.dark .bg-gray-800 {
+  background-color: #0d1a32 !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #0b1730;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.dark table thead {
+  background-color: rgba(22, 36, 63, 0.7) !important;
+}
+
+.dark table tbody tr:hover {
+  background-color: rgba(30, 47, 80, 0.35) !important;
+}
+
+@media (min-width: 1024px) {
+  main.max-w-7xl,
+  main.max-w-6xl,
+  main.max-w-5xl,
+  main.max-w-3xl {
+    margin-left: 19rem !important;
+    margin-right: 1.75rem !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+}
+
+.rounded-lg.shadow,
+.rounded-lg.shadow-lg,
+.rounded-lg.shadow-md {
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 24px -20px rgba(15, 23, 42, 0.55) !important;
+}
+
+.dark .rounded-lg.shadow,
+.dark .rounded-lg.shadow-lg,
+.dark .rounded-lg.shadow-md {
+  box-shadow: 0 20px 28px -24px rgba(0, 0, 0, 0.55) !important;
+}
+
+button,
+a {
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-soft-text);
+  background-color: var(--accent-soft);
+}
+
+.role-subtext {
+  color: var(--accent-strong) !important;
 }
