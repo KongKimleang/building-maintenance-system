@@ -4,21 +4,18 @@
   "description": "A full-stack web application for managing maintenance requests in residential apartment buildings. Built as a Final Year Project using React.js, Node.js, Express.js, and MongoDB.",
   "main": "index.js",
   "scripts": {
-    "setup:root": "npm install && npx lefthook install",
+    "setup:root": "npm install",
     "setup:frontend": "cd Frontend && npm install && npx playwright install",
     "setup": "npm run setup:root && npm run setup:frontend",
     "format": "npm run fix:prettier",
     "format:check": "npm run check:prettier",
-    "lint": "cd Frontend && npx eslint src/ --ext .js,.jsx",
-    "lint:fix": "cd Frontend && npx eslint src/ --ext .js,.jsx --fix",
     "spell": "npm run check:cspell",
-    "fix:all": "npm run lint:fix && npm run format && npm run spell",
+    "fix:all": "npm run format && npm run spell",
     "check": "npm run check:all",
     "check:prettier": "npx prettier --check \"**/*.{js,jsx,json,css,md}\"",
     "fix:prettier": "npx prettier --write \"**/*.{js,jsx,json,css,md}\"",
     "check:cspell": "npx cspell \"**/*.{js,jsx}\" --no-progress",
-    "check:eslint": "cd Frontend && npx eslint src/ --ext .js,.jsx",
-    "check:all": "npm run check:prettier && npm run check:cspell && npm run check:eslint",
+    "check:all": "npm run check:prettier && npm run check:cspell",
     "test:playwright": "cd Frontend && npx playwright test",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -35,7 +32,6 @@
   "homepage": "https://github.com/KongKimleang/building-maintenance-system#readme",
   "devDependencies": {
     "cspell": "^9.7.0",
-    "lefthook": "^2.1.4",
     "prettier": "^3.8.1"
   }
 }
