@@ -3,7 +3,14 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 const connectDB = require('./config/db');
+
+// Import Swagger configuration
+require('./swagger-config');
 
 // Load environment variables
 dotenv.config();
@@ -18,7 +25,17 @@ const app = express();
 // 1. Helmet — secure HTTP headers
 app.use(helmet());
 
-// 2. CORS — only allow your frontend
+// 2. Rate Limiting — protect against brute force attacks
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true, // return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // disable the `X-RateLimit-*` headers
+});
+app.use(limiter);
+
+// 3. CORS — only allow your frontend
 app.use(
   cors({
     origin: [
@@ -31,17 +48,59 @@ app.use(
   })
 );
 
-// 3. Body parser - MUST BE BEFORE ROUTES
+// 4. Compression — reduce response size for better performance
+app.use(compression());
+
+// 5. Body parser - MUST BE BEFORE ROUTES
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 
 // Serve uploaded photos
 app.use('/uploads', express.static('uploads'));
 
+// SWAGGER DOCUMENTATION
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Building Maintenance System API',
+      version: '1.0.0',
+      description: 'API for building maintenance system with request tracking and management',
+    },
+    servers: [
+      {
+        url: 'http://localhost:5000',
+        description: 'Development server',
+      },
+      {
+        url: 'https://your-api-url.com',
+        description: 'Production server',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+  },
+  apis: ['./swagger-config.js', './routes/*.js', './controllers/*.js'],
+};
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // ROUTES
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'Building Maintenance API is running! 🏢' });
+});
+
+// API Documentation
+app.get('/api/docs', (req, res) => {
+  res.json({ message: 'API documentation available at /api-docs' });
 });
 
 app.use('/api/auth', require('./routes/auth'));

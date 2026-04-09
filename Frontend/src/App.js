@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Login from './pages/auth/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminProfile from './pages/admin/Profile';
@@ -28,6 +29,7 @@ import ChangePassword from './pages/auth/ChangePassword';
 function App() {
   return (
     <Router>
+      <Toaster position="top-right" containerClassName="mt-4" />
       <Routes>
         {/* Default route - redirect to login */}
         <Route path="/" element={<Navigate to="/login" />} />
