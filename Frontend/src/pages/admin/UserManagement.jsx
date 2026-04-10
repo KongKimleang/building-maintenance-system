@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
-import { registerUser, getAllUsers, deleteUser } from '../../services/api';
+import {
+  registerUser,
+  getAllUsers,
+  deleteUser,
+  resetUserPassword,
+} from '../../services/api';
 
 function UserManagement() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -114,6 +119,38 @@ function UserManagement() {
       await fetchUsers(); // Refresh list
     } catch (error) {
       alert('Error: ' + (error.message || 'Failed to delete user'));
+    }
+  };
+
+  const handleResetPassword = async (targetUser) => {
+    const newPassword = window.prompt(
+      `Set a new password for ${targetUser.firstName || targetUser.username}:`
+    );
+
+    if (!newPassword) {
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      alert('New password must be at least 8 characters long.');
+      return;
+    }
+
+    const confirmPassword = window.prompt('Confirm the new password:');
+
+    if (newPassword !== confirmPassword) {
+      alert('Passwords do not match.');
+      return;
+    }
+
+    try {
+      await resetUserPassword(targetUser._id, newPassword);
+      alert(
+        'Password reset successfully. User must change password on next login.'
+      );
+      await fetchUsers();
+    } catch (error) {
+      alert('Error: ' + (error.message || 'Failed to reset password'));
     }
   };
 
@@ -343,7 +380,10 @@ function UserManagement() {
                             <button className="text-primary hover:text-blue-700">
                               Edit
                             </button>
-                            <button className="text-warning hover:text-yellow-700">
+                            <button
+                              onClick={() => handleResetPassword(user)}
+                              className="text-warning hover:text-yellow-700"
+                            >
                               Reset Password
                             </button>
                             <button

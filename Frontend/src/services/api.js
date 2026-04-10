@@ -103,6 +103,32 @@ export const deleteUser = async (userId) => {
   }
 };
 
+// Reset user password (Admin)
+export const resetUserPassword = async (userId, newPassword) => {
+  try {
+    const token = getToken();
+
+    const response = await fetch(`${API_URL}/users/${userId}/reset-password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ newPassword }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to reset password');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Create maintenance request
 export const createRequest = async (requestData) => {
   try {

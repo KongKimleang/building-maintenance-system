@@ -222,21 +222,32 @@ const getTechnicians = async (req, res) => {
 // @access  Private (Admin)
 const resetPassword = async (req, res) => {
   try {
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({ message: 'New password is required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ message: 'New password must be at least 8 characters long' });
+    }
+
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const tempPassword = 'Password123';
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(tempPassword, salt);
+    user.password = await bcrypt.hash(newPassword, salt);
     user.requirePasswordChange = true;
     await user.save();
 
     res.status(200).json({
       success: true,
-      message: 'Password reset successfully',
-      tempPassword,
+      message:
+        'Password reset successfully. User must change password on next login.',
     });
   } catch (error) {
     console.error('Reset password error:', error.message);
