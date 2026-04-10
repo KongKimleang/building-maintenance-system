@@ -36,6 +36,7 @@ function UserManagement() {
     newPassword: '',
     confirmPassword: '',
   });
+  const [showResetPasswords, setShowResetPasswords] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState('');
 
@@ -133,6 +134,7 @@ function UserManagement() {
   const openResetPasswordModal = (targetUser) => {
     setSelectedUserForReset(targetUser);
     setResetForm({ newPassword: '', confirmPassword: '' });
+    setShowResetPasswords(false);
     setResetError('');
     setShowResetPasswordModal(true);
   };
@@ -141,6 +143,7 @@ function UserManagement() {
     setShowResetPasswordModal(false);
     setSelectedUserForReset(null);
     setResetForm({ newPassword: '', confirmPassword: '' });
+    setShowResetPasswords(false);
     setResetError('');
   };
 
@@ -453,32 +456,50 @@ function UserManagement() {
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   New Password
                 </label>
-                <input
-                  type="password"
-                  value={resetForm.newPassword}
-                  onChange={(e) =>
-                    setResetForm({ ...resetForm, newPassword: e.target.value })
-                  }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Enter new password"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showResetPasswords ? 'text' : 'password'}
+                    value={resetForm.newPassword}
+                    onChange={(e) =>
+                      setResetForm({ ...resetForm, newPassword: e.target.value })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 pr-16 focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Enter new password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPasswords(!showResetPasswords)}
+                    className="absolute inset-y-0 right-0 px-3 text-sm font-medium text-gray-600 hover:text-gray-900"
+                  >
+                    {showResetPasswords ? 'Hide' : 'Show'}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   Confirm New Password
                 </label>
-                <input
-                  type="password"
-                  value={resetForm.confirmPassword}
-                  onChange={(e) =>
-                    setResetForm({ ...resetForm, confirmPassword: e.target.value })
-                  }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Confirm new password"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showResetPasswords ? 'text' : 'password'}
+                    value={resetForm.confirmPassword}
+                    onChange={(e) =>
+                      setResetForm({ ...resetForm, confirmPassword: e.target.value })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 pr-16 focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Confirm new password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPasswords(!showResetPasswords)}
+                    className="absolute inset-y-0 right-0 px-3 text-sm font-medium text-gray-600 hover:text-gray-900"
+                  >
+                    {showResetPasswords ? 'Hide' : 'Show'}
+                  </button>
+                </div>
               </div>
 
               <p className="text-xs text-gray-500">
