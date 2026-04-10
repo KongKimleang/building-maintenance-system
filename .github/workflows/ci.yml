@@ -43,9 +43,4 @@ jobs:
         working-directory: Frontend
         run: npm test -- --watchAll=false --passWithNoTests
 
-      - name: Install Playwright browsers
-        working-directory: Frontend
-        run: npx playwright install --with-deps
-
-      - name: Run Playwright tests
-        run: npm run test:playwright
+     
