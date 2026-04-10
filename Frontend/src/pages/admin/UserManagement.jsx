@@ -30,6 +30,14 @@ function UserManagement() {
   const [formError, setFormError] = useState('');
   const [formLoading, setFormLoading] = useState(false);
   const [createdUserCredentials, setCreatedUserCredentials] = useState(null);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [selectedUserForReset, setSelectedUserForReset] = useState(null);
+  const [resetForm, setResetForm] = useState({
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
 
   // Fetch users from database
   useEffect(() => {
@@ -122,35 +130,56 @@ function UserManagement() {
     }
   };
 
-  const handleResetPassword = async (targetUser) => {
-    const newPassword = window.prompt(
-      `Set a new password for ${targetUser.firstName || targetUser.username}:`
-    );
+  const openResetPasswordModal = (targetUser) => {
+    setSelectedUserForReset(targetUser);
+    setResetForm({ newPassword: '', confirmPassword: '' });
+    setResetError('');
+    setShowResetPasswordModal(true);
+  };
 
-    if (!newPassword) {
+  const closeResetPasswordModal = () => {
+    setShowResetPasswordModal(false);
+    setSelectedUserForReset(null);
+    setResetForm({ newPassword: '', confirmPassword: '' });
+    setResetError('');
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+
+    if (!selectedUserForReset) {
       return;
     }
 
-    if (newPassword.length < 8) {
-      alert('New password must be at least 8 characters long.');
+    setResetError('');
+
+    if (!resetForm.newPassword || !resetForm.confirmPassword) {
+      setResetError('Both password fields are required.');
       return;
     }
 
-    const confirmPassword = window.prompt('Confirm the new password:');
+    if (resetForm.newPassword.length < 8) {
+      setResetError('New password must be at least 8 characters long.');
+      return;
+    }
 
-    if (newPassword !== confirmPassword) {
-      alert('Passwords do not match.');
+    if (resetForm.newPassword !== resetForm.confirmPassword) {
+      setResetError('Passwords do not match.');
       return;
     }
 
     try {
-      await resetUserPassword(targetUser._id, newPassword);
+      setResetLoading(true);
+      await resetUserPassword(selectedUserForReset._id, resetForm.newPassword);
       alert(
         'Password reset successfully. User must change password on next login.'
       );
+      closeResetPasswordModal();
       await fetchUsers();
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to reset password'));
+      setResetError(error.message || 'Failed to reset password');
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -381,7 +410,7 @@ function UserManagement() {
                               Edit
                             </button>
                             <button
-                              onClick={() => handleResetPassword(user)}
+                              onClick={() => openResetPasswordModal(user)}
                               className="text-warning hover:text-yellow-700"
                             >
                               Reset Password
@@ -405,6 +434,83 @@ function UserManagement() {
           )}
         </div>
       </main>
+
+      {/* Reset Password Modal */}
+      {showResetPasswordModal && selectedUserForReset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-gray-900">Reset User Password</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Set a new password for{' '}
+              <span className="font-semibold">
+                {selectedUserForReset.firstName} {selectedUserForReset.lastName}
+              </span>
+              . This user will be required to change password on next login.
+            </p>
+
+            <form onSubmit={handleResetPassword} className="mt-4 space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={resetForm.newPassword}
+                  onChange={(e) =>
+                    setResetForm({ ...resetForm, newPassword: e.target.value })
+                  }
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Enter new password"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  value={resetForm.confirmPassword}
+                  onChange={(e) =>
+                    setResetForm({ ...resetForm, confirmPassword: e.target.value })
+                  }
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+
+              <p className="text-xs text-gray-500">
+                Password must be at least 8 characters.
+              </p>
+
+              {resetError && (
+                <div className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {resetError}
+                </div>
+              )}
+
+              <div className="mt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={closeResetPasswordModal}
+                  className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="flex-1 rounded-md bg-warning px-4 py-2 text-white hover:bg-yellow-600 disabled:cursor-not-allowed disabled:bg-gray-400"
+                >
+                  {resetLoading ? 'Resetting...' : 'Reset Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add User Modal - FULL FORM */}
       {showAddUserModal && (
