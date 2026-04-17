@@ -1,6 +1,6 @@
 # Building Maintenance Management System
 
-A full-stack web application for managing maintenance requests in residential apartment buildings. Built as a Final Year Project using React.js, Node.js, Express.js, and MongoDB.
+A full-stack web application that streamlines maintenance request management for residential apartment buildings. This project was developed as a Final Year Project using React.js, Node.js, Express.js, and MongoDB.
 
 ![Project Status](https://img.shields.io/badge/Status-In%20Development-yellow)
 ![License](https://img.shields.io/badge/License-MIT-blue)
@@ -14,7 +14,7 @@ A full-stack web application for managing maintenance requests in residential ap
 | 🎨 Frontend    | [https://your-app.vercel.app](https://your-app.vercel.app)   |
 | ⚙️ Backend API | [https://your-app.railway.app](https://your-app.railway.app) |
 
-> Replace these URLs with your real deployed URLs after deployment!
+> Replace these placeholder URLs with your actual deployed frontend and backend URLs.
 
 ---
 
@@ -38,8 +38,11 @@ A full-stack web application for managing maintenance requests in residential ap
 - [Getting Started](#getting-started)
 - [Project Structure](#project-structure)
 - [API Documentation](#api-documentation)
-- [Screenshots](#screenshots)
-- [Team](#team)
+- [Security Features](#security-features)
+- [User Roles](#user-roles)
+- [CI Pipeline](#ci-pipeline)
+- [Git Workflow](#git-workflow---daily-workflow)
+- [Acknowledgements](#acknowledgements)
 
 ---
 
@@ -53,7 +56,7 @@ Traditional maintenance management relies on manual processes such as phone call
 
 ### Solution
 
-A centralized digital platform connecting residents, administrators, and technicians through an efficient workflow system.
+A centralized digital platform that connects residents, administrators, and technicians through a transparent and efficient maintenance workflow.
 
 ---
 
@@ -65,10 +68,11 @@ A centralized digital platform connecting residents, administrators, and technic
 - Role-based access control (Admin, Resident, Staff, Technician)
 - Password hashing with bcrypt
 - First-login password change requirement
+- Forgot-password guidance flow with admin contact popup
 
 ### 🔧 Maintenance Requests
 
-- Submit requests with title, description, category, priority and location
+- Submit requests with title, description, category, priority, and location
 - Auto-generated unique request IDs (#001, #002...)
 - Photo upload support
 - Complete request timeline tracking
@@ -87,6 +91,8 @@ A centralized digital platform connecting residents, administrators, and technic
 - Submit maintenance requests
 - View personal request history
 - Track request status in real-time
+- Edit pending requests
+- Replace existing request photo or remove photo
 - Submit feedback and ratings
 
 ### 👷 Technician Features
@@ -169,7 +175,7 @@ cd Backend
 npm install
 ```
 
-Create `.env` file in `Backend/` folder:
+Create a `.env` file in `Backend/`:
 
 ```env
 PORT=5000
@@ -177,9 +183,12 @@ MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 JWT_EXPIRE=7d
 NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+# Optional: multiple frontend origins (comma-separated)
+# FRONTEND_URLS=http://localhost:3000,https://your-frontend-domain.com
 ```
 
-Run backend:
+Start backend server:
 
 ```bash
 npm run dev
@@ -192,13 +201,13 @@ cd Frontend
 npm install
 ```
 
-Create `.env` file in `Frontend/` folder:
+Create a `.env` file in `Frontend/`:
 
 ```env
 REACT_APP_API_URL=http://localhost:5000
 ```
 
-Run frontend:
+Start frontend application:
 
 ```bash
 npm start
@@ -217,35 +226,25 @@ http://localhost:3000
 ```
 building-maintenance-system/
 │
-├── Frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── Sidebar.jsx
-│   │   │   ├── RequestCard.jsx
-│   │   │   └── NotificationBell.jsx
-│   │   │
-│   │   ├── pages/
-│   │   │   ├── auth/         # Login, Register
-│   │   │   ├── admin/        # Dashboard, AllRequests, ManageUsers, ManageBuildings
-│   │   │   ├── resident/     # Dashboard, SubmitRequest, MyRequests, History
-│   │   │   └── technician/   # Dashboard, MyTasks, UpdateTask
-│   │   │
-│   │   ├── services/
-│   │   │   ├── api.js        # All API calls
-│   │   │   └── auth.js       # Auth helpers
-│   │   │
-│   │   └── utils/
-│   │       ├── formatDate.js
-│   │       └── validateForm.js
-│   │
 ├── Backend/
-│   ├── config/db.js
-│   ├── models/               # User, Request, Notification, Building, Unit, Feedback
-│   ├── controllers/          # authController, userController, requestController, buildingController, feedbackController
-│   ├── middleware/            # auth, roleCheck, upload
-│   ├── routes/               # auth, users, requests, notifications, buildings, feedback
-│   └── server.js
+│   ├── config/               # Database connection
+│   ├── controllers/          # Business logic
+│   ├── middleware/           # Auth, role checks, uploads
+│   ├── models/               # Mongoose schemas
+│   ├── routes/               # API route definitions
+│   └── server.js             # Express app entry point
+│
+├── Frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/       # Shared UI components
+│   │   ├── context/          # React context providers
+│   │   ├── pages/            # Role-based pages (admin/resident/technician/auth)
+│   │   ├── services/         # API layer
+│   │   └── utils/            # Frontend utilities
+│   └── tests/                # Playwright end-to-end tests
+│
+└── README.md
 ```
 
 ---
@@ -299,6 +298,7 @@ Authorization: Bearer <token>
 | GET    | `/requests/my-requests` | Get my requests    | Resident, Staff   |
 | GET    | `/requests/my-tasks`    | Get my tasks       | Technician        |
 | GET    | `/requests/:id`         | Get single request | Private           |
+| PUT    | `/requests/:id`         | Update own pending request | Resident, Staff   |
 | PUT    | `/requests/:id/assign`  | Assign technician  | Admin             |
 | PUT    | `/requests/:id/status`  | Update status      | Admin, Technician |
 | POST   | `/requests/:id/comment` | Add comment        | Private           |
@@ -342,8 +342,28 @@ Authorization: Bearer <token>
 - Rate limiting (100 req/15min, 10 login attempts/15min)
 - NoSQL injection prevention (mongo-sanitize)
 - XSS attack prevention (xss-clean)
-- CORS protection
+- CORS protection with environment-based allowlist
 - Request body size limit (10kb)
+
+---
+
+## ⚙️ CI Pipeline
+
+This project uses a lightweight GitHub Actions workflow in `.github/workflows/ci.yml`:
+
+- Workflow name: `Easy CI`
+- Trigger: push and pull request to `main`
+- Checks:
+	- Install backend dependencies
+	- Install frontend dependencies
+	- Build frontend
+	- Run frontend tests
+
+### Notes
+
+- The workflow uses `npm install` (not `npm ci`) to avoid lockfile mismatch failures during active development.
+- If CI fails on GitHub, open **Actions** tab and inspect the failed step logs first.
+- For stable CI in production, consider returning to `npm ci` after lockfiles are fully synchronized.
 
 ---
 
@@ -395,7 +415,7 @@ This project is for academic purposes — Final Year Project at AUPP.
 
 ---
 
-## 🌿 Git Commands — Daily Workflow
+## 🌿 Git Workflow — Daily Workflow
 
 ### First Time Setup
 
@@ -421,7 +441,7 @@ git pull origin main
 # Step 2 — Check what files you changed
 git status
 
-# Step 3 — Add all changed files
+# Step 3 — Stage all changed files
 git add .
 
 # OR add specific file only
@@ -439,14 +459,14 @@ git push origin main
 ### Good Commit Message Examples
 
 ```bash
-# ✅ Good — clear and specific
+# Good examples (clear and specific)
 git commit -m "Fix submit request bug in requestController"
 git commit -m "Add notification bell component"
 git commit -m "Connect login page to backend API"
 git commit -m "Add security middleware to server.js"
 git commit -m "Update README with API documentation"
 
-# ❌ Bad — too vague
+# Bad examples (too vague)
 git commit -m "fix"
 git commit -m "update"
 git commit -m "changes"
@@ -473,7 +493,7 @@ git diff Backend/server.js
 
 ```bash
 # Undo changes in a file (before commit)
-git checkout -- filename.js
+git restore filename.js
 
 # Unstage a file (after git add but before commit)
 git reset HEAD filename.js
