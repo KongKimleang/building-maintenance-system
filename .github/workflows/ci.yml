@@ -1,4 +1,4 @@
-name: Simple CI
+name: Easy CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  quick-check:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,16 +24,13 @@ jobs:
             Frontend/package-lock.json
             package-lock.json
 
-      - name: Install root deps
-        run: npm ci
-
       - name: Install backend deps
         working-directory: Backend
-        run: npm ci
+        run: npm install
 
       - name: Install frontend deps
         working-directory: Frontend
-        run: npm ci
+        run: npm install
 
       - name: Build frontend
         working-directory: Frontend
