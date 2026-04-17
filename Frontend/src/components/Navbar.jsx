@@ -126,14 +126,60 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isSidebarHidden, setIsSidebarHidden] = useState(() => {
+    return localStorage.getItem('sidebarHidden') === 'true';
+  });
   const userMenuRef = useRef(null);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  const role = userInfo.role || user.role;
+  // Support legacy usage where nav links are passed inside userInfo.
+  const providedLinks =
+    navLinks.length > 0 ? navLinks : (userInfo.navLinks || []);
+
+  const normalizeRole = (value) => {
+    const raw = String(value || '')
+      .trim()
+      .toLowerCase();
+
+    if (!raw) return null;
+    if (raw === 'admin' || raw === 'administrator') return 'admin';
+    if (raw === 'technician' || raw === 'tech') return 'technician';
+    if (raw === 'staff') return 'staff';
+    if (raw === 'resident') return 'resident';
+    return null;
+  };
+
+  const roleFromPath =
+    location.pathname.startsWith('/admin')
+      ? 'admin'
+      : location.pathname.startsWith('/technician')
+        ? 'technician'
+        : location.pathname.startsWith('/resident')
+          ? 'resident'
+          : null;
+
+  const roleFromNavLinks = providedLinks.some((link) =>
+    String(link.path || '').startsWith('/admin')
+  )
+    ? 'admin'
+    : providedLinks.some((link) =>
+        String(link.path || '').startsWith('/technician')
+      )
+      ? 'technician'
+      : providedLinks.some((link) =>
+          String(link.path || '').startsWith('/resident')
+        )
+        ? 'resident'
+        : null;
+
   const normalizedRole =
-    role === 'admin' || role === 'technician' || role === 'staff'
-      ? role
-      : 'resident';
+    normalizeRole(userInfo.role) ||
+    normalizeRole(user.role) ||
+    normalizeRole(userInfo.subtitle) ||
+    roleFromNavLinks ||
+    roleFromPath ||
+    'resident';
 
   const roleMeta = {
     admin: { label: 'Administrator', short: 'ADM' },
@@ -168,13 +214,10 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
     ],
   };
 
-  // Support legacy usage where nav links are passed inside userInfo.
-  const providedLinks =
-    navLinks.length > 0 ? navLinks : (userInfo.navLinks || []);
   const baseNavLinks =
     providedLinks.length > 0
       ? providedLinks
-      : (roleNavMap[role] || []);
+      : (roleNavMap[normalizedRole] || []);
 
   const routeToNavPath = {
     '/admin/request-details/': '/admin/requests',
@@ -196,16 +239,16 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
     }));
 
   const defaultDashboardLink =
-    role === 'admin'
+    normalizedRole === 'admin'
       ? '/admin/dashboard'
-      : role === 'technician'
+      : normalizedRole === 'technician'
         ? '/technician/dashboard'
         : '/resident/dashboard';
 
   const profilePath =
-    role === 'admin'
+    normalizedRole === 'admin'
       ? '/admin/profile'
-      : role === 'technician'
+      : normalizedRole === 'technician'
         ? '/technician/profile'
         : '/resident/profile';
 
@@ -247,9 +290,17 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
   }, [normalizedRole]);
 
   useEffect(() => {
+    document.documentElement.dataset.sidebar = isSidebarHidden
+      ? 'hidden'
+      : 'open';
+    localStorage.setItem('sidebarHidden', String(isSidebarHidden));
+  }, [isSidebarHidden]);
+
+  useEffect(() => {
     // Close menus when navigating to keep UI state predictable.
     setShowDropdown(false);
     setShowNotifications(false);
+    setIsMobileNavOpen(false);
   }, [location.pathname]);
 
   const fetchUnreadCount = async () => {
@@ -267,28 +318,53 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
     navigate('/login');
   };
 
+  const toggleSidebar = () => {
+    setShowDropdown(false);
+    setShowNotifications(false);
+    setIsSidebarHidden((prev) => !prev);
+  };
+
   return (
     <>
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-72 bg-slate-950 text-slate-100 border-r border-slate-800 flex-col z-40">
-        <div className="px-6 py-6 border-b border-slate-800">
-          <Link
-            to={userInfo.dashboardLink || defaultDashboardLink}
-            className="flex items-center gap-3"
-          >
-            <span
-              className="grid place-items-center h-11 w-11 rounded-xl border"
+      {isSidebarHidden && (
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          className="hidden lg:flex fixed top-4 left-4 z-50 h-14 w-14 items-center justify-center rounded-2xl border sidebar-border sidebar-surface shadow-md transition"
+          aria-label="Show sidebar"
+          title="Show sidebar"
+        >
+          <BuildingIcon />
+        </button>
+      )}
+
+      <aside
+        className={`hidden lg:flex fixed left-0 top-0 h-screen w-72 sidebar-shell border-r flex-col z-40 overflow-hidden transition-transform duration-300 ${
+          isSidebarHidden ? '-translate-x-full' : 'translate-x-0'
+        }`}
+      >
+        <div className="px-6 py-6 border-b sidebar-border sidebar-section-header">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="grid place-items-center h-14 w-14 rounded-2xl border sidebar-border sidebar-surface transition"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--accent) 25%, transparent)',
                 borderColor: 'color-mix(in srgb, var(--accent) 40%, #ffffff)',
               }}
+              aria-label="Hide sidebar"
+              title="Hide sidebar"
             >
               <BuildingIcon />
-            </span>
+            </button>
+            <Link to={userInfo.dashboardLink || defaultDashboardLink} className="min-w-0">
             <div>
               <h1 className="text-lg font-bold text-white">BuildingMMS</h1>
-              <p className="text-xs text-slate-400">Operations Console</p>
+              <p className="text-xs sidebar-muted">Operations Console</p>
             </div>
-          </Link>
+            </Link>
+          </div>
           <div className="mt-4">
             <span className="role-badge">
               {roleMeta[normalizedRole].short} · {roleMeta[normalizedRole].label}
@@ -297,36 +373,33 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
         </div>
 
         <div className="px-4 py-5 flex-1 overflow-y-auto">
-          <p className="px-3 text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-3">
+          <p className="px-3 text-[11px] uppercase tracking-[0.12em] sidebar-muted mb-3">
             Navigation
           </p>
-          <nav className="space-y-1.5">
+          <nav className="space-y-2">
             {normalizedNavLinks.map((link, index) => (
               <Link
                 key={index}
                 to={link.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+                className={`sidebar-link group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
                   link.active
-                    ? 'text-white shadow-sm'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'sidebar-link-active text-white shadow-sm'
+                    : 'hover:text-white'
                 }`}
-                style={
-                  link.active ? { backgroundColor: 'var(--accent)' } : undefined
-                }
               >
-                <span className="opacity-90">
+                <span className="sidebar-link-icon">
                   <NavGlyph label={link.label} />
                 </span>
-                <span>{link.label}</span>
+                <span className="sidebar-link-text">{link.label}</span>
               </Link>
             ))}
           </nav>
         </div>
 
-        <div className="px-4 py-4 border-t border-slate-800 space-y-2">
+        <div className="px-4 py-4 border-t sidebar-border space-y-3">
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 transition text-sm"
+            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl sidebar-surface transition text-sm font-semibold"
           >
             <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
             <span>{isDark ? <SunIcon /> : <MoonIcon />}</span>
@@ -335,7 +408,7 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative h-10 w-10 rounded-lg bg-slate-900 hover:bg-slate-800 grid place-items-center"
+              className="relative h-12 w-12 rounded-xl sidebar-surface grid place-items-center"
             >
               <BellIcon />
               {unreadCount > 0 && (
@@ -348,12 +421,12 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
             <div className="relative flex-1" ref={userMenuRef}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-left"
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl sidebar-surface sidebar-profile-card text-left"
               >
                 <div>
-                  <p className="text-sm font-semibold text-white">{userInfo.name || 'User'}</p>
-                  <p className="text-xs text-slate-400">{userInfo.subtitle || ''}</p>
-                  <p className="text-[10px] uppercase tracking-wide role-subtext">
+                  <p className="text-sm font-bold text-white">{userInfo.name || 'User'}</p>
+                  <p className="text-xs sidebar-muted">{userInfo.subtitle || ''}</p>
+                  <p className="text-[10px] uppercase tracking-[0.12em] sidebar-muted font-semibold">
                     {roleMeta[normalizedRole].label}
                   </p>
                 </div>
@@ -394,28 +467,32 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
                 fetchUnreadCount();
               }}
               userRole={user.role}
+              placement="up"
+              mode="sidebar"
             />
           </div>
         </div>
       </aside>
 
-      <nav className="lg:hidden bg-primary shadow-lg text-white">
+      <nav className="lg:hidden mobile-nav-shell shadow-lg text-white">
         <div className="px-4 sm:px-6">
           <div className="flex justify-between h-16 items-center">
-            <Link
-              to={userInfo.dashboardLink || defaultDashboardLink}
+            <button
+              type="button"
+              onClick={() => setIsMobileNavOpen((prev) => !prev)}
               className="flex items-center space-x-3"
+              aria-label={isMobileNavOpen ? 'Hide navigation menu' : 'Show navigation menu'}
             >
               <span className="grid place-items-center h-10 w-10 rounded-lg bg-white/15 border border-white/25">
                 <BuildingIcon />
               </span>
               <div>
                 <h1 className="text-lg font-bold text-white">BuildingMMS</h1>
-                <p className="text-[10px] uppercase tracking-wide text-blue-100/80">
+                <p className="text-[10px] uppercase tracking-wide mobile-nav-muted">
                   {roleMeta[normalizedRole].short}
                 </p>
               </div>
-            </Link>
+            </button>
 
             <div className="flex items-center gap-2">
               <button
@@ -428,7 +505,7 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
               </button>
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 text-blue-100 hover:text-white transition"
+                className="relative p-2 mobile-nav-muted hover:text-white transition"
               >
                 <BellIcon />
                 {unreadCount > 0 && (
@@ -444,13 +521,14 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
                   fetchUnreadCount();
                 }}
                 userRole={user.role}
+                placement="down"
               />
             </div>
           </div>
         </div>
 
-        {normalizedNavLinks.length > 0 && (
-          <div className="border-t border-blue-700">
+        {normalizedNavLinks.length > 0 && isMobileNavOpen && (
+          <div className="border-t mobile-nav-border">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {normalizedNavLinks.map((link, index) => (
                 <Link
@@ -459,7 +537,7 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
                   className={`block px-3 py-2 rounded-md text-base font-medium ${
                     link.active
                       ? 'text-white'
-                      : 'text-blue-100 hover:bg-blue-600 hover:text-white'
+                      : 'mobile-nav-link'
                   }`}
                   style={
                     link.active ? { backgroundColor: 'var(--accent)' } : undefined

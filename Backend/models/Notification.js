@@ -9,7 +9,12 @@ const NotificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['assigned', 'status_update', 'completed', 'comment'],
+      enum: ['new_request', 'assigned', 'status_update', 'completed', 'comment'],
+    },
+    title: {
+      type: String,
+      required: true,
+      default: 'Notification',
     },
     message: { type: String, required: true },
     requestId: { type: mongoose.Schema.Types.ObjectId, ref: 'Request' },

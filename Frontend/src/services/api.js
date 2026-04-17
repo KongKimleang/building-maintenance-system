@@ -1,6 +1,23 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = (
+  process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
+).replace(/\/+$/, '');
 
 const getToken = () => localStorage.getItem('token');
+
+// Check backend and database health
+export const getHealthStatus = async () => {
+  const response = await fetch(`${API_URL}/health`, {
+    method: 'GET',
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Health check failed');
+  }
+
+  return data;
+};
 
 // Login
 export const login = async (email, password) => {
@@ -103,6 +120,32 @@ export const deleteUser = async (userId) => {
   }
 };
 
+// Update user (Admin)
+export const updateUser = async (userId, userData) => {
+  try {
+    const token = getToken();
+
+    const response = await fetch(`${API_URL}/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(userData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update user');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Reset user password (Admin)
 export const resetUserPassword = async (userId, newPassword) => {
   try {
@@ -181,6 +224,33 @@ export const getCurrentUser = async () => {
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch profile');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Upload current user's profile photo
+export const uploadProfilePhoto = async (photoFile) => {
+  try {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append('photo', photoFile);
+
+    const response = await fetch(`${API_URL}/auth/profile-photo`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to upload profile photo');
     }
 
     return data;
@@ -414,6 +484,71 @@ export const addComment = async (requestId, comment) => {
   }
 };
 
+// Update resident request
+export const updateRequest = async (requestId, requestData) => {
+  try {
+    const token = getToken();
+    const formData = new FormData();
+
+    formData.append('title', requestData.title);
+    formData.append('description', requestData.description);
+    formData.append('category', requestData.category);
+    formData.append('priority', requestData.priority);
+    formData.append('floor', requestData.floor);
+    formData.append('unit', requestData.unit);
+
+    if (requestData.removePhoto) {
+      formData.append('removePhoto', 'true');
+    }
+
+    if (requestData.photo) {
+      formData.append('photo', requestData.photo);
+    }
+
+    const response = await fetch(`${API_URL}/requests/${requestId}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update request');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete request (Admin)
+export const deleteRequest = async (requestId) => {
+  try {
+    const token = getToken();
+
+    const response = await fetch(`${API_URL}/requests/${requestId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to delete request');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Get user's notifications
 export const getNotifications = async () => {
   try {
@@ -470,7 +605,7 @@ export const markAllNotificationsAsRead = async () => {
   try {
     const token = getToken();
 
-    const response = await fetch(`${API_URL}/notifications/mark-all-read`, {
+    const response = await fetch(`${API_URL}/notifications/read-all`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -483,6 +618,30 @@ export const markAllNotificationsAsRead = async () => {
       throw new Error(
         data.message || 'Failed to mark all notifications as read'
       );
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Seed sample notifications for the logged-in user (testing)
+export const seedNotifications = async () => {
+  try {
+    const token = getToken();
+
+    const response = await fetch(`${API_URL}/notifications/seed`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to seed notifications');
     }
 
     return data;

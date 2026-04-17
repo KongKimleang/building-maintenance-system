@@ -2,6 +2,32 @@ const Request = require('../models/Request');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 
+const ALLOWED_REQUEST_STATUSES = [
+  'Pending',
+  'Assigned',
+  'In Progress',
+  'Completed',
+  'Cancelled',
+];
+
+const buildPagination = (query) => {
+  const page = Math.max(parseInt(query.page, 10) || 1, 1);
+  const requestedLimit = parseInt(query.limit, 10) || 20;
+  const limit = Math.min(Math.max(requestedLimit, 1), 100);
+  const skip = (page - 1) * limit;
+  return { page, limit, skip };
+};
+
+const getNextRequestId = async () => {
+  const latestRequest = await Request.findOne({ requestId: { $exists: true } })
+    .sort({ createdAt: -1 })
+    .select('requestId');
+
+  const latestNumber = parseInt(latestRequest?.requestId, 10);
+  const nextNumber = Number.isFinite(latestNumber) ? latestNumber + 1 : 1;
+  return String(nextNumber).padStart(3, '0');
+};
+
 const createNotification = async (userId, type, title, message, requestId) => {
   try {
     await Notification.create({ userId, type, title, message, requestId });
@@ -17,6 +43,13 @@ const createRequest = async (req, res) => {
   try {
     const { title, description, category, priority, floor, unit } = req.body;
 
+    if (!title || !description || !category || !priority || !floor || !unit) {
+      return res.status(400).json({
+        message:
+          'Title, description, category, priority, floor, and unit are required',
+      });
+    }
+
     // Create location string
     const location = `Unit ${unit} - Floor ${floor}`;
 
@@ -29,8 +62,7 @@ const createRequest = async (req, res) => {
       };
     }
 
-    const count = await Request.countDocuments();
-    const requestId = String(count + 1).padStart(3, '0');
+    const requestId = await getNextRequestId();
 
     // Create request
     const request = await Request.create({
@@ -87,10 +119,17 @@ const createRequest = async (req, res) => {
 // @access  Private (Admin, Technician)
 const getAllRequests = async (req, res) => {
   try {
-    const requests = await Request.find()
+    const { page, limit, skip } = buildPagination(req.query);
+
+    const [requests, total] = await Promise.all([
+      Request.find()
       .populate('submittedBy', 'firstName lastName email phone unit')
       .populate('assignedTo', 'firstName lastName specialization phone email')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+      Request.countDocuments(),
+    ]);
 
     // Convert photo buffers to base64
     const requestsWithPhotos = requests.map((req) => {
@@ -104,6 +143,9 @@ const getAllRequests = async (req, res) => {
     res.status(200).json({
       success: true,
       count: requestsWithPhotos.length,
+      total,
+      page,
+      totalPages: Math.max(Math.ceil(total / limit), 1),
       requests: requestsWithPhotos,
     });
   } catch (error) {
@@ -118,6 +160,7 @@ const getAllRequests = async (req, res) => {
 const getMyRequests = async (req, res) => {
   try {
     const { status, priority, category, search } = req.query;
+    const { page, limit, skip } = buildPagination(req.query);
 
     // CRITICAL: Always filter by current user
     let filter = { submittedBy: req.user._id };
@@ -127,19 +170,25 @@ const getMyRequests = async (req, res) => {
     if (priority) filter.priority = priority;
     if (category) filter.category = category;
 
-    if (search) {
+    if (search && String(search).trim()) {
+      const searchText = String(search).trim();
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { requestId: { $regex: search, $options: 'i' } },
-        { unit: { $regex: search, $options: 'i' } },
+        { title: { $regex: searchText, $options: 'i' } },
+        { description: { $regex: searchText, $options: 'i' } },
+        { requestId: { $regex: searchText, $options: 'i' } },
+        { unit: { $regex: searchText, $options: 'i' } },
       ];
     }
 
-    const requests = await Request.find(filter)
+    const [requests, total] = await Promise.all([
+      Request.find(filter)
       .populate('submittedBy', 'firstName lastName email phone unit floor')
       .populate('assignedTo', 'firstName lastName specialization phone email')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+      Request.countDocuments(filter),
+    ]);
 
     // Convert photo buffers to base64
     const requestsWithPhotos = requests.map((req) => {
@@ -153,6 +202,9 @@ const getMyRequests = async (req, res) => {
     res.status(200).json({
       success: true,
       count: requestsWithPhotos.length,
+      total,
+      page,
+      totalPages: Math.max(Math.ceil(total / limit), 1),
       requests: requestsWithPhotos,
     });
   } catch (error) {
@@ -197,9 +249,19 @@ const assignTechnician = async (req, res) => {
   try {
     const { technicianId } = req.body;
 
+    if (!technicianId) {
+      return res.status(400).json({ message: 'technicianId is required' });
+    }
+
     const request = await Request.findById(req.params.id);
     if (!request) {
       return res.status(404).json({ message: 'Request not found' });
+    }
+
+    if (request.status === 'Completed' || request.status === 'Cancelled') {
+      return res.status(400).json({
+        message: `Cannot assign technician to a ${request.status.toLowerCase()} request`,
+      });
     }
 
     const technician = await User.findById(technicianId);
@@ -257,6 +319,12 @@ const assignTechnician = async (req, res) => {
 const updateStatus = async (req, res) => {
   try {
     const { status, notes } = req.body;
+
+    if (!ALLOWED_REQUEST_STATUSES.includes(status)) {
+      return res.status(400).json({
+        message: `Invalid status. Allowed values: ${ALLOWED_REQUEST_STATUSES.join(', ')}`,
+      });
+    }
 
     const request = await Request.findById(req.params.id);
     if (!request) {
@@ -380,19 +448,118 @@ const addComment = async (req, res) => {
   }
 };
 
+// @desc    Update own request
+// @route   PUT /api/requests/:id
+// @access  Private (Owner, Pending only)
+const updateRequest = async (req, res) => {
+  try {
+    const request = await Request.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Request not found' });
+    }
+
+    if (String(request.submittedBy) !== String(req.user.id)) {
+      return res.status(403).json({ message: 'You can only edit your own request' });
+    }
+
+    if (request.status !== 'Pending') {
+      return res.status(400).json({
+        message: 'Only pending requests can be edited',
+      });
+    }
+
+    const { title, description, category, priority, floor, unit, removePhoto } = req.body;
+
+    if (!title || !description || !category || !priority || !floor || !unit) {
+      return res.status(400).json({
+        message:
+          'Title, description, category, priority, floor, and unit are required',
+      });
+    }
+
+    request.title = title;
+    request.description = description;
+    request.category = category;
+    request.priority = priority;
+    request.floor = floor;
+    request.unit = unit;
+    request.location = `Unit ${unit} - Floor ${floor}`;
+
+    if (req.file) {
+      request.photo = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      };
+    } else if (removePhoto === 'true' || removePhoto === true || removePhoto === '1') {
+      request.set('photo', undefined);
+    }
+
+    request.timeline.push({
+      type: 'edited',
+      user: `${req.user.firstName} ${req.user.lastName} (${req.user.role})`,
+      action: 'Updated request details',
+      note: 'Resident edited the request information',
+      timestamp: new Date(),
+    });
+
+    await request.save();
+
+    await request.populate('submittedBy', 'firstName lastName email phone unit');
+
+    res.status(200).json({
+      success: true,
+      message: 'Request updated successfully',
+      request,
+    });
+  } catch (error) {
+    console.error('Update request error:', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Delete request
+// @route   DELETE /api/requests/:id
+// @access  Private (Admin)
+const deleteRequest = async (req, res) => {
+  try {
+    const request = await Request.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Request not found' });
+    }
+
+    await request.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Request deleted successfully',
+    });
+  } catch (error) {
+    console.error('Delete request error:', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 // @desc    Get requests assigned to logged in technician
 // @route   GET /api/requests/my-tasks
 // @access  Private (Technician)
 const getMyTasks = async (req, res) => {
   try {
     const { status } = req.query;
+    const { page, limit, skip } = buildPagination(req.query);
     let filter = { assignedTo: req.user._id };
     if (status) filter.status = status;
 
-    const requests = await Request.find(filter)
+    const [requests, total] = await Promise.all([
+      Request.find(filter)
       .populate('submittedBy', 'firstName lastName email phone unit floor')
       .populate('assignedTo', 'firstName lastName specialization phone email')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+      Request.countDocuments(filter),
+    ]);
 
     // Convert photo buffers to base64
     const requestsWithPhotos = requests.map((req) => {
@@ -406,6 +573,9 @@ const getMyTasks = async (req, res) => {
     res.status(200).json({
       success: true,
       count: requestsWithPhotos.length,
+      total,
+      page,
+      totalPages: Math.max(Math.ceil(total / limit), 1),
       requests: requestsWithPhotos,
     });
   } catch (error) {
@@ -424,5 +594,7 @@ module.exports = {
   updateStatus,
   getStats,
   addComment,
+  updateRequest,
+  deleteRequest,
   createNotification,
 };

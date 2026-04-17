@@ -3,6 +3,7 @@ import Navbar from '../../components/Navbar';
 import {
   registerUser,
   getAllUsers,
+  updateUser,
   deleteUser,
   resetUserPassword,
 } from '../../services/api';
@@ -39,6 +40,31 @@ function UserManagement() {
   const [showResetPasswords, setShowResetPasswords] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState('');
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    sex: '',
+    email: '',
+    phone: '',
+    floor: '',
+    unit: '',
+    position: '',
+    specialization: '',
+    isActive: true,
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmLabel: 'Confirm',
+    variant: 'primary',
+    onConfirm: null,
+  });
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   // Fetch users from database
   useEffect(() => {
@@ -114,20 +140,50 @@ function UserManagement() {
 
   // Handle delete user
   const handleDeleteUser = async (userId, userName) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${userName}? This cannot be undone.`
-      )
-    ) {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete User',
+      message: `Are you sure you want to delete ${userName}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteUser(userId);
+          alert('User deleted successfully');
+          await fetchUsers();
+        } catch (error) {
+          alert('Error: ' + (error.message || 'Failed to delete user'));
+        }
+      },
+    });
+  };
+
+  const closeConfirmDialog = (force = false) => {
+    if (confirmLoading && !force) {
+      return;
+    }
+    setConfirmDialog({
+      isOpen: false,
+      title: '',
+      message: '',
+      confirmLabel: 'Confirm',
+      variant: 'primary',
+      onConfirm: null,
+    });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmDialog.onConfirm) {
+      closeConfirmDialog(true);
       return;
     }
 
     try {
-      await deleteUser(userId);
-      alert('User deleted successfully');
-      await fetchUsers(); // Refresh list
-    } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to delete user'));
+      setConfirmLoading(true);
+      await confirmDialog.onConfirm();
+    } finally {
+      setConfirmLoading(false);
+      closeConfirmDialog(true);
     }
   };
 
@@ -184,6 +240,60 @@ function UserManagement() {
     } finally {
       setResetLoading(false);
     }
+  };
+
+  const handleOpenEditModal = (targetUser) => {
+    setSelectedUserForEdit(targetUser);
+    setEditForm({
+      firstName: targetUser.firstName || '',
+      lastName: targetUser.lastName || '',
+      sex: targetUser.sex || '',
+      email: targetUser.email || '',
+      phone: targetUser.phone || '',
+      floor: targetUser.floor || '',
+      unit: targetUser.unit || '',
+      position: targetUser.position || '',
+      specialization: targetUser.specialization || '',
+      isActive: targetUser.isActive !== false,
+    });
+    setEditError('');
+    setShowEditUserModal(true);
+  };
+
+  const closeEditModal = () => {
+    setShowEditUserModal(false);
+    setSelectedUserForEdit(null);
+    setEditError('');
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+
+    if (!selectedUserForEdit) {
+      return;
+    }
+
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Save User Changes',
+      message: `Are you sure you want to save changes for ${selectedUserForEdit.firstName} ${selectedUserForEdit.lastName}?`,
+      confirmLabel: 'Save Changes',
+      variant: 'primary',
+      onConfirm: async () => {
+        try {
+          setEditLoading(true);
+          setEditError('');
+          await updateUser(selectedUserForEdit._id, editForm);
+          alert('User updated successfully');
+          closeEditModal();
+          await fetchUsers();
+        } catch (error) {
+          setEditError(error.message || 'Failed to update user');
+        } finally {
+          setEditLoading(false);
+        }
+      },
+    });
   };
 
   // Get current tab data
@@ -397,19 +507,24 @@ function UserManagement() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
                               className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                user.status === 'Active'
+                                user.isActive
                                   ? 'bg-green-100 text-green-800'
                                   : 'bg-red-100 text-red-800'
                               }`}
                             >
-                              {user.status}
+                              {user.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {user.lastLogin}
+                            {user.lastLogin
+                              ? new Date(user.lastLogin).toLocaleString()
+                              : 'Never'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
-                            <button className="text-primary hover:text-blue-700">
+                            <button
+                              onClick={() => handleOpenEditModal(user)}
+                              className="text-primary hover:text-blue-700"
+                            >
                               Edit
                             </button>
                             <button
@@ -526,6 +641,224 @@ function UserManagement() {
                   className="flex-1 rounded-md bg-warning px-4 py-2 text-white hover:bg-yellow-600 disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
                   {resetLoading ? 'Resetting...' : 'Reset Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditUserModal && selectedUserForEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
+          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-900">Edit User</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Update account info for {selectedUserForEdit.firstName}{' '}
+              {selectedUserForEdit.lastName}
+            </p>
+
+            <form onSubmit={handleUpdateUser} className="mt-5 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.firstName}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, firstName: e.target.value })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.lastName}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, lastName: e.target.value })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, email: e.target.value })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.phone}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, phone: e.target.value })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sex
+                  </label>
+                  <select
+                    value={editForm.sex}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, sex: e.target.value })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Select sex</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={editForm.isActive ? 'active' : 'inactive'}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        isActive: e.target.value === 'active',
+                      })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              {(selectedUserForEdit.role === 'resident' ||
+                selectedUserForEdit.role === 'staff') && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Floor
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.floor}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, floor: e.target.value })
+                      }
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  {selectedUserForEdit.role === 'resident' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Unit
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.unit}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, unit: e.target.value })
+                        }
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {selectedUserForEdit.role === 'staff' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Position
+                  </label>
+                  <select
+                    value={editForm.position}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, position: e.target.value })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Select position</option>
+                    <option value="Receptionist">Receptionist</option>
+                    <option value="Security">Security</option>
+                    <option value="Housekeeper">Housekeeper</option>
+                  </select>
+                </div>
+              )}
+
+              {selectedUserForEdit.role === 'technician' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Specialization
+                  </label>
+                  <select
+                    value={editForm.specialization}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        specialization: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Select specialization</option>
+                    <option value="Plumber">Plumber</option>
+                    <option value="Electrician">Electrician</option>
+                    <option value="HVAC Technician">HVAC Technician</option>
+                    <option value="Carpenter">Carpenter</option>
+                    <option value="General Maintenance">
+                      General Maintenance
+                    </option>
+                  </select>
+                </div>
+              )}
+
+              {editError && (
+                <div className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {editError}
+                </div>
+              )}
+
+              <div className="mt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="flex-1 rounded-md bg-primary px-4 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                >
+                  {editLoading ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
@@ -834,6 +1167,39 @@ function UserManagement() {
                 )}
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Shared Confirm Modal */}
+      {confirmDialog.isOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-gray-900">{confirmDialog.title}</h2>
+            <p className="mt-3 text-sm text-gray-700">{confirmDialog.message}</p>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={closeConfirmDialog}
+                disabled={confirmLoading}
+                className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAction}
+                disabled={confirmLoading}
+                className={`flex-1 rounded-md px-4 py-2 text-white disabled:cursor-not-allowed disabled:bg-gray-400 ${
+                  confirmDialog.variant === 'danger'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-primary hover:bg-blue-700'
+                }`}
+              >
+                {confirmLoading ? 'Please wait...' : confirmDialog.confirmLabel}
+              </button>
+            </div>
           </div>
         </div>
       )}

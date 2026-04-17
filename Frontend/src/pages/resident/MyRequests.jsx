@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import { getMyRequests, addComment } from '../../services/api';
+import { getMyRequests, addComment, updateRequest } from '../../services/api';
 
 function MyRequests() {
   const navigate = useNavigate();
@@ -11,6 +11,20 @@ function MyRequests() {
   const [allRequests, setAllRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editRequest, setEditRequest] = useState(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    category: '',
+    priority: '',
+    floor: '',
+    unit: '',
+  });
+  const [editPhoto, setEditPhoto] = useState(null);
+  const [editPhotoPreview, setEditPhotoPreview] = useState('');
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
 
   // Fetch my requests
   useEffect(() => {
@@ -38,6 +52,74 @@ function MyRequests() {
       await fetchMyRequests(); // Refresh list
     } catch (error) {
       alert('Error: ' + (error.message || 'Failed to add comment'));
+    }
+  };
+
+  const openEditModal = (request) => {
+    setEditRequest(request);
+    setEditForm({
+      title: request.title || '',
+      description: request.description || '',
+      category: request.category || '',
+      priority: request.priority || '',
+      floor: request.floor || '',
+      unit: request.unit || '',
+    });
+    setEditPhoto(null);
+    setEditPhotoPreview(
+      request.photo && request.photo.data
+        ? `data:${request.photo.contentType};base64,${request.photo.data}`
+        : ''
+    );
+    setRemovePhoto(false);
+    setEditError('');
+  };
+
+  const closeEditModal = () => {
+    setEditRequest(null);
+    setEditPhoto(null);
+    setEditPhotoPreview('');
+    setRemovePhoto(false);
+    setEditError('');
+    setEditSaving(false);
+  };
+
+  const handleEditPhotoChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setEditPhoto(file);
+    setRemovePhoto(false);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setEditPhotoPreview(String(reader.result || ''));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveEdit = async (event) => {
+    event.preventDefault();
+
+    if (!editRequest) return;
+
+    try {
+      setEditSaving(true);
+      setEditError('');
+
+      await updateRequest(editRequest._id, {
+        ...editForm,
+        photo: editPhoto,
+        removePhoto: removePhoto && !editPhoto,
+      });
+
+      closeEditModal();
+      await fetchMyRequests();
+      alert('Request updated successfully.');
+    } catch (err) {
+      setEditError(err.message || 'Failed to update request');
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -329,6 +411,14 @@ function MyRequests() {
                     >
                       View Full Details
                     </button>
+                    {request.status === 'Pending' && (
+                      <button
+                        onClick={() => openEditModal(request)}
+                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition font-medium text-sm"
+                      >
+                        Edit Request
+                      </button>
+                    )}
                     {request.status !== 'Completed' && (
                       <button
                         onClick={() => {
@@ -366,6 +456,198 @@ function MyRequests() {
           </div>
         )}
       </main>
+
+      {editRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6">
+          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-slate-900 dark:text-slate-100">
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
+                  Edit Request
+                </p>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                  Request #{editRequest.requestId}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={closeEditModal}
+                className="rounded-lg border border-slate-200 px-2 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                X
+              </button>
+            </div>
+
+            <form className="space-y-5 px-6 py-5" onSubmit={handleSaveEdit}>
+              {editError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+                  {editError}
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.title}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, title: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    Category
+                  </label>
+                  <select
+                    value={editForm.category}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, category: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    <option>Plumbing</option>
+                    <option>Electrical</option>
+                    <option>HVAC</option>
+                    <option>Carpentry</option>
+                    <option>Appliance</option>
+                    <option>Cleaning</option>
+                    <option>Mechanical</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    Priority
+                  </label>
+                  <select
+                    value={editForm.priority}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, priority: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    <option>Low</option>
+                    <option>Medium</option>
+                    <option>High</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    Floor
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.floor}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, floor: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    Unit
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.unit}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, unit: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Description
+                </label>
+                <textarea
+                  rows="4"
+                  value={editForm.description}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    Replace Photo
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEditPhotoChange}
+                    className="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-white hover:file:bg-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    Upload a new image to replace the current one.
+                  </p>
+                </div>
+
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRemovePhoto(true);
+                      setEditPhoto(null);
+                      setEditPhotoPreview('');
+                    }}
+                    className="w-full rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
+                  >
+                    Remove current photo
+                  </button>
+                </div>
+              </div>
+
+              {editPhotoPreview && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                  <p className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    Photo Preview
+                  </p>
+                  <img
+                    src={editPhotoPreview}
+                    alt="Preview"
+                    className="max-h-64 w-full rounded-lg border border-slate-200 object-contain bg-white dark:border-slate-700 dark:bg-slate-900"
+                  />
+                </div>
+              )}
+
+              {removePhoto && !editPhoto && !editPhotoPreview && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/35 dark:text-amber-300">
+                  Current photo will be removed when you save changes.
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSaving}
+                  className="rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {editSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

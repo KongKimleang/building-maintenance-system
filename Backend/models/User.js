@@ -36,6 +36,12 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Profile Photo
+    profilePhoto: {
+      data: Buffer,
+      contentType: String,
+    },
+
     // Role & Permissions
     role: {
       type: String,

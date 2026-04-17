@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 
 // Import Swagger configuration
@@ -14,9 +15,6 @@ require('./swagger-config');
 
 // Load environment variables
 dotenv.config();
-
-// Connect to MongoDB
-connectDB();
 
 // Initialize Express app
 const app = express();
@@ -36,17 +34,37 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // 3. CORS — only allow your frontend
+const allowedOrigins = new Set(
+  [process.env.FRONTEND_URL, process.env.FRONTEND_URLS]
+    .filter(Boolean)
+    .flatMap((value) => String(value).split(',').map((item) => item.trim()).filter(Boolean))
+);
+
 app.use(
   cors({
-    origin: [
-      'http://localhost:3000', // local development
-      'https://your-app.vercel.app', // update when deployed
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: (origin, callback) => {
+      // Allow non-browser clients and same-origin requests
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const isLocalDevOrigin =
+        /^http:\/\/localhost:\d+$/.test(origin) ||
+        /^http:\/\/127\.0\.0\.1:\d+$/.test(origin);
+
+      if (allowedOrigins.has(origin) || isLocalDevOrigin) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   })
 );
+
+app.options('*', cors());
 
 // 4. Compression — reduce response size for better performance
 app.use(compression());
@@ -103,6 +121,27 @@ app.get('/api/docs', (req, res) => {
   res.json({ message: 'API documentation available at /api-docs' });
 });
 
+// Health check endpoint for quick backend/db diagnosis
+app.get('/api/health', (req, res) => {
+  const states = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  };
+
+  const dbStateCode = mongoose.connection.readyState;
+  const dbState = states[dbStateCode] || 'unknown';
+
+  res.status(200).json({
+    success: true,
+    server: 'up',
+    database: dbState,
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/requests', require('./routes/requests'));
@@ -124,7 +163,27 @@ app.use((err, req, res, next) => {
 
 // START SERVER
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🔒 Security enabled`);
+
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🔒 Security enabled`);
+    });
+  } catch (error) {
+    console.error(`❌ Failed to start server: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection:', reason);
 });
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+});
+
+startServer();

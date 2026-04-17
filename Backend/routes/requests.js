@@ -10,6 +10,8 @@ const {
   updateStatus,
   getStats,
   addComment,
+  updateRequest,
+  deleteRequest,
 } = require('../controllers/requestController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/roleCheck');
@@ -30,8 +32,10 @@ router.get('/:id', getRequestById); // ← this is now AFTER specific routes
 router.post('/', upload.single('photo'), createRequest);
 
 // Update
+router.put('/:id', upload.single('photo'), updateRequest);
 router.put('/:id/assign', authorize('admin'), assignTechnician);
 router.put('/:id/status', updateStatus);
 router.post('/:id/comment', addComment);
+router.delete('/:id', authorize('admin'), deleteRequest);
 
 module.exports = router;

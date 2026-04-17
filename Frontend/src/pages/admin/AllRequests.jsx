@@ -5,6 +5,7 @@ import {
   getAllRequests,
   getAllTechnicians,
   assignTechnician,
+  deleteRequest,
 } from '../../services/api';
 
 function AllRequests() {
@@ -125,23 +126,7 @@ function AllRequests() {
   const handleDeleteRequest = async () => {
     try {
       setDeleteLoading(true);
-      const token = localStorage.getItem('token');
-
-      const response = await fetch(
-        `http://localhost:5000/api/requests/${requestToDelete._id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete request');
-      }
+      await deleteRequest(requestToDelete._id);
 
       alert('Request deleted successfully.');
       setShowDeleteModal(false);

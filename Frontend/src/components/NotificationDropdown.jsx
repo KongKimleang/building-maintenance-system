@@ -6,7 +6,13 @@ import {
   markAllNotificationsAsRead,
 } from '../services/api';
 
-function NotificationDropdown({ isOpen, onClose, userRole }) {
+function NotificationDropdown({
+  isOpen,
+  onClose,
+  userRole,
+  placement = 'down',
+  mode = 'default',
+}) {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +38,7 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
   const handleNotificationClick = async (notification) => {
     try {
       // Mark as read
-      if (!notification.read) {
+      if (!notification.isRead) {
         await markNotificationAsRead(notification._id);
       }
 
@@ -98,17 +104,29 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
 
   if (!isOpen) return null;
 
+  const dropdownPositionClass =
+    mode === 'sidebar'
+      ? 'fixed left-[calc(18rem+1rem)] bottom-4'
+      : placement === 'up'
+        ? 'absolute right-0 bottom-full mb-2'
+        : 'absolute right-0 mt-2';
+
+  const dropdownSizeClass =
+    mode === 'sidebar'
+      ? 'w-[min(26rem,calc(100vw-20rem-2rem))] max-h-[calc(100vh-2rem)]'
+      : 'w-96 max-w-[calc(100vw-2rem)] max-h-[600px]';
+
   return (
     <>
       {/* Backdrop */}
       <div className="fixed inset-0 z-40" onClick={onClose}></div>
 
       {/* Dropdown */}
-      <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[600px] flex flex-col">
+      <div className={`${dropdownPositionClass} ${dropdownSizeClass} bg-white rounded-lg shadow-xl border border-gray-200 z-[70] flex flex-col`}>
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
-          {notifications.some((n) => !n.read) && (
+          {notifications.some((n) => !n.isRead) && (
             <button
               onClick={handleMarkAllAsRead}
               className="text-sm text-primary hover:text-blue-700 font-medium"
@@ -141,7 +159,7 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
                   key={notification._id}
                   onClick={() => handleNotificationClick(notification)}
                   className={`w-full p-4 text-left hover:bg-gray-50 transition ${
-                    !notification.read ? 'bg-blue-50' : ''
+                    !notification.isRead ? 'bg-blue-50' : ''
                   }`}
                 >
                   <div className="flex gap-3">
@@ -153,7 +171,7 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
                     <div className="flex-1 min-w-0">
                       <p
                         className={`text-sm font-medium text-gray-900 ${
-                          !notification.read ? 'font-bold' : ''
+                          !notification.isRead ? 'font-bold' : ''
                         }`}
                       >
                         {notification.title}
@@ -165,7 +183,7 @@ function NotificationDropdown({ isOpen, onClose, userRole }) {
                         {getTimeAgo(notification.createdAt)}
                       </p>
                     </div>
-                    {!notification.read && (
+                    {!notification.isRead && (
                       <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2"></div>
                     )}
                   </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from '../../components/Navbar';
-import { getCurrentUser } from '../../services/api';
+import { getCurrentUser, uploadProfilePhoto } from '../../services/api';
 
 function formatDate(value) {
   if (!value) return 'N/A';
@@ -58,6 +58,8 @@ export default function ProfilePage({ role }) {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState('');
 
   const roleMeta = getRoleMeta(role);
 
@@ -82,6 +84,55 @@ export default function ProfilePage({ role }) {
     const last = profile.lastName?.[0] || '';
     return `${first}${last}`.toUpperCase() || 'U';
   }, [profile.firstName, profile.lastName]);
+
+  const profilePhotoUrl = useMemo(() => {
+    const photo = profile.profilePhoto;
+    if (!photo || !photo.data) {
+      return null;
+    }
+
+    if (typeof photo.data === 'string') {
+      return `data:${photo.contentType || 'image/jpeg'};base64,${photo.data}`;
+    }
+
+    if (Array.isArray(photo.data)) {
+      const binary = photo.data
+        .map((byte) => String.fromCharCode(byte))
+        .join('');
+      return `data:${photo.contentType || 'image/jpeg'};base64,${btoa(binary)}`;
+    }
+
+    return null;
+  }, [profile.profilePhoto]);
+
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    try {
+      setPhotoError('');
+      setUploadingPhoto(true);
+      const data = await uploadProfilePhoto(file);
+      setProfile(data.user || {});
+
+      const cachedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          ...cachedUser,
+          firstName: data.user?.firstName || cachedUser.firstName,
+          lastName: data.user?.lastName || cachedUser.lastName,
+        })
+      );
+    } catch (err) {
+      setPhotoError(err.message || 'Failed to upload profile photo');
+    } finally {
+      setUploadingPhoto(false);
+      event.target.value = '';
+    }
+  };
 
   const profileRows = [
     { label: 'Full Name', value: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'N/A' },
@@ -123,12 +174,35 @@ export default function ProfilePage({ role }) {
         <section className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
           <div className="h-28 bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500" />
           <div className="px-6 pb-6 -mt-12">
-            <div className="h-24 w-24 rounded-2xl bg-white border border-gray-200 shadow-md flex items-center justify-center text-2xl font-bold text-primary">
-              {initials}
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="h-24 w-24 rounded-2xl bg-white border border-gray-200 shadow-md overflow-hidden flex items-center justify-center text-2xl font-bold text-primary">
+                {profilePhotoUrl ? (
+                  <img
+                    src={profilePhotoUrl}
+                    alt="Profile"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  initials
+                )}
+              </div>
+              <label className="inline-flex cursor-pointer items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                {uploadingPhoto ? 'Uploading...' : 'Upload Photo'}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  disabled={uploadingPhoto}
+                />
+              </label>
             </div>
             <div className="mt-4">
               <h1 className="text-3xl font-bold text-gray-900">{roleMeta.title}</h1>
               <p className="text-gray-600 mt-1">Manage your account information</p>
+              {photoError && (
+                <p className="text-sm text-red-700 mt-2">{photoError}</p>
+              )}
             </div>
           </div>
         </section>

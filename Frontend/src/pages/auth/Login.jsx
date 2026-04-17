@@ -10,6 +10,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotPopup, setShowForgotPopup] = useState(false);
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -171,7 +172,13 @@ function Login() {
                     Remember me
                   </label>
 
-                  <span className="text-sm font-semibold text-primary">Need help? Contact admin</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPopup(true)}
+                    className="text-sm font-semibold text-primary hover:opacity-85"
+                  >
+                    Forgot password?
+                  </button>
                 </div>
 
                 <button
@@ -186,6 +193,71 @@ function Login() {
           </section>
         </div>
       </div>
+
+      {showForgotPopup && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="forgot-password-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
+                  Password Help
+                </p>
+                <h3
+                  id="forgot-password-title"
+                  className="mt-1 text-xl font-extrabold text-gray-900 dark:text-gray-100"
+                >
+                  Contact Admin for reset
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowForgotPopup(false)}
+                className="rounded-lg border border-slate-200 px-2 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                aria-label="Close password help"
+              >
+                X
+              </button>
+            </div>
+
+            <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+              If you forgot your password, please contact your building system admin. After identity verification, admin will issue a temporary password.
+            </p>
+
+            <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/60 dark:bg-blue-950/35">
+              <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+                Recommended delivery method
+              </p>
+              <p className="mt-1 text-sm text-blue-700 dark:text-blue-300/90">
+                Send the temporary password by SMS to your registered phone number, and optionally send a confirmation by your registered email.
+              </p>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/60 dark:bg-amber-950/35">
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                Security note
+              </p>
+              <p className="mt-1 text-sm text-amber-700 dark:text-amber-300/90">
+                For safety, change the temporary password immediately after login.
+              </p>
+            </div>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowForgotPopup(false)}
+                className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white transition hover:brightness-95"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

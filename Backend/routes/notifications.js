@@ -39,7 +39,10 @@ router.put('/read-all', async (req, res) => {
 
 router.put('/:id/read', async (req, res) => {
   try {
-    await Notification.findByIdAndUpdate(req.params.id, { isRead: true });
+    await Notification.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      { isRead: true }
+    );
     res.status(200).json({ success: true, message: 'Marked as read' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -48,8 +51,56 @@ router.put('/:id/read', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    await Notification.findByIdAndDelete(req.params.id);
+    await Notification.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
     res.status(200).json({ success: true, message: 'Deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Create sample notifications for current user (testing helper)
+router.post('/seed', async (req, res) => {
+  try {
+    const samples = [
+      {
+        userId: req.user._id,
+        type: 'new_request',
+        title: 'New Maintenance Request',
+        message: 'A new maintenance request was submitted in your area.',
+      },
+      {
+        userId: req.user._id,
+        type: 'assigned',
+        title: 'Task Assigned',
+        message: 'A request has been assigned and needs your attention.',
+      },
+      {
+        userId: req.user._id,
+        type: 'status_update',
+        title: 'Status Updated',
+        message: 'A request status was updated recently.',
+      },
+      {
+        userId: req.user._id,
+        type: 'comment',
+        title: 'New Comment',
+        message: 'Someone added a comment on a maintenance request.',
+      },
+      {
+        userId: req.user._id,
+        type: 'completed',
+        title: 'Request Completed',
+        message: 'A maintenance request has been marked as completed.',
+      },
+    ];
+
+    const created = await Notification.insertMany(samples);
+
+    res.status(201).json({
+      success: true,
+      message: 'Sample notifications created',
+      count: created.length,
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

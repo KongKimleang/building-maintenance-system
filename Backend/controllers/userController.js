@@ -53,25 +53,52 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update fields
-    const updateFields = [
-      'firstName',
-      'lastName',
-      'sex',
-      'email',
-      'phone',
-      'floor',
-      'unit',
-      'position',
-      'specialization',
-      'isActive',
-    ];
+    const { role } = user;
+    const originalEmail = user.email;
 
-    updateFields.forEach((field) => {
+    // Base fields valid for all roles
+    const baseFields = ['firstName', 'lastName', 'sex', 'email', 'phone', 'isActive'];
+    baseFields.forEach((field) => {
       if (req.body[field] !== undefined) {
         user[field] = req.body[field];
       }
     });
+
+    // Role-specific fields: ignore empty strings to avoid enum validation failures.
+    if ((role === 'resident' || role === 'staff') && req.body.floor !== undefined && req.body.floor !== '') {
+      user.floor = req.body.floor;
+    }
+
+    if (role === 'resident' && req.body.unit !== undefined && req.body.unit !== '') {
+      user.unit = req.body.unit;
+    }
+
+    if (role === 'staff' && req.body.position !== undefined && req.body.position !== '') {
+      user.position = req.body.position;
+    }
+
+    if (role === 'technician' && req.body.specialization !== undefined && req.body.specialization !== '') {
+      user.specialization = req.body.specialization;
+    }
+
+    // Clear fields that do not apply to the user's role.
+    if (role !== 'resident') {
+      user.unit = undefined;
+    }
+    if (role !== 'staff') {
+      user.position = undefined;
+    }
+    if (role !== 'technician') {
+      user.specialization = undefined;
+    }
+
+    // Friendly duplicate-email check before save.
+    if (req.body.email && req.body.email !== originalEmail) {
+      const emailExists = await User.findOne({ email: req.body.email, _id: { $ne: user._id } });
+      if (emailExists) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
+    }
 
     await user.save();
 
@@ -82,6 +109,10 @@ const updateUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Update user error:', error);
+    if (error.name === 'ValidationError') {
+      const firstError = Object.values(error.errors)[0];
+      return res.status(400).json({ message: firstError?.message || 'Validation error' });
+    }
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

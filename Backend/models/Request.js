@@ -79,7 +79,7 @@ const requestSchema = new mongoose.Schema(
       {
         type: {
           type: String,
-          enum: ['created', 'assigned', 'status_update', 'comment'],
+          enum: ['created', 'edited', 'assigned', 'status_update', 'comment'],
         },
         user: String,
         action: String,

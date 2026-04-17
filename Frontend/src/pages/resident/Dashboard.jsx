@@ -119,16 +119,7 @@ function ResidentDashboard() {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Need Maintenance?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition">
-              <div className="text-center">
-                <p className="font-medium text-gray-900">Scan QR Code</p>
-                <p className="text-sm text-gray-500">
-                  Quick report by location
-                </p>
-              </div>
-            </button>
-
+          <div className="grid grid-cols-1 gap-4">
             <Link
               to="/resident/submit-request"
               className="flex items-center justify-center p-6 border-2 border-primary bg-primary rounded-lg hover:bg-blue-700 transition"

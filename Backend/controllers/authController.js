@@ -2,6 +2,14 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const serializeUser = (userDoc) => {
+  const user = userDoc.toObject ? userDoc.toObject() : userDoc;
+  if (user.profilePhoto && user.profilePhoto.data) {
+    user.profilePhoto.data = user.profilePhoto.data.toString('base64');
+  }
+  return user;
+};
+
 // @desc    Register new user (Admin only - will add middleware later)
 // @route   POST /api/auth/register
 // @access  Private (Admin)
@@ -175,8 +183,41 @@ const loginUser = async (req, res) => {
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
-    res.status(200).json({ success: true, user });
+    res.status(200).json({ success: true, user: serializeUser(user) });
   } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Upload profile photo
+// @route   PUT /api/auth/profile-photo
+// @access  Private
+const uploadProfilePhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Profile photo is required' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.profilePhoto = {
+      data: req.file.buffer,
+      contentType: req.file.mimetype,
+    };
+
+    await user.save();
+
+    const sanitizedUser = await User.findById(req.user._id).select('-password');
+    res.status(200).json({
+      success: true,
+      message: 'Profile photo updated successfully',
+      user: serializeUser(sanitizedUser),
+    });
+  } catch (error) {
+    console.error('Upload profile photo error:', error.message);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -227,4 +268,5 @@ module.exports = {
   loginUser,
   getMe,
   changePassword,
+  uploadProfilePhoto,
 };

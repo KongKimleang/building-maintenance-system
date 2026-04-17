@@ -357,15 +357,6 @@ function RequestDetails() {
                     <span className="font-medium">Email:</span>{' '}
                     {request.assignedTo.email}
                   </p>
-
-                  <div className="mt-4 pt-4 border-t">
-                    <a
-                      href={`tel:${request.assignedTo.phone}`}
-                      className="block w-full text-center px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 font-medium"
-                    >
-                      Call Technician
-                    </a>
-                  </div>
                 </div>
               </div>
             )}
