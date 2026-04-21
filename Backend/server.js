@@ -64,8 +64,6 @@ app.use(
   })
 );
 
-app.options('*', cors());
-
 // 4. Compression — reduce response size for better performance
 app.use(compression());
 
