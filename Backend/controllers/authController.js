@@ -28,8 +28,16 @@ const registerUser = async (req, res) => {
       specialization,
     } = req.body;
 
+    if (!firstName || !lastName || !email || !phone || !role || !sex) {
+      return res.status(400).json({
+        message: 'firstName, lastName, sex, email, phone, and role are required',
+      });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+
     // Check if user already exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return res
         .status(400)
@@ -37,14 +45,15 @@ const registerUser = async (req, res) => {
     }
 
     // Generate username from name
-    const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
+    const baseUsername = `${String(firstName).trim().toLowerCase()}.${String(lastName).trim().toLowerCase()}`;
+    let username = baseUsername;
 
     // Check if username already exists
     const usernameExists = await User.findOne({ username });
     if (usernameExists) {
       // Add a number if username exists
       const randomNum = Math.floor(Math.random() * 1000);
-      username = `${username}${randomNum}`;
+      username = `${baseUsername}${randomNum}`;
     }
 
     // Generate temporary password
@@ -61,7 +70,7 @@ const registerUser = async (req, res) => {
       firstName,
       lastName,
       sex,
-      email,
+      email: normalizedEmail,
       phone,
       role,
       requirePasswordChange: true,
@@ -94,10 +103,11 @@ const registerUser = async (req, res) => {
         role: user.role,
       },
       credentials: {
+        loginEmail: user.email,
         username: user.username,
         tempPassword: tempPassword,
         message:
-          'Please provide these credentials to the user. They will be required to change password on first login.',
+          'Provide the login email and temporary password to the user. They must change password on first login.',
       },
     });
   } catch (error) {
@@ -112,16 +122,20 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const loginId = String(email || '').trim();
+    const normalizedEmail = loginId.toLowerCase();
 
     // Validate input
-    if (!email || !password) {
+    if (!loginId || !password) {
       return res
         .status(400)
-        .json({ message: 'Please provide email and password' });
+        .json({ message: 'Please provide email or username and password' });
     }
 
-    // Check if user exists
-    const user = await User.findOne({ email });
+    // Check if user exists (allow login via email or username)
+    const user = await User.findOne({
+      $or: [{ email: normalizedEmail }, { username: loginId }],
+    });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }

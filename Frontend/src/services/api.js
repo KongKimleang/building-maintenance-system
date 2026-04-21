@@ -259,6 +259,31 @@ export const uploadProfilePhoto = async (photoFile) => {
   }
 };
 
+export const changePassword = async (currentPassword, newPassword) => {
+  try {
+    const token = getToken();
+
+    const response = await fetch(`${API_URL}/auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to change password');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Get current user's requests
 export const getMyRequests = async () => {
   try {

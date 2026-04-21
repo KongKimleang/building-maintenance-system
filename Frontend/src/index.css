@@ -289,6 +289,13 @@ body {
   background-color: rgba(30, 47, 80, 0.35) !important;
 }
 
+/* Ensure mobile main content is not hidden under navbar */
+@media (max-width: 1023px) {
+  main {
+    padding-top: 4.25rem !important;
+  }
+}
+
 @media (min-width: 1024px) {
   main.max-w-7xl,
   main.max-w-6xl,

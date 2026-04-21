@@ -459,20 +459,20 @@ function Navbar({ userInfo = {}, navLinks = [] }) {
               )}
             </div>
           </div>
-          <div className="relative">
-            <NotificationDropdown
-              isOpen={showNotifications}
-              onClose={() => {
-                setShowNotifications(false);
-                fetchUnreadCount();
-              }}
-              userRole={user.role}
-              placement="up"
-              mode="sidebar"
-            />
-          </div>
         </div>
       </aside>
+
+      {/* Notification Dropdown - rendered outside sidebar to avoid overflow-hidden clipping */}
+      <NotificationDropdown
+        isOpen={showNotifications}
+        onClose={() => {
+          setShowNotifications(false);
+          fetchUnreadCount();
+        }}
+        userRole={user.role}
+        placement="up"
+        mode="sidebar"
+      />
 
       <nav className="lg:hidden mobile-nav-shell shadow-lg text-white">
         <div className="px-4 sm:px-6">

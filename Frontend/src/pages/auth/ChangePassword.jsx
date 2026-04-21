@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { changePassword } from '../../services/api';
 
 function ChangePassword() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ function ChangePassword() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -24,6 +26,7 @@ function ChangePassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
 
     // Validation
     if (
@@ -72,42 +75,24 @@ function ChangePassword() {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        'http://localhost:5000/api/auth/change-password',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            currentPassword: formData.currentPassword,
-            newPassword: formData.newPassword,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to change password');
-      }
+      await changePassword(formData.currentPassword, formData.newPassword);
 
       // Update user in localStorage
       const updatedUser = { ...user, requirePasswordChange: false };
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      alert('Password changed successfully.');
+      setSuccessMessage('Password changed successfully. Redirecting to your dashboard...');
 
-      // Redirect to appropriate dashboard
-      if (user.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else if (user.role === 'resident' || user.role === 'staff') {
-        navigate('/resident/dashboard');
-      } else if (user.role === 'technician') {
-        navigate('/technician/dashboard');
-      }
+      // Redirect to appropriate dashboard after showing in-page success state
+      window.setTimeout(() => {
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (user.role === 'resident' || user.role === 'staff') {
+          navigate('/resident/dashboard');
+        } else if (user.role === 'technician') {
+          navigate('/technician/dashboard');
+        }
+      }, 1000);
     } catch (err) {
       setError(err.message || 'Failed to change password');
     } finally {
@@ -221,7 +206,13 @@ function ChangePassword() {
               </div>
             </form>
           </section>
-        </div>
+        </div>{successMessage && (
+                <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                  {successMessage}
+                </div>
+              )}
+
+              
       </div>
     </div>
   );

@@ -106,15 +106,15 @@ function NotificationDropdown({
 
   const dropdownPositionClass =
     mode === 'sidebar'
-      ? 'fixed left-[calc(18rem+1rem)] bottom-4'
+      ? 'fixed bottom-6 left-6 lg:bottom-8 lg:left-80'
       : placement === 'up'
-        ? 'absolute right-0 bottom-full mb-2'
-        : 'absolute right-0 mt-2';
+        ? 'fixed left-2 right-2 bottom-[max(1rem,env(safe-area-inset-bottom))] sm:absolute sm:left-auto sm:right-0 sm:bottom-full sm:mb-2'
+        : 'fixed left-2 right-2 top-[max(5rem,calc(env(safe-area-inset-top)+1rem))] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2';
 
   const dropdownSizeClass =
     mode === 'sidebar'
-      ? 'w-[min(26rem,calc(100vw-20rem-2rem))] max-h-[calc(100vh-2rem)]'
-      : 'w-96 max-w-[calc(100vw-2rem)] max-h-[600px]';
+      ? 'w-[min(92vw,32rem)] sm:w-96 max-h-[calc(100vh-10rem)] lg:max-h-[calc(100vh-8rem)]'
+      : 'w-auto sm:w-96 sm:max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-8rem)] sm:max-h-[32rem]';
 
   return (
     <>
@@ -122,22 +122,31 @@ function NotificationDropdown({
       <div className="fixed inset-0 z-40" onClick={onClose}></div>
 
       {/* Dropdown */}
-      <div className={`${dropdownPositionClass} ${dropdownSizeClass} bg-white rounded-lg shadow-xl border border-gray-200 z-[70] flex flex-col`}>
+      <div className={`${dropdownPositionClass} ${dropdownSizeClass} bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex flex-col`}>
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between gap-2">
           <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
-          {notifications.some((n) => !n.isRead) && (
+          <div className="flex items-center gap-2">
+            {notifications.some((n) => !n.isRead) && (
+              <button
+                onClick={handleMarkAllAsRead}
+                className="text-sm text-primary hover:text-blue-700 font-medium whitespace-nowrap"
+              >
+                Mark all read
+              </button>
+            )}
             <button
-              onClick={handleMarkAllAsRead}
-              className="text-sm text-primary hover:text-blue-700 font-medium"
+              onClick={onClose}
+              className="sm:hidden inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+              aria-label="Close notifications"
             >
-              Mark all read
+              X
             </button>
-          )}
+          </div>
         </div>
 
         {/* Notifications List */}
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1 scroll-smooth" style={{ scrollPaddingTop: '0.5rem', scrollPaddingBottom: '0.5rem' }}>
           {loading ? (
             <div className="p-8 text-center text-gray-600">
               Loading notifications...

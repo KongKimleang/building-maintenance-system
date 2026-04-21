@@ -1114,7 +1114,11 @@ function UserManagement() {
                         Temporary Credentials:
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">Username:</span>{' '}
+                        <span className="font-medium">Login Email:</span>{' '}
+                        {createdUserCredentials.loginEmail || newUser.email}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium">Username (optional):</span>{' '}
                         {createdUserCredentials.username}
                       </p>
                       <p className="text-sm text-gray-600">

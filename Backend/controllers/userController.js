@@ -60,7 +60,9 @@ const updateUser = async (req, res) => {
     const baseFields = ['firstName', 'lastName', 'sex', 'email', 'phone', 'isActive'];
     baseFields.forEach((field) => {
       if (req.body[field] !== undefined) {
-        user[field] = req.body[field];
+        user[field] = field === 'email'
+          ? String(req.body[field]).trim().toLowerCase()
+          : req.body[field];
       }
     });
 
@@ -93,8 +95,11 @@ const updateUser = async (req, res) => {
     }
 
     // Friendly duplicate-email check before save.
-    if (req.body.email && req.body.email !== originalEmail) {
-      const emailExists = await User.findOne({ email: req.body.email, _id: { $ne: user._id } });
+    if (req.body.email && String(req.body.email).trim().toLowerCase() !== originalEmail) {
+      const emailExists = await User.findOne({
+        email: String(req.body.email).trim().toLowerCase(),
+        _id: { $ne: user._id },
+      });
       if (emailExists) {
         return res.status(400).json({ message: 'Email already exists' });
       }

@@ -18,6 +18,7 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // SECURITY MIDDLEWARE
 // 1. Helmet — secure HTTP headers
@@ -26,10 +27,11 @@ app.use(helmet());
 // 2. Rate Limiting — protect against brute force attacks
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  max: isDevelopment ? 1000 : 100, // keep local dev from tripping the limiter too easily
+  message: { message: 'Too many requests from this IP, please try again later.' },
   standardHeaders: true, // return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // disable the `X-RateLimit-*` headers
+  skip: (req) => isDevelopment && req.path === '/api/health',
 });
 app.use(limiter);
 
@@ -50,7 +52,10 @@ app.use(
 
       const isLocalDevOrigin =
         /^http:\/\/localhost:\d+$/.test(origin) ||
-        /^http:\/\/127\.0\.0\.1:\d+$/.test(origin);
+        /^http:\/\/127\.0\.0\.1:\d+$/.test(origin) ||
+        /^http:\/\/(10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+):\d+$/.test(
+          origin
+        );
 
       if (allowedOrigins.has(origin) || isLocalDevOrigin) {
         return callback(null, true);

@@ -8,9 +8,10 @@ const {
   uploadProfilePhoto,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
+const { authorize } = require('../middleware/roleCheck');
 const upload = require('../middleware/upload');
 
-router.post('/register', protect, registerUser);
+router.post('/register', protect, authorize('admin'), registerUser);
 router.post('/login', loginUser);
 router.get('/me', protect, getMe);
 router.post('/change-password', protect, changePassword);
