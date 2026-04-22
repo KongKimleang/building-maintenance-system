@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { showError, showSuccess, showWarning } from '../../utils/toastNotifications';
 import {
   getAllRequests,
   getAllTechnicians,
@@ -94,7 +95,7 @@ function AllRequests() {
 
   const handleAssignTechnician = async () => {
     if (!selectedTechnicianId) {
-      alert('Please select a technician');
+      showWarning('Please select a technician');
       return;
     }
 
@@ -105,14 +106,14 @@ function AllRequests() {
       const selectedTech = technicians.find(
         (t) => t._id === selectedTechnicianId
       );
-      alert(
+      showSuccess(
         `Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}.`
       );
 
       setShowAssignModal(false);
       await fetchRequests();
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to assign technician'));
+      showError(error.message || 'Failed to assign technician');
     } finally {
       setAssignLoading(false);
     }
@@ -128,12 +129,12 @@ function AllRequests() {
       setDeleteLoading(true);
       await deleteRequest(requestToDelete._id);
 
-      alert('Request deleted successfully.');
+      showSuccess('Request deleted successfully.');
       setShowDeleteModal(false);
       setRequestToDelete(null);
       await fetchRequests();
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to delete request'));
+      showError(error.message || 'Failed to delete request');
     } finally {
       setDeleteLoading(false);
     }

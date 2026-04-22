@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
+import { showError, showSuccess } from '../../utils/toastNotifications';
 import {
   registerUser,
   getAllUsers,
@@ -149,10 +150,10 @@ function UserManagement() {
       onConfirm: async () => {
         try {
           await deleteUser(userId);
-          alert('User deleted successfully');
+          showSuccess('User deleted successfully');
           await fetchUsers();
         } catch (error) {
-          alert('Error: ' + (error.message || 'Failed to delete user'));
+          showError(error.message || 'Failed to delete user');
         }
       },
     });
@@ -230,9 +231,7 @@ function UserManagement() {
     try {
       setResetLoading(true);
       await resetUserPassword(selectedUserForReset._id, resetForm.newPassword);
-      alert(
-        'Password reset successfully. User must change password on next login.'
-      );
+      showSuccess('Password reset successfully. User must change password on next login.');
       closeResetPasswordModal();
       await fetchUsers();
     } catch (error) {
@@ -284,7 +283,7 @@ function UserManagement() {
           setEditLoading(true);
           setEditError('');
           await updateUser(selectedUserForEdit._id, editForm);
-          alert('User updated successfully');
+          showSuccess('User updated successfully');
           closeEditModal();
           await fetchUsers();
         } catch (error) {

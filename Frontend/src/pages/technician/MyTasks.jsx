@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { showError, showSuccess, showWarning } from '../../utils/toastNotifications';
 import { getAllRequests, updateRequestStatus } from '../../services/api';
 
 function MyTasks() {
@@ -53,7 +54,7 @@ function MyTasks() {
   // Handle status update
   const handleUpdateStatus = async () => {
     if (newStatus === 'Completed' && !statusNotes.trim()) {
-      alert('Please add completion notes');
+      showWarning('Please add completion notes');
       return;
     }
 
@@ -63,14 +64,14 @@ function MyTasks() {
 
       const statusMessage =
         newStatus === 'In Progress' ? 'Task started!' : 'Task completed!';
-      alert(`✅ ${statusMessage}`);
+      showSuccess(statusMessage);
 
       setShowStatusModal(false);
       setSelectedTask(null);
       setStatusNotes('');
       await fetchTasks(); // Refresh list
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to update status'));
+      showError(error.message || 'Failed to update status');
     } finally {
       setUpdateLoading(false);
     }

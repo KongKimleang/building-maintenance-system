@@ -63,7 +63,7 @@ function ResidentDashboard() {
         <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow">
           <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Resident Portal</p>
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user.firstName || 'Resident'}!
+            Welcome, {user.firstName || 'Resident'}!
           </h1>
           <p className="text-gray-600 mt-1">
             {user.role === 'resident'

@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import { getAllRequests as fetchAllRequests } from '../../services/api';
+import { getAllRequests as fetchAllRequests, updateRequestStatus } from '../../services/api';
+import InputPromptModal from '../../components/InputPromptModal';
+import { showError, showSuccess, showWarning } from '../../utils/toastNotifications';
 
 function TechnicianDashboard() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const [allRequests, setAllRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [statusNotes, setStatusNotes] = useState('');
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -19,7 +26,7 @@ function TechnicianDashboard() {
       const data = await fetchAllRequests();
       // Filter only requests assigned to this technician
       const myTasks = data.requests.filter(
-        (r) => r.assignedTo && r.assignedTo._id === user.id
+        (r) => r.assignedTo && r.assignedTo._id === (user._id || user.id)
       );
       setAllRequests(myTasks);
     } catch (error) {
@@ -53,6 +60,47 @@ function TechnicianDashboard() {
   const completedTasks = allRequests
     .filter((r) => r.status === 'Completed')
     .slice(0, 3);
+
+  const openStatusModal = (task, status) => {
+    setSelectedTask(task);
+    setNewStatus(status);
+    setStatusNotes('');
+    setShowStatusModal(true);
+  };
+
+  const closeStatusModal = () => {
+    setShowStatusModal(false);
+    setSelectedTask(null);
+    setNewStatus('');
+    setStatusNotes('');
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!selectedTask) {
+      return;
+    }
+
+    if (newStatus === 'Completed' && !statusNotes.trim()) {
+      showWarning('Please add completion notes');
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      await updateRequestStatus(selectedTask._id, newStatus, statusNotes);
+
+      showSuccess(
+        newStatus === 'In Progress' ? 'Task started!' : 'Task completed!'
+      );
+
+      closeStatusModal();
+      await fetchDashboardData();
+    } catch (error) {
+      showError(error.message || 'Failed to update status');
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -229,13 +277,19 @@ function TechnicianDashboard() {
                         <div className="flex gap-2">
                           {(task.status === 'Pending' ||
                             task.status === 'Assigned') && (
-                            <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition text-sm font-medium">
+                            <button
+                              onClick={() => openStatusModal(task, 'In Progress')}
+                              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition text-sm font-medium"
+                            >
                               Start Task
                             </button>
                           )}
                           {task.status === 'In Progress' && (
                             <>
-                              <button className="px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 transition text-sm font-medium">
+                              <button
+                                onClick={() => openStatusModal(task, 'Completed')}
+                                className="px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 transition text-sm font-medium"
+                              >
                                 ✅ Mark Complete
                               </button>
                               <button className="px-4 py-2 bg-warning text-white rounded-md hover:bg-yellow-600 transition text-sm font-medium">
@@ -310,6 +364,28 @@ function TechnicianDashboard() {
           </div>
         </div>
       </main>
+
+      <InputPromptModal
+        isOpen={showStatusModal}
+        title={newStatus === 'In Progress' ? 'Start Task' : 'Complete Task'}
+        message={
+          selectedTask
+            ? `#${selectedTask.requestId} ${selectedTask.title}`
+            : ''
+        }
+        value={statusNotes}
+        onChange={setStatusNotes}
+        onCancel={closeStatusModal}
+        onConfirm={handleUpdateStatus}
+        confirmLabel={newStatus === 'In Progress' ? 'Start Task' : 'Mark Complete'}
+        placeholder={
+          newStatus === 'Completed'
+            ? 'Describe the work completed...'
+            : 'Add a short note about starting the task...'
+        }
+        loading={updateLoading}
+        allowEmptyValue={newStatus === 'In Progress'}
+      />
     </div>
   );
 }

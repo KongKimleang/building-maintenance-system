@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import InputPromptModal from '../../components/InputPromptModal';
+import { showError, showSuccess } from '../../utils/toastNotifications';
 import { getRequestById, addComment } from '../../services/api';
 
 function RequestDetails() {
@@ -11,6 +13,9 @@ function RequestDetails() {
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [commentDraft, setCommentDraft] = useState('');
+  const [commentSaving, setCommentSaving] = useState(false);
 
   useEffect(() => {
     fetchRequestDetails();
@@ -32,11 +37,16 @@ function RequestDetails() {
   // Add comment handler
   const handleAddComment = async (comment) => {
     try {
+      setCommentSaving(true);
       await addComment(request._id, comment);
-      alert('✅ Comment added successfully!');
+      showSuccess('Comment added successfully.');
+      setCommentModalOpen(false);
+      setCommentDraft('');
       await fetchRequestDetails(); // Refresh
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to add comment'));
+      showError(error.message || 'Failed to add comment');
+    } finally {
+      setCommentSaving(false);
     }
   };
 
@@ -369,12 +379,7 @@ function RequestDetails() {
               <div className="space-y-3">
                 {request.status !== 'Completed' && (
                   <button
-                    onClick={() => {
-                      const comment = prompt('Add a comment or question:');
-                      if (comment && comment.trim()) {
-                        handleAddComment(comment);
-                      }
-                    }}
+                    onClick={() => setCommentModalOpen(true)}
                     className="w-full px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 font-medium"
                   >
                     Add Comment
@@ -414,6 +419,22 @@ function RequestDetails() {
           </div>
         </div>
       </main>
+
+      <InputPromptModal
+        isOpen={commentModalOpen}
+        title="Add Comment"
+        message="Add a comment or question for building management."
+        value={commentDraft}
+        onChange={setCommentDraft}
+        onCancel={() => {
+          setCommentModalOpen(false);
+          setCommentDraft('');
+        }}
+        onConfirm={() => handleAddComment(commentDraft)}
+        confirmLabel="Submit Comment"
+        placeholder="Type your comment or question here..."
+        loading={commentSaving}
+      />
     </div>
   );
 }

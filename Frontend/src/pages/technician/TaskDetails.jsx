@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import InputPromptModal from '../../components/InputPromptModal';
+import { showError, showSuccess, showWarning } from '../../utils/toastNotifications';
 import {
   getRequestById,
   updateRequestStatus,
@@ -20,6 +22,9 @@ function TaskDetails() {
   const [newStatus, setNewStatus] = useState('');
   const [statusNotes, setStatusNotes] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [noteSaving, setNoteSaving] = useState(false);
 
   useEffect(() => {
     fetchTaskDetails();
@@ -46,7 +51,7 @@ function TaskDetails() {
 
   const handleUpdateStatus = async () => {
     if (newStatus === 'Completed' && !statusNotes.trim()) {
-      alert('Please add completion notes');
+      showWarning('Please add completion notes');
       return;
     }
 
@@ -56,13 +61,13 @@ function TaskDetails() {
 
       const statusMessage =
         newStatus === 'In Progress' ? 'Task started!' : 'Task completed!';
-      alert(statusMessage);
+      showSuccess(statusMessage);
 
       setShowStatusModal(false);
       setStatusNotes('');
       await fetchTaskDetails(); // Refresh
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to update status'));
+      showError(error.message || 'Failed to update status');
     } finally {
       setUpdateLoading(false);
     }
@@ -71,11 +76,16 @@ function TaskDetails() {
   // Add comment handler
   const handleAddComment = async (comment) => {
     try {
+      setNoteSaving(true);
       await addComment(request._id, comment);
-      alert('Note added successfully.');
+      showSuccess('Note added successfully.');
+      setNoteModalOpen(false);
+      setNoteDraft('');
       await fetchTaskDetails(); // Refresh
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to add note'));
+      showError(error.message || 'Failed to add note');
+    } finally {
+      setNoteSaving(false);
     }
   };
 
@@ -330,12 +340,7 @@ function TaskDetails() {
                   )}
 
                   <button
-                    onClick={() => {
-                      const comment = prompt('Add work note or update:');
-                      if (comment && comment.trim()) {
-                        handleAddComment(comment);
-                      }
-                    }}
+                    onClick={() => setNoteModalOpen(true)}
                     className="px-6 py-3 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
                   >
                     Add Note
@@ -516,6 +521,22 @@ function TaskDetails() {
           </div>
         </div>
       )}
+
+      <InputPromptModal
+        isOpen={noteModalOpen}
+        title="Add Work Note"
+        message="Add your work update or note for this task."
+        value={noteDraft}
+        onChange={setNoteDraft}
+        onCancel={() => {
+          setNoteModalOpen(false);
+          setNoteDraft('');
+        }}
+        onConfirm={() => handleAddComment(noteDraft)}
+        confirmLabel="Submit Note"
+        placeholder="Type work note here..."
+        loading={noteSaving}
+      />
     </div>
   );
 }

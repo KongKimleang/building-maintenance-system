@@ -21,6 +21,27 @@ function SubmitRequest() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [photoPreview, setPhotoPreview] = useState('');
+  const [popup, setPopup] = useState({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+    requestId: null,
+    redirectToMyRequests: false,
+  });
+
+  const closePopup = () => {
+    const shouldRedirect = popup.redirectToMyRequests;
+    setPopup((prev) => ({
+      ...prev,
+      isOpen: false,
+      redirectToMyRequests: false,
+    }));
+
+    if (shouldRedirect) {
+      navigate('/resident/my-requests');
+    }
+  };
 
   useEffect(() => {
     if (!formData.photo) {
@@ -67,7 +88,14 @@ function SubmitRequest() {
       !formData.unit ||
       !formData.description
     ) {
-      alert('Please fill all required fields!');
+      setPopup({
+        isOpen: true,
+        type: 'warning',
+        title: 'Incomplete Form',
+        message: 'Please fill all required fields before submitting.',
+        requestId: null,
+        redirectToMyRequests: false,
+      });
       setLoading(false);
       return;
     }
@@ -84,11 +112,6 @@ function SubmitRequest() {
         photo: formData.photo,
       });
 
-      // Show success with REAL request ID
-      alert(
-        `✅ Request submitted successfully!\n\nRequest ID: #${data.request.requestId}\n\nYou can track this request in "My Requests" page.`
-      );
-
       // Reset form
       setFormData({
         title: '',
@@ -101,11 +124,25 @@ function SubmitRequest() {
       });
       setPhotoPreview('');
 
-      // Redirect to My Requests page
-      navigate('/resident/my-requests');
+      // Show success popup with REAL request ID, then redirect after user confirmation
+      setPopup({
+        isOpen: true,
+        type: 'success',
+        title: 'Request Submitted Successfully',
+        message: 'You can track this request in My Requests page.',
+        requestId: data?.request?.requestId || null,
+        redirectToMyRequests: true,
+      });
     } catch (err) {
       setError(err.message || 'Failed to submit request');
-      alert('❌ Error: ' + (err.message || 'Failed to submit request'));
+      setPopup({
+        isOpen: true,
+        type: 'error',
+        title: 'Submission Failed',
+        message: err.message || 'Failed to submit request. Please try again.',
+        requestId: null,
+        redirectToMyRequests: false,
+      });
     } finally {
       setLoading(false);
     }
@@ -404,6 +441,45 @@ function SubmitRequest() {
           </div>
         </form>
       </main>
+
+      {popup.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-start gap-3">
+              <span
+                className={`mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
+                  popup.type === 'success'
+                    ? 'bg-green-100 text-green-700'
+                    : popup.type === 'error'
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-amber-100 text-amber-700'
+                }`}
+              >
+                {popup.type === 'success' ? '✓' : popup.type === 'error' ? '!' : '?'}
+              </span>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{popup.title}</h3>
+                <p className="mt-1 text-gray-600">{popup.message}</p>
+                {popup.requestId && (
+                  <p className="mt-3 text-base font-semibold text-gray-900">
+                    Request ID: #{popup.requestId}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={closePopup}
+                className="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition hover:bg-blue-700"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

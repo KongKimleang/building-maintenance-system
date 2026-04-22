@@ -36,6 +36,30 @@ const createNotification = async (userId, type, title, message, requestId) => {
   }
 };
 
+const notifyUsers = async ({
+  userIds,
+  type,
+  title,
+  message,
+  requestId,
+  excludeUserId,
+}) => {
+  const excludeId = excludeUserId ? String(excludeUserId) : null;
+  const uniqueUserIds = [...new Set((userIds || []).filter(Boolean).map((id) => String(id)))].filter(
+    (id) => !excludeId || id !== excludeId
+  );
+
+  if (!uniqueUserIds.length) {
+    return;
+  }
+
+  await Promise.all(
+    uniqueUserIds.map((id) =>
+      createNotification(id, type, title, message, requestId)
+    )
+  );
+};
+
 // @desc    Create new request
 // @route   POST /api/requests
 // @access  Private (Resident, Staff)
@@ -347,13 +371,41 @@ const updateStatus = async (req, res) => {
 
     await request.save();
 
-    await createNotification(
-      request.submittedBy,
-      'status_update',
-      'Request Status Updated',
-      `Your request "${request.title}" is now: ${status}`,
-      request._id
-    );
+    // Resident notifications: when technician starts/updates task
+    if (req.user.role === 'technician') {
+      await createNotification(
+        request.submittedBy,
+        'status_update',
+        'Request Status Updated',
+        `Technician ${req.user.firstName} updated your request "${request.title}" to: ${status}`,
+        request._id
+      );
+
+      // Admin notifications: when technician starts/updates task
+      const admins = await User.find({ role: 'admin' }).select('_id');
+      await notifyUsers({
+        userIds: admins.map((admin) => admin._id),
+        type: 'status_update',
+        title: 'Technician Update',
+        message: `${req.user.firstName} ${req.user.lastName} updated "${request.title}" to ${status}`,
+        requestId: request._id,
+        excludeUserId: req.user._id,
+      });
+    }
+
+    // Technician notifications: when someone else changes status
+    if (
+      request.assignedTo &&
+      String(request.assignedTo) !== String(req.user._id)
+    ) {
+      await createNotification(
+        request.assignedTo,
+        'status_update',
+        'Task Updated',
+        `${req.user.firstName} ${req.user.lastName} changed "${request.title}" to ${status}`,
+        request._id
+      );
+    }
 
     res.status(200).json({
       success: true,
@@ -437,6 +489,47 @@ const addComment = async (req, res) => {
 
     await request.save();
 
+    const actorName = `${req.user.firstName} ${req.user.lastName}`;
+
+    // Admin notifications: when anyone adds a comment
+    const admins = await User.find({ role: 'admin' }).select('_id');
+    await notifyUsers({
+      userIds: admins.map((admin) => admin._id),
+      type: 'comment',
+      title: 'New Request Comment',
+      message: `${actorName} commented on "${request.title}"`,
+      requestId: request._id,
+      excludeUserId: req.user._id,
+    });
+
+    // Resident notifications: when technician adds updates/comments
+    if (
+      req.user.role === 'technician' &&
+      String(request.submittedBy) !== String(req.user._id)
+    ) {
+      await createNotification(
+        request.submittedBy,
+        'comment',
+        'Technician Comment',
+        `Technician ${actorName} added an update on "${request.title}"`,
+        request._id
+      );
+    }
+
+    // Technician notifications: when resident/anyone adds comment
+    if (
+      request.assignedTo &&
+      String(request.assignedTo) !== String(req.user._id)
+    ) {
+      await createNotification(
+        request.assignedTo,
+        'comment',
+        'New Comment on Task',
+        `${actorName} added a comment on "${request.title}"`,
+        request._id
+      );
+    }
+
     res.status(200).json({
       success: true,
       message: 'Comment added',
@@ -504,6 +597,17 @@ const updateRequest = async (req, res) => {
     });
 
     await request.save();
+
+    // Technician notifications: when resident changes request details
+    if (request.assignedTo) {
+      await createNotification(
+        request.assignedTo,
+        'status_update',
+        'Task Details Updated',
+        `${req.user.firstName} ${req.user.lastName} updated request details for "${request.title}"`,
+        request._id
+      );
+    }
 
     await request.populate('submittedBy', 'firstName lastName email phone unit');
 

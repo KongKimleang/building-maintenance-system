@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import InputPromptModal from '../../components/InputPromptModal';
+import { showError, showSuccess } from '../../utils/toastNotifications';
 import { getMyRequests, addComment, updateRequest } from '../../services/api';
 
 function MyRequests() {
@@ -25,6 +27,15 @@ function MyRequests() {
   const [removePhoto, setRemovePhoto] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
+  const [statusPopup, setStatusPopup] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [commentDraft, setCommentDraft] = useState('');
+  const [commentRequestId, setCommentRequestId] = useState('');
+  const [commentSaving, setCommentSaving] = useState(false);
 
   // Fetch my requests
   useEffect(() => {
@@ -47,12 +58,24 @@ function MyRequests() {
   // Add comment handler
   const handleAddComment = async (requestId, comment) => {
     try {
+      setCommentSaving(true);
       await addComment(requestId, comment);
-      alert('Comment added successfully.');
+      showSuccess('Comment added successfully.');
+      setCommentModalOpen(false);
+      setCommentDraft('');
+      setCommentRequestId('');
       await fetchMyRequests(); // Refresh list
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to add comment'));
+      showError(error.message || 'Failed to add comment');
+    } finally {
+      setCommentSaving(false);
     }
+  };
+
+  const openCommentModal = (requestId) => {
+    setCommentRequestId(requestId);
+    setCommentDraft('');
+    setCommentModalOpen(true);
   };
 
   const openEditModal = (request) => {
@@ -103,6 +126,8 @@ function MyRequests() {
 
     if (!editRequest) return;
 
+    const requestNumber = editRequest.requestId;
+
     try {
       setEditSaving(true);
       setEditError('');
@@ -115,7 +140,11 @@ function MyRequests() {
 
       closeEditModal();
       await fetchMyRequests();
-      alert('Request updated successfully.');
+      setStatusPopup({
+        isOpen: true,
+        title: 'Request Updated',
+        message: `Request #${requestNumber} was resubmitted successfully.`,
+      });
     } catch (err) {
       setEditError(err.message || 'Failed to update request');
     } finally {
@@ -421,12 +450,7 @@ function MyRequests() {
                     )}
                     {request.status !== 'Completed' && (
                       <button
-                        onClick={() => {
-                          const comment = prompt('Add a comment or update:');
-                          if (comment && comment.trim()) {
-                            handleAddComment(request._id, comment);
-                          }
-                        }}
+                        onClick={() => openCommentModal(request._id)}
                         className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-sm"
                       >
                         Add Comment
@@ -458,8 +482,8 @@ function MyRequests() {
       </main>
 
       {editRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-slate-900 dark:text-slate-100">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 px-4 py-6">
+          <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-slate-900 dark:text-slate-100">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
@@ -478,14 +502,18 @@ function MyRequests() {
               </button>
             </div>
 
-            <form className="space-y-5 px-6 py-5" onSubmit={handleSaveEdit}>
-              {editError && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
-                  {editError}
-                </div>
-              )}
+            <form
+              className="flex max-h-[calc(100vh-7rem)] flex-col"
+              onSubmit={handleSaveEdit}
+            >
+              <div className="space-y-5 overflow-y-auto px-6 py-5">
+                {editError && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+                    {editError}
+                  </div>
+                )}
 
-              <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
                     Title
@@ -499,7 +527,7 @@ function MyRequests() {
                     className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                 </div>
-                <div>
+                  <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
                     Category
                   </label>
@@ -520,7 +548,7 @@ function MyRequests() {
                     <option>Other</option>
                   </select>
                 </div>
-                <div>
+                  <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
                     Priority
                   </label>
@@ -536,7 +564,7 @@ function MyRequests() {
                     <option>High</option>
                   </select>
                 </div>
-                <div>
+                  <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
                     Floor
                   </label>
@@ -549,7 +577,7 @@ function MyRequests() {
                     className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                 </div>
-                <div>
+                  <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
                     Unit
                   </label>
@@ -562,73 +590,74 @@ function MyRequests() {
                     className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                 </div>
-              </div>
+                </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  Description
-                </label>
-                <textarea
-                  rows="4"
-                  value={editForm.description}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, description: e.target.value }))
-                  }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
-                    Replace Photo
+                    Description
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleEditPhotoChange}
-                    className="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-white hover:file:bg-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  <textarea
+                    rows="4"
+                    value={editForm.description}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, description: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
-                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                    Upload a new image to replace the current one.
-                  </p>
                 </div>
 
-                <div className="flex items-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRemovePhoto(true);
-                      setEditPhoto(null);
-                      setEditPhotoPreview('');
-                    }}
-                    className="w-full rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
-                  >
-                    Remove current photo
-                  </button>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Replace Photo
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditPhotoChange}
+                      className="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-white hover:file:bg-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      Upload a new image to replace the current one.
+                    </p>
+                  </div>
+
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRemovePhoto(true);
+                        setEditPhoto(null);
+                        setEditPhotoPreview('');
+                      }}
+                      className="w-full rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-950/60"
+                    >
+                      Remove current photo
+                    </button>
+                  </div>
                 </div>
+
+                {editPhotoPreview && (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <p className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Photo Preview
+                    </p>
+                    <img
+                      src={editPhotoPreview}
+                      alt="Preview"
+                      className="max-h-64 w-full rounded-lg border border-slate-200 object-contain bg-white dark:border-slate-700 dark:bg-slate-900"
+                    />
+                  </div>
+                )}
+
+                {removePhoto && !editPhoto && !editPhotoPreview && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/35 dark:text-amber-300">
+                    Current photo will be removed when you resubmit.
+                  </div>
+                )}
               </div>
 
-              {editPhotoPreview && (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-                  <p className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                    Photo Preview
-                  </p>
-                  <img
-                    src={editPhotoPreview}
-                    alt="Preview"
-                    className="max-h-64 w-full rounded-lg border border-slate-200 object-contain bg-white dark:border-slate-700 dark:bg-slate-900"
-                  />
-                </div>
-              )}
-
-              {removePhoto && !editPhoto && !editPhotoPreview && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/35 dark:text-amber-300">
-                  Current photo will be removed when you save changes.
-                </div>
-              )}
-
-              <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end dark:border-slate-700">
+              <div className="sticky bottom-0 flex flex-col gap-3 border-t border-slate-200 bg-white px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-900">
                 <button
                   type="button"
                   onClick={closeEditModal}
@@ -641,13 +670,51 @@ function MyRequests() {
                   disabled={editSaving}
                   className="rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {editSaving ? 'Saving...' : 'Save Changes'}
+                  {editSaving ? 'Resubmitting...' : 'Resubmit Request'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {statusPopup.isOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 py-6">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-900">{statusPopup.title}</h3>
+            <p className="mt-2 text-slate-600">{statusPopup.message}</p>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() =>
+                  setStatusPopup({ isOpen: false, title: '', message: '' })
+                }
+                className="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition hover:bg-blue-700"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <InputPromptModal
+        isOpen={commentModalOpen}
+        title="Add Comment"
+        message="Share an update or question for this request."
+        value={commentDraft}
+        onChange={setCommentDraft}
+        onCancel={() => {
+          setCommentModalOpen(false);
+          setCommentDraft('');
+          setCommentRequestId('');
+        }}
+        onConfirm={() => handleAddComment(commentRequestId, commentDraft)}
+        confirmLabel="Submit Comment"
+        placeholder="Type your comment here..."
+        loading={commentSaving}
+      />
     </div>
   );
 }

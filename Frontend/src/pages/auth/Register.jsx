@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { showInfo, showWarning } from '../../utils/toastNotifications';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -30,18 +31,18 @@ function Register() {
 
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      showWarning('Passwords do not match!');
       return;
     }
 
     if (!formData.agreeToTerms) {
-      alert('Please agree to Terms & Conditions');
+      showWarning('Please agree to Terms & Conditions');
       return;
     }
 
     // For now, just log the values (we'll connect to backend later)
     console.log('Registration attempt:', formData);
-    alert('Registration feature will be connected in Week 2!');
+    showInfo('Registration feature will be connected in Week 2!');
   };
 
   return (

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import InputPromptModal from '../../components/InputPromptModal';
+import { showError, showSuccess, showWarning } from '../../utils/toastNotifications';
 import {
   getRequestById,
   assignTechnician,
@@ -21,6 +23,9 @@ function RequestDetails() {
   const [technicians, setTechnicians] = useState([]);
   const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
   const [assignLoading, setAssignLoading] = useState(false);
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [noteSaving, setNoteSaving] = useState(false);
 
   useEffect(() => {
     fetchRequestDetails();
@@ -56,7 +61,7 @@ function RequestDetails() {
 
   const handleAssignTechnician = async () => {
     if (!selectedTechnicianId) {
-      alert('Please select a technician');
+      showWarning('Please select a technician');
       return;
     }
 
@@ -67,14 +72,14 @@ function RequestDetails() {
       const selectedTech = technicians.find(
         (t) => t._id === selectedTechnicianId
       );
-      alert(
+      showSuccess(
         `Successfully assigned to ${selectedTech.firstName} ${selectedTech.lastName}.`
       );
 
       setShowAssignModal(false);
       await fetchRequestDetails(); // Refresh to show updated assignment
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to assign technician'));
+      showError(error.message || 'Failed to assign technician');
     } finally {
       setAssignLoading(false);
     }
@@ -83,11 +88,16 @@ function RequestDetails() {
   // Add comment handler
   const handleAddComment = async (comment) => {
     try {
+      setNoteSaving(true);
       await addComment(request._id, comment);
-      alert('Note added successfully.');
+      showSuccess('Note added successfully.');
+      setNoteModalOpen(false);
+      setNoteDraft('');
       await fetchRequestDetails(); // Refresh
     } catch (error) {
-      alert('Error: ' + (error.message || 'Failed to add note'));
+      showError(error.message || 'Failed to add note');
+    } finally {
+      setNoteSaving(false);
     }
   };
 
@@ -407,12 +417,7 @@ function RequestDetails() {
                 )}
 
                 <button
-                  onClick={() => {
-                    const comment = prompt('Add admin note:');
-                    if (comment && comment.trim()) {
-                      handleAddComment(comment);
-                    }
-                  }}
+                  onClick={() => setNoteModalOpen(true)}
                   className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
                 >
                   Add Note
@@ -512,6 +517,22 @@ function RequestDetails() {
           </div>
         </div>
       )}
+
+      <InputPromptModal
+        isOpen={noteModalOpen}
+        title="Add Admin Note"
+        message="Add an internal update to this request timeline."
+        value={noteDraft}
+        onChange={setNoteDraft}
+        onCancel={() => {
+          setNoteModalOpen(false);
+          setNoteDraft('');
+        }}
+        onConfirm={() => handleAddComment(noteDraft)}
+        confirmLabel="Submit Note"
+        placeholder="Type admin note here..."
+        loading={noteSaving}
+      />
     </div>
   );
 }
